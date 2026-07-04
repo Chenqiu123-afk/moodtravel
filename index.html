@@ -76,7 +76,7 @@ body::before {
   position: fixed;
   inset: 0;
   background: rgba(5,5,15,0.75);
-  z-index: -1;
+  z-index: 1;
   pointer-events: none;
 }
 
@@ -101,15 +101,6 @@ body.light-mode::before { background: transparent !important; }
   overflow: hidden;
   position: relative; z-index: 2;
 }
-/* 深色遮罩 — 在premium-page内部，bg-layer之上，内容之下 */
-.premium-page::after {
-  content: '';
-  position: fixed; inset: 0;
-  background: rgba(5,5,15,0.75);
-  z-index: 0;
-  pointer-events: none;
-}
-body.light-mode .premium-page::after { background: transparent !important; }
 
 /* ================================================================
    背景层 — 固定全屏，多层 CSS 动画
@@ -410,7 +401,7 @@ body.light-mode .premium-page::after { background: transparent !important; }
 /* 温暖问候语 */
 .warm-greeting {
   font-family:var(--font-body); font-size:14px; font-weight:400;
-  color:rgba(255,255,255,0.5); margin:14px 0 0 0;
+  color:rgba(255,255,255,0.6); margin:14px 0 0 0;
   padding:10px 16px; background:rgba(255,255,255,0.04);
   border-radius:var(--radius-sm); border-left:2px solid rgba(255,255,255,0.15);
   line-height:1.5; transition:all 0.5s var(--easing);
@@ -436,7 +427,7 @@ body.light-mode .premium-page::after { background: transparent !important; }
 .daily-tip-icon { font-size:14px; flex-shrink:0; line-height:1.5; }
 .daily-tip-text {
   font-family:var(--font-body); font-size:14px; font-weight:300;
-  color:rgba(255,255,255,0.5); line-height:1.5;
+  color:rgba(255,255,255,0.6); line-height:1.5;
   transition:opacity 0.3s var(--easing), transform 0.3s var(--easing);
 }
 
@@ -620,7 +611,7 @@ body.light-mode .premium-page::after { background: transparent !important; }
 
 /* 显性情绪选择器（极简三态） */
 .explicit-mood { display:flex; align-items:center; gap:10px; width:100%; margin-top:16px; }
-.explicit-mood-label { font-size:12px; font-weight:500; color:rgba(255,255,255,0.45); white-space:nowrap; }
+.explicit-mood-label { font-size:13px; font-weight:500; color:rgba(255,255,255,0.6); white-space:nowrap; }
 .explicit-mood-btn {
   flex:1; display:flex; flex-direction:column; align-items:center; gap:3px;
   padding:10px 8px; border-radius:14px; border:1px solid rgba(255,255,255,0.08);
@@ -629,7 +620,7 @@ body.light-mode .premium-page::after { background: transparent !important; }
   box-shadow:0 2px 4px rgba(0,0,0,0.2);
 }
 .explicit-mood-btn:hover {
-  background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.4);
+  background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.55);
   color:#fff; transform:translateY(-2px);
   box-shadow:0 6px 16px rgba(0,0,0,0.3);
 }
@@ -685,7 +676,7 @@ body.light-mode .premium-page::after { background: transparent !important; }
 .companion-chip .comp-icon { font-size:22px; line-height:1; transition:transform 0.4s var(--easing-bounce); }
 .companion-chip:hover .comp-icon { transform:scale(1.15); }
 .companion-chip .comp-label { font-size:13px; }
-.companion-chip .comp-desc { font-size:10px; opacity:0.5; font-weight:300; }
+.companion-chip .comp-desc { font-size:11px; opacity:0.6; font-weight:300; }
 
 /* 长者模式开关 */
 .elderly-toggle-wrap { display:flex; align-items:center; gap:10px; }
@@ -746,7 +737,7 @@ body.elderly-mode .bg-waves { opacity:0.4 !important; }
   font-size:16px; cursor:pointer; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
   transition:all 0.3s var(--easing);
 }
-.quick-link:hover { border-color:rgba(255,255,255,0.5); color:#FFFFFF; background:rgba(255,255,255,0.12); transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,0.2); }
+.quick-link:hover { border-color:rgba(255,255,255,0.6); color:#FFFFFF; background:rgba(255,255,255,0.12); transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,0.2); }
 
 /* 右侧面板 58% — 可滚动 */
 .right-panel {
@@ -823,7 +814,7 @@ body.elderly-mode .bg-waves { opacity:0.4 !important; }
 .checklist-section.show { display:block; }
 .checklist-card { padding:28px; }
 .checklist-title { font-size:18px; font-weight:600; color:#fff; margin-bottom:6px; display:flex; align-items:center; gap:8px; }
-.checklist-sub { font-size:13px; color:rgba(255,255,255,0.5); margin-bottom:18px; }
+.checklist-sub { font-size:13px; color:rgba(255,255,255,0.6); margin-bottom:18px; }
 .checklist-items { display:flex; flex-direction:column; gap:8px; }
 .checklist-item {
   display:flex; align-items:center; gap:12px; padding:12px 16px;
@@ -832,7 +823,7 @@ body.elderly-mode .bg-waves { opacity:0.4 !important; }
 }
 .checklist-item:hover { background:rgba(255,255,255,0.14); }
 .checklist-item.checked { background:rgba(139,168,140,0.08); border-color:rgba(139,168,140,0.15); }
-.checklist-item.checked .checklist-text { color:rgba(255,255,255,0.4); text-decoration:line-through; }
+.checklist-item.checked .checklist-text { color:rgba(255,255,255,0.55); text-decoration:line-through; }
 .checklist-cb {
   width:20px; height:20px; border-radius:6px; border:2px solid rgba(255,255,255,0.4);
   flex-shrink:0; display:flex; align-items:center; justify-content:center;
@@ -903,12 +894,12 @@ input, select, textarea, .budget-slider, .slider-track {
   transition:all 0.3s var(--easing);
 }
 .budget-custom-wrap:focus-within { border-color:rgba(255,255,255,0.55); background:rgba(255,255,255,0.1); transform:scale(1.02); }
-.budget-custom-prefix { font-size:18px; color:rgba(255,255,255,0.5); margin-right:6px; }
+.budget-custom-prefix { font-size:18px; color:rgba(255,255,255,0.6); margin-right:6px; }
 .budget-custom-input {
   flex:1; background:none; border:none; outline:none; padding:13px 0;
   font-family:var(--font-title); font-size:18px; font-weight:500; color:#FFFFFF;
 }
-.budget-custom-input::placeholder { color:rgba(255,255,255,0.5); font-weight:300; }
+.budget-custom-input::placeholder { color:rgba(255,255,255,0.6); font-weight:300; }
 
 /* 日常场景 */
 .daily-section { width:100%; }
@@ -935,8 +926,8 @@ input, select, textarea, .budget-slider, .slider-track {
 .daily-spot-emoji { font-size:24px; flex-shrink:0; }
 .daily-spot-info { flex:1; min-width:0; }
 .daily-spot-title { font-size:15px; font-weight:600; color:#fff; }
-.daily-spot-desc { font-size:12px; color:rgba(255,255,255,0.5); margin-top:2px; }
-.daily-spot-dist { font-size:13px; color:rgba(255,255,255,0.5); flex-shrink:0; }
+.daily-spot-desc { font-size:12px; color:rgba(255,255,255,0.6); margin-top:2px; }
+.daily-spot-dist { font-size:13px; color:rgba(255,255,255,0.6); flex-shrink:0; }
 
 /* 热门路线 — 横向滚动 */
 .hot-routes-section { will-change:transform,opacity; }
@@ -988,7 +979,7 @@ input, select, textarea, .budget-slider, .slider-track {
   border-radius:10px; border:1px solid rgba(255,255,255,0.35); background:rgba(255,255,255,0.05);
   cursor:pointer; transition:all 0.25s var(--easing);
 }
-.plan-card-switch:hover { background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.5); }
+.plan-card-switch:hover { background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.6); }
 .plan-card-route { display:flex; flex-direction:column; gap:0; padding-left:2px; }
 .plan-route-step { display:flex; align-items:center; gap:16px; padding:6px 0; position:relative; }
 .plan-route-step:not(:last-child)::after {
@@ -1013,7 +1004,7 @@ input, select, textarea, .budget-slider, .slider-track {
   padding:16px 48px; border:none; font-family:var(--font-body); font-size:16px;
   font-weight:500; color:rgba(255,255,255,0.75); cursor:pointer; transition:all 0.25s var(--easing);
 }
-.load-more-btn:hover:not(:disabled) { color:#FFFFFF; border-color:rgba(255,255,255,0.5); transform:translateY(-2px); }
+.load-more-btn:hover:not(:disabled) { color:#FFFFFF; border-color:rgba(255,255,255,0.6); transform:translateY(-2px); }
 .load-more-btn:disabled { opacity:0.4; cursor:not-allowed; }
 .loading-dots { display:flex; gap:5px; align-items:center; }
 .loading-dots .dot { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,0.5); animation:dotPulse 0.6s ease-in-out infinite alternate; }
@@ -1037,7 +1028,7 @@ input, select, textarea, .budget-slider, .slider-track {
 .generate-btn:hover:not(:disabled) {
   transform:translateY(-4px) scale(1.03);
   box-shadow:0 14px 40px rgba(0,0,0,0.35), 0 0 40px rgba(255,255,255,0.08);
-  border-color:rgba(255,255,255,0.4);
+  border-color:rgba(255,255,255,0.55);
 }
 .generate-btn:active:not(:disabled) { transform:scale(0.96); }
 .generate-btn:disabled { opacity:0.5; cursor:not-allowed; animation:none; }
@@ -1065,8 +1056,8 @@ input, select, textarea, .budget-slider, .slider-track {
 .time { font-family:var(--font-title); font-size:13px; color:rgba(255,255,255,0.55); }
 .category { font-size:12px; padding:2px 10px; border-radius:8px; background:rgba(255,255,255,0.12); color:rgba(255,255,255,0.55); }
 .poi-name { font-size:16px; font-weight:600; color:#fff; display:block; text-shadow:0 1px 4px rgba(0,0,0,0.1); }
-.poi-desc { font-size:13px; color:rgba(255,255,255,0.5); margin-top:4px; display:block; }
-.reason-bar { font-size:12px; color:rgba(255,255,255,0.5); margin-top:6px; }
+.poi-desc { font-size:13px; color:rgba(255,255,255,0.6); margin-top:4px; display:block; }
+.reason-bar { font-size:12px; color:rgba(255,255,255,0.6); margin-top:6px; }
 .tags { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
 .tag { font-size:11px; padding:3px 10px; border-radius:8px; background:rgba(255,255,255,0.12); color:rgba(255,255,255,0.55); }
 .booking-row { display:flex; align-items:center; justify-content:space-between; margin-top:10px; }
@@ -1079,7 +1070,7 @@ input, select, textarea, .budget-slider, .slider-track {
 .book-btn:hover { transform:translateY(-1px); }
 .book-btn:active { transform:scale(0.95); }
 .book-btn.loading { opacity:0.7; }
-.compare-inline { display:flex; align-items:center; gap:6px; margin-top:8px; font-size:12px; color:rgba(255,255,255,0.4); }
+.compare-inline { display:flex; align-items:center; gap:6px; margin-top:8px; font-size:13px; color:rgba(255,255,255,0.55); }
 .compare-inline-save { color:#8BA88C; font-weight:600; }
 
 /* 酒店推荐 */
@@ -1091,7 +1082,7 @@ input, select, textarea, .budget-slider, .slider-track {
 .hotel-name { font-size:20px; font-weight:700; color:#fff; }
 .hotel-rating { font-size:14px; color:rgba(255,255,255,0.55); }
 .hotel-price { font-size:28px; font-weight:800; }
-.hotel-reason { font-size:13px; color:rgba(255,255,255,0.5); }
+.hotel-reason { font-size:13px; color:rgba(255,255,255,0.6); }
 .ai-compare { margin-top:14px; padding:16px; border-radius:14px; background:rgba(255,255,255,0.1); }
 .compare-title { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
 .ai-badge { font-size:12px; padding:3px 10px; border-radius:8px; background:rgba(139,168,140,0.2); color:#8BA88C; font-weight:600; }
@@ -1103,7 +1094,7 @@ input, select, textarea, .budget-slider, .slider-track {
 .compare-price { font-weight:700; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,0.1); }
 .compare-features { font-size:11px; color:rgba(255,255,255,0.55); }
 .compare-best-tag { font-size:11px; padding:2px 8px; border-radius:6px; background:#8BA88C; color:#fff; font-weight:600; }
-.compare-verdict { padding:10px 14px; border-radius:10px; margin-top:10px; font-size:13px; color:rgba(255,255,255,0.5); }
+.compare-verdict { padding:10px 14px; border-radius:10px; margin-top:10px; font-size:13px; color:rgba(255,255,255,0.6); }
 .hotel-savings { font-size:14px; color:#8BA88C; font-weight:600; margin-top:10px; }
 .hotel-book-btn { width:100%; margin-top:14px; padding:14px; text-align:center; }
 
@@ -1114,7 +1105,7 @@ input, select, textarea, .budget-slider, .slider-track {
 .care-letter-greeting { font-size:28px; font-weight:600; color:#fff; margin-bottom:8px; }
 .care-letter-title { font-size:20px; font-weight:600; color:rgba(255,255,255,0.8); margin-bottom:12px; }
 .care-letter-body { font-size:15px; color:rgba(255,255,255,0.6); line-height:1.8; margin-bottom:16px; }
-.care-letter-action { font-size:14px; color:rgba(255,255,255,0.5); margin-bottom:16px; padding:12px; border-radius:12px; background:rgba(255,255,255,0.1); }
+.care-letter-action { font-size:15px; color:rgba(255,255,255,0.6); margin-bottom:16px; padding:12px; border-radius:12px; background:rgba(255,255,255,0.1); }
 .care-letter-quote { font-size:14px; color:rgba(255,255,255,0.6); font-style:italic; }
 
 /* 预订比价弹窗 */
@@ -1188,7 +1179,7 @@ input, select, textarea, .budget-slider, .slider-track {
   box-shadow:0 4px 20px rgba(0,0,0,0.12);
 }
 .tree-hole-btn:hover {
-  background:rgba(255,255,255,0.14); border-color:rgba(255,255,255,0.5);
+  background:rgba(255,255,255,0.14); border-color:rgba(255,255,255,0.6);
   transform:scale(1.08); box-shadow:0 8px 32px rgba(0,0,0,0.18);
 }
 .tree-hole-btn.pulse {
@@ -1214,7 +1205,7 @@ input, select, textarea, .budget-slider, .slider-track {
   font-size:16px; font-weight:600; color:#fff; margin-bottom:6px;
 }
 .tree-hole-popup-sub {
-  font-size:13px; color:rgba(255,255,255,0.5); margin-bottom:16px; line-height:1.6;
+  font-size:13px; color:rgba(255,255,255,0.6); margin-bottom:16px; line-height:1.6;
 }
 .tree-hole-input {
   width:100%; padding:12px 16px; border-radius:14px; border:1px solid rgba(255,255,255,0.12);
@@ -1222,7 +1213,7 @@ input, select, textarea, .budget-slider, .slider-track {
   font-size:14px; outline:none; resize:none; min-height:80px;
   transition:border-color 0.3s;
 }
-.tree-hole-input::placeholder { color:rgba(255,255,255,0.5); }
+.tree-hole-input::placeholder { color:rgba(255,255,255,0.6); }
 .tree-hole-input:focus { border-color:rgba(139,168,140,0.5); }
 .tree-hole-send {
   width:100%; margin-top:12px; padding:12px; border-radius:14px; border:none;
@@ -1260,7 +1251,7 @@ input, select, textarea, .budget-slider, .slider-track {
 .healing-btn:active { transform:scale(0.95); }
 .healing-dismiss {
   background:none; border:1px solid rgba(255,255,255,0.35); border-radius:24px;
-  padding:10px 28px; color:rgba(255,255,255,0.5); font-family:var(--font-body);
+  padding:10px 28px; color:rgba(255,255,255,0.6); font-family:var(--font-body);
   font-size:14px; cursor:pointer; transition:all 0.3s;
 }
 .healing-dismiss:hover { color:rgba(255,255,255,0.75); border-color:rgba(255,255,255,0.55); }
@@ -1313,10 +1304,10 @@ input, select, textarea, .budget-slider, .slider-track {
 /* 隐私透明化声明 */
 .privacy-notice {
   padding:12px 0; text-align:center; font-size:11px; font-weight:300;
-  color:rgba(255,255,255,0.45); letter-spacing:0.5px; line-height:1.8;
+  color:rgba(255,255,255,0.55); letter-spacing:0.5px; line-height:1.8;
   transition:color 0.8s var(--easing);
 }
-.privacy-notice:hover { color:rgba(255,255,255,0.5); }
+.privacy-notice:hover { color:rgba(255,255,255,0.6); }
 
 /* Trae 开发证据条 */
 .trae-evidence-strip {
@@ -1327,7 +1318,7 @@ input, select, textarea, .budget-slider, .slider-track {
 }
 .trae-badge {
   font-size: 10px; font-weight: 400; letter-spacing: 0.3px;
-  color: rgba(255,255,255,0.35);
+  color: rgba(255,255,255,0.55);
   padding: 4px 10px; border-radius: 6px;
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.06);
@@ -1516,7 +1507,7 @@ body.mood-insomnia .bg-geo { opacity:0.5; }
 .rain-plan-toggle:hover { background:rgba(107,143,163,0.25); }
 .rain-plan-detail {
   display:none; margin-top:6px; padding:10px; border-radius:10px;
-  background:rgba(107,143,163,0.08); font-size:12px; color:rgba(255,255,255,0.4);
+  background:rgba(107,143,163,0.08); font-size:12px; color:rgba(255,255,255,0.55);
   line-height:1.6;
 }
 .rain-plan-detail.show { display:block; }
@@ -1528,7 +1519,7 @@ body.mood-insomnia .bg-geo { opacity:0.5; }
   color:rgba(255,255,255,0.55); font-family:var(--font-body); font-size:12px;
   cursor:pointer; transition:all 0.25s var(--easing); backdrop-filter:blur(8px);
 }
-.refresh-btn:hover { background:rgba(255,255,255,0.12); color:#fff; border-color:rgba(255,255,255,0.45); }
+.refresh-btn:hover { background:rgba(255,255,255,0.12); color:#fff; border-color:rgba(255,255,255,0.55); }
 .refresh-btn:active { transform:scale(0.95); }
 .refresh-btn.refreshing { pointer-events:none; opacity:0.5; }
 
@@ -1543,7 +1534,7 @@ body.mood-insomnia .bg-geo { opacity:0.5; }
   backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
   transition:all 0.25s var(--easing);
 }
-.export-btn:hover { background:rgba(255,255,255,0.14); color:#fff; border-color:rgba(255,255,255,0.5); }
+.export-btn:hover { background:rgba(255,255,255,0.14); color:#fff; border-color:rgba(255,255,255,0.6); }
 .export-btn:active { transform:scale(0.95); }
 
 /* ================================================================
@@ -1635,12 +1626,12 @@ body.mood-insomnia .bg-geo { opacity:0.5; }
 }
 .map-ctrl-btn {
   padding:6px 14px; border-radius:14px; border:1px solid rgba(255,255,255,0.1);
-  background:rgba(255,255,255,0.1); color:rgba(255,255,255,0.5);
+  background:rgba(255,255,255,0.1); color:rgba(255,255,255,0.6);
   font-family:var(--font-body); font-size:11px; cursor:pointer;
   transition:all 0.25s var(--easing);
 }
 .map-ctrl-btn:hover { background:rgba(255,255,255,0.12); color:#fff; }
-.map-ctrl-btn.active { background:rgba(255,255,255,0.12); color:#fff; border-color:rgba(255,255,255,0.45); }
+.map-ctrl-btn.active { background:rgba(255,255,255,0.12); color:#fff; border-color:rgba(255,255,255,0.55); }
 
 /* 行程卡片 — 地图联动指示 */
 .day-header {
@@ -1695,10 +1686,10 @@ body.mood-insomnia .bg-geo { opacity:0.5; }
 .ai-narrative-meta { font-size:12px; color:rgba(255,255,255,0.55); }
 .ai-narrative-regen {
   background:none; border:1px solid rgba(255,255,255,0.12); border-radius:14px;
-  padding:6px 16px; color:rgba(255,255,255,0.5); font-family:var(--font-body);
+  padding:6px 16px; color:rgba(255,255,255,0.6); font-family:var(--font-body);
   font-size:12px; cursor:pointer; transition:all 0.25s;
 }
-.ai-narrative-regen:hover { color:#fff; border-color:rgba(255,255,255,0.5); }
+.ai-narrative-regen:hover { color:#fff; border-color:rgba(255,255,255,0.6); }
 
 /* ================================================================
    行程历史 — 「我的行程」Tab
@@ -1751,7 +1742,7 @@ body.mood-insomnia .bg-geo { opacity:0.5; }
   0%,100%{border-color:rgba(107,180,210,0.3)} 50%{border-color:rgba(107,180,210,0.6)}
 }
 .weather-icon { font-size:18px; }
-.weather-detail { color:rgba(255,255,255,0.5); font-size:11px; }
+.weather-detail { color:rgba(255,255,255,0.6); font-size:11px; }
 
 /* ================================================================
    Canvas 分享卡片
@@ -1824,7 +1815,7 @@ body.mood-insomnia .bg-geo { opacity:0.5; }
 .export-modal-btn:active { transform:scale(0.95); }
 .export-modal-close {
   position:absolute; top:16px; right:20px; background:none; border:none;
-  color:rgba(255,255,255,0.5); font-size:20px; cursor:pointer;
+  color:rgba(255,255,255,0.6); font-size:20px; cursor:pointer;
 }
 
 /* 深夜模式全局暗色 */
@@ -1953,7 +1944,7 @@ body.night-mode .bg-geo { opacity:0.2; }
 .algo-step-name { font-size:14px; font-weight:600; color:rgba(255,255,255,0.55); transition:color 0.4s; }
 .algo-step.active .algo-step-name { color:rgba(255,255,255,0.9); }
 .algo-step.done .algo-step-name { color:rgba(139,168,140,0.8); }
-.algo-step-detail { font-size:11px; color:rgba(255,255,255,0.5); margin-top:2px; transition:color 0.4s; }
+.algo-step-detail { font-size:11px; color:rgba(255,255,255,0.6); margin-top:2px; transition:color 0.4s; }
 .algo-step.active .algo-step-detail { color:rgba(255,255,255,0.55); }
 .algo-step-status {
   font-size:11px; font-weight:600; padding:3px 10px; border-radius:8px;
@@ -2034,13 +2025,13 @@ body.night-mode .bg-geo { opacity:0.2; }
 }
 .agent-info { flex:1; min-width:0; }
 .agent-name {
-  font-size:13px; font-weight:600; color:rgba(255,255,255,0.5);
+  font-size:13px; font-weight:600; color:rgba(255,255,255,0.6);
   transition:color 0.4s;
 }
 .agent-card.thinking .agent-name { color:rgba(255,255,255,0.9); }
 .agent-card.done .agent-name { color:rgba(139,168,140,0.7); }
 .agent-output {
-  font-size:11px; color:rgba(255,255,255,0.45); margin-top:2px;
+  font-size:11px; color:rgba(255,255,255,0.55); margin-top:2px;
   transition:all 0.4s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
 .agent-card.thinking .agent-output { color:rgba(255,255,255,0.55); }
@@ -2159,7 +2150,7 @@ body.night-mode .bg-geo { opacity:0.2; }
   background:#8BA88C; cursor:pointer; border:2px solid rgba(255,255,255,0.5);
 }
 .soundtrack-label {
-  font-size:11px; color:rgba(255,255,255,0.5); white-space:nowrap;
+  font-size:11px; color:rgba(255,255,255,0.6); white-space:nowrap;
 }
 
 /* ================================================================
@@ -2199,9 +2190,9 @@ body.night-mode .bg-geo { opacity:0.2; }
 .safety-card:hover { border-color:rgba(255,255,255,0.35); background:rgba(255,255,255,0.12); }
 .safety-card-icon { font-size:24px; margin-bottom:6px; }
 .safety-card-title { font-size:12px; font-weight:600; color:rgba(255,255,255,0.7); }
-.safety-card-detail { font-size:11px; color:rgba(255,255,255,0.4); margin-top:4px; }
+.safety-card-detail { font-size:12px; color:rgba(255,255,255,0.55); margin-top:4px; }
 .safety-tip {
-  font-size:12px; color:rgba(255,255,255,0.4); margin-top:12px;
+  font-size:13px; color:rgba(255,255,255,0.55); margin-top:12px;
   padding:10px 14px; border-radius:10px;
   background:rgba(139,168,140,0.06); border-left:3px solid rgba(139,168,140,0.3);
   line-height:1.6;
@@ -2245,18 +2236,18 @@ body.night-mode .bg-geo { opacity:0.2; }
   color:#8BA88C;
 }
 .carbon-score-label {
-  font-size:10px; color:rgba(255,255,255,0.4);
+  font-size:12px; color:rgba(255,255,255,0.55);
 }
 .carbon-details {
   flex:1; display:flex; flex-direction:column; gap:6px;
 }
 .carbon-detail-row {
   display:flex; justify-content:space-between; font-size:12px;
-  color:rgba(255,255,255,0.5);
+  color:rgba(255,255,255,0.6);
 }
 .carbon-detail-val { font-weight:600; color:rgba(255,255,255,0.7); }
 .carbon-tips {
-  margin-top:12px; font-size:12px; color:rgba(255,255,255,0.4);
+  margin-top:12px; font-size:13px; color:rgba(255,255,255,0.55);
   line-height:1.8;
 }
 .carbon-tips li { margin-bottom:4px; }
@@ -2270,7 +2261,7 @@ body.night-mode .bg-geo { opacity:0.2; }
 }
 .timeline-toggle-btn {
   padding:6px 14px; font-size:12px; border:none; cursor:pointer;
-  background:rgba(255,255,255,0.1); color:rgba(255,255,255,0.4);
+  background:rgba(255,255,255,0.1); color:rgba(255,255,255,0.55);
   font-family:var(--font-body); transition:all 0.3s var(--easing);
 }
 .timeline-toggle-btn.active {
@@ -2288,7 +2279,7 @@ body.night-mode .bg-geo { opacity:0.2; }
 .timeline-day-row::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:1px; }
 .timeline-day-label {
   writing-mode:vertical-rl; font-size:12px; font-weight:600;
-  color:rgba(255,255,255,0.5); padding:8px; flex-shrink:0;
+  color:rgba(255,255,255,0.6); padding:8px; flex-shrink:0;
   text-orientation:mixed; letter-spacing:2px;
 }
 .timeline-snake-item {
@@ -2296,10 +2287,10 @@ body.night-mode .bg-geo { opacity:0.2; }
   background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.14);
   transition:all 0.35s var(--easing);
 }
-.timeline-snake-item:hover { border-color:rgba(255,255,255,0.4); transform:translateY(-2px); }
-.timeline-snake-time { font-size:11px; color:rgba(255,255,255,0.4); }
+.timeline-snake-item:hover { border-color:rgba(255,255,255,0.55); transform:translateY(-2px); }
+.timeline-snake-time { font-size:12px; color:rgba(255,255,255,0.55); }
 .timeline-snake-name { font-size:14px; font-weight:600; color:rgba(255,255,255,0.8); margin:4px 0; }
-.timeline-snake-arrow { text-align:center; font-size:16px; color:rgba(255,255,255,0.4); }
+.timeline-snake-arrow { text-align:center; font-size:16px; color:rgba(255,255,255,0.55); }
 
 /* ================================================================
    旅行护照成就系统
@@ -2346,7 +2337,7 @@ body.night-mode .bg-geo { opacity:0.2; }
 }
 .lang-btn {
   padding:4px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.14);
-  background:rgba(255,255,255,0.1); color:rgba(255,255,255,0.5);
+  background:rgba(255,255,255,0.1); color:rgba(255,255,255,0.6);
   font-size:11px; font-family:var(--font-body); cursor:pointer;
   transition:all 0.3s var(--easing);
 }
@@ -2366,15 +2357,15 @@ body.night-mode .bg-geo { opacity:0.2; }
   border-color:rgba(139,168,140,0.4); background:rgba(255,255,255,0.1);
   box-shadow:0 0 24px rgba(139,168,140,0.1);
 }
-.search-icon { font-size:18px; color:rgba(255,255,255,0.5); margin-left:10px; flex-shrink:0; }
+.search-icon { font-size:18px; color:rgba(255,255,255,0.6); margin-left:10px; flex-shrink:0; }
 .search-input {
   flex:1; background:none; border:none; outline:none; padding:12px 8px;
   font-family:var(--font-body); font-size:15px; color:#fff;
 }
-.search-input::placeholder { color:rgba(255,255,255,0.5); }
+.search-input::placeholder { color:rgba(255,255,255,0.6); }
 .search-shortcut {
   font-size:11px; padding:3px 8px; border-radius:6px; margin-right:8px;
-  background:rgba(255,255,255,0.14); color:rgba(255,255,255,0.5); flex-shrink:0;
+  background:rgba(255,255,255,0.14); color:rgba(255,255,255,0.6); flex-shrink:0;
 }
 .search-dropdown {
   position:absolute; top:100%; left:0; right:0; margin-top:8px;
@@ -2400,7 +2391,7 @@ body.night-mode .bg-geo { opacity:0.2; }
   background:rgba(139,168,140,0.15); color:#8BA88C;
 }
 .search-no-result {
-  padding:24px; text-align:center; color:rgba(255,255,255,0.5); font-size:14px;
+  padding:24px; text-align:center; color:rgba(255,255,255,0.6); font-size:14px;
 }
 
 /* ================================================================
@@ -2435,7 +2426,7 @@ body.night-mode .bg-geo { opacity:0.2; }
 }
 .poi-detail-stat-val { font-size:18px; font-weight:700; }
 .poi-detail-stat-label { font-size:11px; color:rgba(255,255,255,0.55); }
-.poi-detail-desc { font-size:14px; color:rgba(255,255,255,0.5); line-height:1.8; margin-bottom:16px; }
+.poi-detail-desc { font-size:14px; color:rgba(255,255,255,0.6); line-height:1.8; margin-bottom:16px; }
 .poi-detail-tags { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px; }
 .poi-detail-actions { display:flex; gap:10px; }
 .poi-detail-btn {
@@ -2467,7 +2458,7 @@ body.night-mode .bg-geo { opacity:0.2; }
   color:rgba(255,255,255,0.7);
 }
 .theme-toggle-btn:hover {
-  background:rgba(255,255,255,0.14); border-color:rgba(255,255,255,0.5);
+  background:rgba(255,255,255,0.14); border-color:rgba(255,255,255,0.6);
   transform:scale(1.08);
 }
 .theme-toggle-btn:active { transform:scale(0.92); }
@@ -2736,7 +2727,7 @@ body.light-mode .left-panel::-webkit-scrollbar-thumb:hover { background:rgba(0,0
   align-items:center; justify-content:center; font-size:16px;
   transition:all 0.25s var(--easing); flex-shrink:0;
 }
-.voice-btn:hover { background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.45); }
+.voice-btn:hover { background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.55); }
 .voice-btn.listening {
   background:rgba(255,107,107,0.25); border-color:rgba(255,107,107,0.5);
   animation:voicePulse 1s ease-in-out infinite;
@@ -2748,7 +2739,7 @@ body.light-mode .left-panel::-webkit-scrollbar-thumb:hover { background:rgba(0,0
    ================================================================ */
 .edit-mode-toggle {
   padding:8px 16px; border-radius:14px; border:1px solid rgba(255,255,255,0.12);
-  background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.5);
+  background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.6);
   font-family:var(--font-body); font-size:12px; cursor:pointer;
   transition:all 0.25s var(--easing);
 }
@@ -2768,7 +2759,7 @@ body.light-mode .left-panel::-webkit-scrollbar-thumb:hover { background:rgba(0,0
 .timeline-item-remove:hover { background:rgba(255,107,107,0.4); }
 .add-poi-btn {
   width:100%; padding:12px; border-radius:14px; border:1px dashed rgba(255,255,255,0.35);
-  background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.4);
+  background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.55);
   font-family:var(--font-body); font-size:13px; cursor:pointer;
   transition:all 0.25s var(--easing); display:none;
 }
@@ -2812,7 +2803,7 @@ body.light-mode .left-panel::-webkit-scrollbar-thumb:hover { background:rgba(0,0
 .onboarding-dot.active { background:#8BA88C; width:24px; border-radius:4px; }
 .onboarding-icon { font-size:56px; margin-bottom:16px; display:block; }
 .onboarding-title { font-size:22px; font-weight:700; color:#fff; margin-bottom:8px; }
-.onboarding-desc { font-size:14px; color:rgba(255,255,255,0.5); line-height:1.8; margin-bottom:28px; }
+.onboarding-desc { font-size:14px; color:rgba(255,255,255,0.6); line-height:1.8; margin-bottom:28px; }
 .onboarding-actions { display:flex; gap:10px; justify-content:center; }
 .onboarding-btn {
   padding:12px 28px; border-radius:16px; border:none; color:#fff;
@@ -2824,10 +2815,10 @@ body.light-mode .left-panel::-webkit-scrollbar-thumb:hover { background:rgba(0,0
 .onboarding-btn.secondary { background:rgba(255,255,255,0.14); border:1px solid rgba(255,255,255,0.35); }
 .onboarding-btn.secondary:hover { background:rgba(255,255,255,0.14); }
 .onboarding-skip {
-  background:none; border:none; color:rgba(255,255,255,0.45); font-family:var(--font-body);
+  background:none; border:none; color:rgba(255,255,255,0.55); font-family:var(--font-body);
   font-size:12px; cursor:pointer; margin-top:12px; transition:color 0.3s;
 }
-.onboarding-skip:hover { color:rgba(255,255,255,0.5); }
+.onboarding-skip:hover { color:rgba(255,255,255,0.6); }
 
 /* ================================================================
    微交互 — 涟漪效果
@@ -2895,16 +2886,16 @@ body.light-mode .left-panel::-webkit-scrollbar-thumb:hover { background:rgba(0,0
 .feedback-overlay.show .feedback-card { transform:translateY(0); }
 .feedback-close {
   position:absolute; top:14px; right:16px; width:28px; height:28px; border-radius:50%;
-  background:rgba(255,255,255,0.14); border:none; color:rgba(255,255,255,0.5);
+  background:rgba(255,255,255,0.14); border:none; color:rgba(255,255,255,0.6);
   font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center;
   transition:all 0.25s;
 }
 .feedback-close:hover { background:rgba(255,255,255,0.35); color:#fff; }
 .feedback-title { font-size:20px; font-weight:700; color:#fff; margin-bottom:6px; }
-.feedback-sub { font-size:13px; color:rgba(255,255,255,0.4); margin-bottom:20px; }
+.feedback-sub { font-size:14px; color:rgba(255,255,255,0.55); margin-bottom:20px; }
 .feedback-stars { display:flex; gap:8px; justify-content:center; margin-bottom:16px; }
 .feedback-star {
-  font-size:36px; color:rgba(255,255,255,0.4); cursor:pointer;
+  font-size:36px; color:rgba(255,255,255,0.55); cursor:pointer;
   transition:all 0.2s var(--easing); user-select:none;
 }
 .feedback-star:hover { color:#FFD700; transform:scale(1.2); }
@@ -2915,7 +2906,7 @@ body.light-mode .left-panel::-webkit-scrollbar-thumb:hover { background:rgba(0,0
   transition:border-color 0.3s;
 }
 .feedback-input:focus { border-color:rgba(139,168,140,0.5); }
-.feedback-input::placeholder { color:rgba(255,255,255,0.4); }
+.feedback-input::placeholder { color:rgba(255,255,255,0.55); }
 .feedback-submit-btn {
   width:100%; padding:13px; border-radius:16px; border:none;
   background:linear-gradient(135deg, #8BA88C, #6B8E6C); color:#fff;
@@ -2943,8 +2934,8 @@ body.light-mode .left-panel::-webkit-scrollbar-thumb:hover { background:rgba(0,0
   transition:border-color 0.3s;
 }
 .api-settings-input:focus { border-color:rgba(139,168,140,0.5); }
-.api-settings-input::placeholder { color:rgba(255,255,255,0.35); }
-.api-settings-hint { font-size:11px; color:rgba(255,255,255,0.45); margin-top:4px; }
+.api-settings-input::placeholder { color:rgba(255,255,255,0.55); }
+.api-settings-hint { font-size:12px; color:rgba(255,255,255,0.55); margin-top:4px; }
 .api-settings-actions { display:flex; gap:10px; margin-top:20px; }
 .api-settings-btn {
   flex:1; padding:11px; border-radius:14px; border:none; color:#fff;
@@ -3023,7 +3014,7 @@ body.light-mode .left-panel::-webkit-scrollbar-thumb:hover { background:rgba(0,0
 }
 .ai-chat-close {
   width:28px; height:28px; border-radius:50%; border:none;
-  background:rgba(255,255,255,0.14); color:rgba(255,255,255,0.5);
+  background:rgba(255,255,255,0.14); color:rgba(255,255,255,0.6);
   font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center;
   transition:all 0.25s;
 }
@@ -3049,7 +3040,7 @@ body.light-mode .left-panel::-webkit-scrollbar-thumb:hover { background:rgba(0,0
 }
 .ai-chat-msg.typing {
   align-self:flex-start; background:rgba(139,168,140,0.08); border:1px solid rgba(139,168,140,0.12);
-  color:rgba(255,255,255,0.4); border-bottom-left-radius:4px;
+  color:rgba(255,255,255,0.55); border-bottom-left-radius:4px;
 }
 .ai-chat-suggestions {
   display:flex; flex-wrap:wrap; gap:6px; padding:8px 20px 12px;
@@ -3057,7 +3048,7 @@ body.light-mode .left-panel::-webkit-scrollbar-thumb:hover { background:rgba(0,0
 }
 .ai-chat-suggestion {
   padding:6px 14px; border-radius:14px; border:1px solid rgba(255,255,255,0.1);
-  background:rgba(255,255,255,0.1); color:rgba(255,255,255,0.5);
+  background:rgba(255,255,255,0.1); color:rgba(255,255,255,0.6);
   font-size:11px; cursor:pointer; transition:all 0.25s; white-space:nowrap;
 }
 .ai-chat-suggestion:hover { background:rgba(139,168,140,0.12); border-color:rgba(139,168,140,0.3); color:#8BA88C; }
@@ -3069,7 +3060,7 @@ body.light-mode .left-panel::-webkit-scrollbar-thumb:hover { background:rgba(0,0
   background:rgba(255,255,255,0.05); color:#fff; font-family:var(--font-body);
   font-size:13px; outline:none; transition:border-color 0.3s;
 }
-.ai-chat-input::placeholder { color:rgba(255,255,255,0.4); }
+.ai-chat-input::placeholder { color:rgba(255,255,255,0.55); }
 .ai-chat-input:focus { border-color:rgba(139,168,140,0.5); }
 .ai-chat-send {
   width:36px; height:36px; border-radius:50%; border:none;
@@ -3109,8 +3100,8 @@ body.light-mode .left-panel::-webkit-scrollbar-thumb:hover { background:rgba(0,0
   padding:48px 24px; text-align:center;
 }
 .empty-state-icon { font-size:56px; margin-bottom:16px; opacity:0.5; }
-.empty-state-title { font-size:18px; font-weight:600; color:rgba(255,255,255,0.5); margin-bottom:6px; }
-.empty-state-desc { font-size:14px; color:rgba(255,255,255,0.5); line-height:1.8; max-width:320px; }
+.empty-state-title { font-size:18px; font-weight:600; color:rgba(255,255,255,0.6); margin-bottom:6px; }
+.empty-state-desc { font-size:14px; color:rgba(255,255,255,0.6); line-height:1.8; max-width:320px; }
 
 /* ================================================================
    旅行人格画像
@@ -3137,14 +3128,14 @@ body.light-mode .left-panel::-webkit-scrollbar-thumb:hover { background:rgba(0,0
 @keyframes personaRing { 0%,100%{transform:scale(1);opacity:0.3} 50%{transform:scale(1.08);opacity:0.6} }
 .persona-info { flex:1; }
 .persona-name { font-size:22px; font-weight:700; color:#fff; margin-bottom:4px; }
-.persona-type { font-size:14px; color:rgba(255,255,255,0.5); font-weight:500; }
+.persona-type { font-size:14px; color:rgba(255,255,255,0.6); font-weight:500; }
 .persona-traits { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; }
 .persona-trait {
   padding:6px 14px; border-radius:20px; font-size:12px; font-weight:500;
   border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.1);
   color:rgba(255,255,255,0.6); transition:all 0.3s var(--easing);
 }
-.persona-trait:hover { background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.45); transform:translateY(-1px); }
+.persona-trait:hover { background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.55); transform:translateY(-1px); }
 .persona-stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
 .persona-stat {
   padding:14px 12px; border-radius:14px; text-align:center;
@@ -3156,7 +3147,7 @@ body.light-mode .left-panel::-webkit-scrollbar-thumb:hover { background:rgba(0,0
 .persona-stat-val { font-size:16px; font-weight:700; color:#fff; }
 .persona-stat-label { font-size:10px; color:rgba(255,255,255,0.55); margin-top:2px; }
 .persona-desc {
-  font-size:14px; color:rgba(255,255,255,0.5); line-height:1.8;
+  font-size:14px; color:rgba(255,255,255,0.6); line-height:1.8;
   padding:16px; border-radius:12px; background:rgba(255,255,255,0.08);
   border-left:2px solid rgba(139,168,140,0.3);
 }
@@ -3184,9 +3175,9 @@ body.light-mode .left-panel::-webkit-scrollbar-thumb:hover { background:rgba(0,0
   white-space:nowrap; box-shadow:0 4px 12px rgba(139,168,140,0.3);
 }
 .compare-col-title { font-size:16px; font-weight:700; color:#fff; margin-bottom:6px; display:flex; align-items:center; gap:8px; }
-.compare-col-subtitle { font-size:12px; color:rgba(255,255,255,0.4); margin-bottom:16px; }
+.compare-col-subtitle { font-size:13px; color:rgba(255,255,255,0.55); margin-bottom:16px; }
 .compare-metric { display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.1); }
-.compare-metric-label { font-size:12px; color:rgba(255,255,255,0.4); }
+.compare-metric-label { font-size:13px; color:rgba(255,255,255,0.55); }
 .compare-metric-val { font-size:14px; font-weight:600; }
 .compare-verdict { margin-top:16px; padding:14px; border-radius:12px; font-size:13px; line-height:1.8; }
 .compare-select-btn {
@@ -3237,7 +3228,7 @@ body.light-mode .left-panel::-webkit-scrollbar-thumb:hover { background:rgba(0,0
 .viz-card-title { font-size:14px; font-weight:600; color:rgba(255,255,255,0.6); margin-bottom:12px; }
 .viz-canvas { width:100%; max-width:200px; height:auto; }
 .viz-legend { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:10px; }
-.viz-legend-item { display:flex; align-items:center; gap:4px; font-size:10px; color:rgba(255,255,255,0.4); }
+.viz-legend-item { display:flex; align-items:center; gap:4px; font-size:12px; color:rgba(255,255,255,0.55); }
 .viz-legend-dot { width:8px; height:8px; border-radius:2px; }
 
 /* ================================================================
@@ -3272,12 +3263,12 @@ body.light-mode .left-panel::-webkit-scrollbar-thumb:hover { background:rgba(0,0
   border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.12);
   backdrop-filter:blur(12px); cursor:pointer;
   display:flex; align-items:center; justify-content:center;
-  font-size:18px; color:rgba(255,255,255,0.5);
+  font-size:18px; color:rgba(255,255,255,0.6);
   opacity:0; pointer-events:none; transform:translateY(10px);
   transition:all 0.35s var(--easing);
 }
 .back-to-top.visible { opacity:1; pointer-events:auto; transform:translateY(0); }
-.back-to-top:hover { background:rgba(255,255,255,0.14); color:#fff; border-color:rgba(255,255,255,0.5); }
+.back-to-top:hover { background:rgba(255,255,255,0.14); color:#fff; border-color:rgba(255,255,255,0.6); }
 
 /* ================================================================
    滚动揭示动画
@@ -3323,7 +3314,7 @@ body.light-mode .left-panel::-webkit-scrollbar-thumb:hover { background:rgba(0,0
   color:#fff; text-align:center; margin-bottom:8px;
 }
 .mbti-quiz-subtitle {
-  font-size:14px; color:rgba(255,255,255,0.5); text-align:center; margin-bottom:32px;
+  font-size:14px; color:rgba(255,255,255,0.6); text-align:center; margin-bottom:32px;
 }
 .mbti-question-block {
   margin-bottom:28px; animation:fadeInUp 0.5s var(--easing) both;
@@ -3408,7 +3399,7 @@ body.light-mode .left-panel::-webkit-scrollbar-thumb:hover { background:rgba(0,0
   background-clip:text; margin-bottom:4px;
 }
 .mbti-result-nickname {
-  font-size:16px; color:rgba(255,255,255,0.5); letter-spacing:2px;
+  font-size:16px; color:rgba(255,255,255,0.6); letter-spacing:2px;
 }
 .mbti-result-traits {
   display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin:16px 0;
@@ -3423,7 +3414,7 @@ body.light-mode .left-panel::-webkit-scrollbar-thumb:hover { background:rgba(0,0
   background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12);
 }
 .mbti-result-section-title {
-  font-size:13px; font-weight:600; color:rgba(255,255,255,0.4);
+  font-size:13px; font-weight:600; color:rgba(255,255,255,0.55);
   text-transform:uppercase; letter-spacing:2px; margin-bottom:10px;
 }
 .mbti-result-destinations {
@@ -3661,7 +3652,7 @@ body.light-mode .left-panel::-webkit-scrollbar-thumb:hover { background:rgba(0,0
 @media (prefers-contrast: high) {
   body { color:#fff; }
   .glass-depth-1, .glass-depth-2, .glass-depth-3 {
-    background:rgba(0,0,0,0.5); border-color:rgba(255,255,255,0.5);
+    background:rgba(0,0,0,0.5); border-color:rgba(255,255,255,0.6);
   }
 }
 
@@ -3759,12 +3750,12 @@ body.light-mode .left-panel::-webkit-scrollbar-thumb:hover { background:rgba(0,0
 .expense-pp-amount { font-weight:700; color:#8BA88C; font-size:15px; }
 .expense-add-btn {
   width:100%; padding:10px; border-radius:12px; border:1px dashed rgba(255,255,255,0.35);
-  background:transparent; color:rgba(255,255,255,0.4); cursor:pointer;
+  background:transparent; color:rgba(255,255,255,0.55); cursor:pointer;
   font-size:14px; transition:all 0.3s var(--easing); margin-top:8px;
 }
 .expense-add-btn:hover { border-color:rgba(139,168,140,0.4); color:rgba(255,255,255,0.7); }
 .expense-remove-btn {
-  background:none; border:none; color:rgba(255,255,255,0.5); cursor:pointer;
+  background:none; border:none; color:rgba(255,255,255,0.6); cursor:pointer;
   font-size:16px; padding:4px 8px; transition:color 0.3s;
 }
 .expense-remove-btn:hover { color:#FF6B6B; }
@@ -3989,7 +3980,7 @@ button:active:not(:disabled),
 
 /* 卡片悬停边框发光 */
 .glass-panel:hover {
-  border-color: rgba(255,255,255,0.35) !important;
+  border-color: rgba(255,255,255,0.55) !important;
   box-shadow: 0 12px 40px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.08) !important;
 }
 .section-block:hover {
@@ -4049,7 +4040,7 @@ button:active:not(:disabled),
 /* 边框发光 */
 @keyframes borderGlow {
   0%, 100% { border-color: rgba(255,255,255,0.12); box-shadow: 0 0 0 rgba(255,255,255,0); }
-  50% { border-color: rgba(255,255,255,0.35); box-shadow: 0 0 24px rgba(255,255,255,0.06); }
+  50% { border-color: rgba(255,255,255,0.55); box-shadow: 0 0 24px rgba(255,255,255,0.06); }
 }
 .border-glow {
   animation: borderGlow 3s ease-in-out infinite;
@@ -4585,7 +4576,7 @@ button:active:not(:disabled),
         <div class="section-block reveal-section" id="pricePredictionSection">
           <div class="section-title">
             <span>📊 智能价格预测</span>
-            <span style="font-size:12px;color:rgba(255,255,255,0.5);font-weight:400">AI 预测最佳预订时机</span>
+            <span style="font-size:12px;color:rgba(255,255,255,0.6);font-weight:400">AI 预测最佳预订时机</span>
           </div>
           <div id="pricePredictionContent" style="padding:8px 0"></div>
         </div>
@@ -4753,7 +4744,7 @@ button:active:not(:disabled),
       <div id="qrCodeContainer" style="display:flex;justify-content:center;padding:24px;background:#fff;border-radius:16px;margin-bottom:16px">
         <canvas id="qrCanvas" width="200" height="200"></canvas>
       </div>
-      <p style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:16px">使用手机相机扫描二维码，即可查看完整行程</p>
+      <p style="font-size:13px;color:rgba(255,255,255,0.55);margin-bottom:16px">使用手机相机扫描二维码，即可查看完整行程</p>
       <div class="export-modal-actions" style="justify-content:center">
         <button class="export-modal-btn" id="qrDownloadBtn" style="background:#8BA88C" onclick="downloadQRCode()">📥 下载二维码</button>
         <button class="export-modal-btn" style="background:rgba(255,255,255,0.1)" onclick="closeQRModal()">关闭</button>
@@ -4830,7 +4821,7 @@ button:active:not(:disabled),
   <div class="expense-splitter-overlay" id="expenseSplitterOverlay">
     <div class="expense-splitter-modal">
       <div class="expense-splitter-title">💸 旅行费用分摊</div>
-      <div style="text-align:center;font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:16px">记录每个人的花费，公平分摊</div>
+      <div style="text-align:center;font-size:13px;color:rgba(255,255,255,0.55);margin-bottom:16px">记录每个人的花费，公平分摊</div>
       <div class="expense-member-list" id="expenseMemberList"></div>
       <button class="expense-add-btn" onclick="addExpenseMember()">+ 添加成员</button>
       <div class="expense-summary" id="expenseSummary" style="display:none"></div>
@@ -4858,7 +4849,7 @@ button:active:not(:disabled),
   <div class="postcard-overlay" id="postcardOverlay">
     <div class="postcard-modal">
       <div class="expense-splitter-title">✉️ 旅行明信片</div>
-      <div style="text-align:center;font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:12px">生成专属旅行明信片，分享给朋友</div>
+      <div style="text-align:center;font-size:13px;color:rgba(255,255,255,0.55);margin-bottom:12px">生成专属旅行明信片，分享给朋友</div>
       <div class="postcard-style-chips" id="postcardStyleChips">
         <span class="postcard-style-chip active" onclick="selectPostcardStyle('watercolor', this)">🎨 水彩风</span>
         <span class="postcard-style-chip" onclick="selectPostcardStyle('vintage', this)">📮 复古风</span>
@@ -6603,7 +6594,7 @@ function renderMbtiQuestion() {
     var selected = mbtiAnswers[q.id] === opt.value;
     html += '<div class="mbti-option' + (selected ? ' selected' : '') + '" onclick="selectMbtiOption(\'' + q.id + '\', \'' + opt.value + '\')" style="--mbti-accent:' + activeMoodColor + '">';
     html += '<div style="font-size:28px;margin-bottom:6px">' + opt.label.split(' ')[0] + '</div>';
-    html += '<div style="font-size:13px;color:rgba(255,255,255,0.5)">' + opt.desc + '</div>';
+    html += '<div style="font-size:13px;color:rgba(255,255,255,0.6)">' + opt.desc + '</div>';
     html += '</div>';
   });
   html += '</div></div>';
@@ -6937,7 +6928,7 @@ function renderExpenseMembers() {
     html += '<div class="expense-member-row">';
     html += '<div class="expense-member-avatar">' + m.avatar + '</div>';
     html += '<input class="expense-member-name" value="' + m.name + '" onchange="expenseMembers[' + i + '].name=this.value" placeholder="姓名">';
-    html += '<span style="color:rgba(255,255,255,0.5)">¥</span>';
+    html += '<span style="color:rgba(255,255,255,0.6)">¥</span>';
     html += '<input class="expense-member-input" type="number" value="' + m.amount + '" onchange="expenseMembers[' + i + '].amount=parseFloat(this.value)||0" placeholder="0">';
     if (expenseMembers.length > 1) {
       html += '<button class="expense-remove-btn" onclick="removeExpenseMember(' + i + ')">✕</button>';
@@ -7044,7 +7035,7 @@ function renderPricePrediction() {
     html += '<span>' + c.icon + ' ' + c.label + '</span>';
     html += '<span class="carbon-detail-val">' + c.p.trend + '</span>';
     html += '</div>';
-    html += '<div class="carbon-detail-row" style="font-size:12px;color:rgba(255,255,255,0.4)">';
+    html += '<div class="carbon-detail-row" style="font-size:12px;color:rgba(255,255,255,0.55)">';
     html += '<span>最佳预订：' + c.p.bestDay + '</span>';
     html += '<span style="color:#8BA88C">可省 ¥' + saving.toLocaleString() + '</span>';
     html += '</div>';
@@ -8814,11 +8805,11 @@ function renderItinerary() {
       }
       // 新增：拍照技巧提示
       if (item.photoTip) {
-        html += '<div class="photo-tip" style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:6px;padding:6px 10px;background:rgba(255,255,255,0.05);border-radius:6px;line-height:1.4">📸 ' + item.photoTip + '</div>';
+        html += '<div class="photo-tip" style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:6px;padding:6px 10px;background:rgba(255,255,255,0.05);border-radius:6px;line-height:1.4">📸 ' + item.photoTip + '</div>';
       }
       // 新增：最佳拍照时间
       if (item.bestPhotoTime) {
-        html += '<div class="best-photo-time" style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px">' + t.itineraryBestPhotoTime + item.bestPhotoTime + '</div>';
+        html += '<div class="best-photo-time" style="font-size:11px;color:rgba(255,255,255,0.55);margin-top:4px">' + t.itineraryBestPhotoTime + item.bestPhotoTime + '</div>';
       }
       if (item.reason) html += '<div class="reason-bar">💡 ' + item.reason + '</div>';
       if (item.reasonTags && item.reasonTags.length) {
@@ -8826,7 +8817,7 @@ function renderItinerary() {
       }
       // 新增：本地人小贴士
       if (item.localTip) {
-        html += '<div class="local-tip" style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:6px;padding:6px 10px;background:rgba(139,168,140,0.08);border-left:2px solid ' + activeMoodColor + '60;border-radius:4px;line-height:1.4">🗣️ ' + item.localTip + '</div>';
+        html += '<div class="local-tip" style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:6px;padding:6px 10px;background:rgba(139,168,140,0.08);border-left:2px solid ' + activeMoodColor + '60;border-radius:4px;line-height:1.4">🗣️ ' + item.localTip + '</div>';
       }
       if (item.type !== 'rest') {
         html += '<div class="booking-row"><div class="price-tag" style="color:' + activeMoodColor + '">¥' + (item.estimatedCost || 0) + '</div><button class="book-btn" style="background:' + activeMoodColor + '" onclick="showBookingPopup(\'' + __(item.name, 'poiNames') + '\')">' + t.itineraryBook + '</button></div>';
@@ -9043,10 +9034,10 @@ function renderStats() {
   var t = (window.i18n && window.i18n[currentLang]) || (window.i18n && window.i18n.zh) || {};
   row.style.display = 'flex';
   var theme = MOOD_THEME_MAP[activeMood] || MOOD_THEME_MAP.calm;
-  row.innerHTML = '<div class="glass-panel" style="flex:1;min-width:140px;padding:16px;text-align:center"><span style="font-size:24px;font-weight:700;color:' + activeMoodColor + '">' + stats.filterPassed + '/' + stats.filterTotal + '</span><br><span style="font-size:12px;color:rgba(255,255,255,0.4)">' + t.statsFilterPassed + '</span></div>' +
-    '<div class="glass-panel" style="flex:1;min-width:140px;padding:16px;text-align:center"><span style="font-size:24px;font-weight:700;color:' + activeMoodColor + '">' + stats.totalPois + '</span><br><span style="font-size:12px;color:rgba(255,255,255,0.4)">' + t.statsSelectedPois + '</span></div>' +
-    '<div class="glass-panel" style="flex:1;min-width:140px;padding:16px;text-align:center"><span style="font-size:24px;font-weight:700;color:' + activeMoodColor + '">¥' + (stats.totalSaved || 0) + '</span><br><span style="font-size:12px;color:rgba(255,255,255,0.4)">' + t.statsSavedAmount + '</span></div>' +
-    '<div class="glass-panel" style="flex:1;min-width:140px;padding:16px;text-align:center"><span style="font-size:24px;font-weight:700;color:' + activeMoodColor + '">¥' + (stats.totalCost || 0) + '</span><br><span style="font-size:12px;color:rgba(255,255,255,0.4)">' + t.statsTotalBudget + '</span></div>';
+  row.innerHTML = '<div class="glass-panel" style="flex:1;min-width:140px;padding:16px;text-align:center"><span style="font-size:24px;font-weight:700;color:' + activeMoodColor + '">' + stats.filterPassed + '/' + stats.filterTotal + '</span><br><span style="font-size:12px;color:rgba(255,255,255,0.55)">' + t.statsFilterPassed + '</span></div>' +
+    '<div class="glass-panel" style="flex:1;min-width:140px;padding:16px;text-align:center"><span style="font-size:24px;font-weight:700;color:' + activeMoodColor + '">' + stats.totalPois + '</span><br><span style="font-size:12px;color:rgba(255,255,255,0.55)">' + t.statsSelectedPois + '</span></div>' +
+    '<div class="glass-panel" style="flex:1;min-width:140px;padding:16px;text-align:center"><span style="font-size:24px;font-weight:700;color:' + activeMoodColor + '">¥' + (stats.totalSaved || 0) + '</span><br><span style="font-size:12px;color:rgba(255,255,255,0.55)">' + t.statsSavedAmount + '</span></div>' +
+    '<div class="glass-panel" style="flex:1;min-width:140px;padding:16px;text-align:center"><span style="font-size:24px;font-weight:700;color:' + activeMoodColor + '">¥' + (stats.totalCost || 0) + '</span><br><span style="font-size:12px;color:rgba(255,255,255,0.55)">' + t.statsTotalBudget + '</span></div>';
 }
 
 // ================================================================
@@ -11352,7 +11343,7 @@ function showShortcutHelp() {
 
 // 在控制台提示
 console.log('%c🌿 MoodTravel %c快捷键已就绪 %c按 Ctrl+K 聚焦搜索',
-  'font-size:18px;color:#8BA88C', 'color:#fff', 'color:rgba(255,255,255,0.5)');
+  'font-size:18px;color:#8BA88C', 'color:#fff', 'color:rgba(255,255,255,0.6)');
 
 // ================================================================
 //  智能搜索
@@ -12526,7 +12517,7 @@ function renderTimelineView() {
       html += '<div class="timeline-snake-item" style="border-left:3px solid ' + dotColor + '">' +
         '<div class="timeline-snake-time">' + item.time + '</div>' +
         '<div class="timeline-snake-name">' + __(item.name, 'poiNames') + '</div>' +
-        '<div style="font-size:10px;color:rgba(255,255,255,0.5)">¥' + (item.estimatedCost || 0) + '</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.6)">¥' + (item.estimatedCost || 0) + '</div>' +
         '</div>';
       if (itemIndex < day.items.length - 1) {
         html += '<div class="timeline-snake-arrow">→</div>';
@@ -13711,7 +13702,7 @@ function rotateDailyTip() {
   <div class="soundtrack-popup" id="soundtrackPopup">
     <span class="soundtrack-label" id="soundtrackLabel">环境音</span>
     <input type="range" class="soundtrack-volume" id="soundtrackVolume" min="0" max="100" value="30" oninput="setSoundtrackVolume(this.value)" title="音量">
-    <span style="font-size:10px;color:rgba(255,255,255,0.5)" id="soundtrackVolLabel">30%</span>
+    <span style="font-size:10px;color:rgba(255,255,255,0.6)" id="soundtrackVolLabel">30%</span>
   </div>
 </div>
 
