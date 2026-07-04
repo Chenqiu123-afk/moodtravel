@@ -1,0 +1,24 @@
+{
+  "name": "moodtravel",
+  "version": "2.0.0",
+  "description": "MoodTravel - AI-powered emotional travel planner for Zhejiang",
+  "main": "server.cjs",
+  "scripts": {
+    "start": "node server.cjs",
+    "dev": "node server.cjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "travel",
+    "ai",
+    "mood",
+    "emotion",
+    "planning"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "vercel": "^54.20.1"
+  }
+}

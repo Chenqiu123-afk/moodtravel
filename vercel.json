@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "server.cjs",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/agents/(.*)",
+      "dest": "server.cjs"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "server.cjs"
+    }
+  ],
+  "env": {
+    "PORT": "8106"
+  }
+}
