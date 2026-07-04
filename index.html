@@ -2763,34 +2763,43 @@ body.light-mode .map-container .leaflet-popup-content-wrapper {
 body.light-mode .map-container .leaflet-popup-tip { background:rgba(255,255,255,0.95) !important; }
 body.light-mode .map-container .leaflet-popup-close-button { color:rgba(0,0,0,0.5) !important; }
 
-/* 安全出行 浅色模式 */
-body.light-mode .safety-card { background:rgba(255,255,255,0.7); border-color:rgba(0,0,0,0.08); }
-body.light-mode .safety-card:hover { border-color:rgba(0,0,0,0.2); background:rgba(255,255,255,0.85); }
-body.light-mode .safety-card-title { color:#2D3436; }
-body.light-mode .safety-card-detail { color:#555; }
-body.light-mode .safety-tip { color:#444; background:rgba(139,168,140,0.08); border-left-color:rgba(139,168,140,0.4); }
-
-/* 绿色出行/碳足迹 浅色模式 */
-body.light-mode .carbon-section { background:rgba(255,255,255,0.5); border-color:rgba(0,0,0,0.06); }
-body.light-mode .carbon-score-inner { background:rgba(0,0,0,0.04); }
-body.light-mode .carbon-score-label { color:#555; }
-body.light-mode .carbon-detail-row { color:#444; }
-body.light-mode .carbon-detail-val { color:#2D3436; }
-body.light-mode .carbon-tips { color:#444; }
-body.light-mode .carbon-tips li { color:#444; }
-
-/* 智能价格预测 浅色模式 */
-body.light-mode .price-prediction-card { background:rgba(255,255,255,0.6); border-color:rgba(0,0,0,0.06); }
-body.light-mode .price-prediction-card:hover { background:rgba(255,255,255,0.8); border-color:rgba(0,0,0,0.12); }
-body.light-mode .price-prediction-title { color:#2D3436; }
-body.light-mode .price-prediction-current { color:#2D3436; }
-body.light-mode .price-prediction-low { color:#8BA88C; }
-body.light-mode .price-prediction-trend { color:#555; }
-body.light-mode .price-prediction-bar-label { color:#555; }
-body.light-mode .price-prediction-tip { color:#444; background:rgba(139,168,140,0.06); }
-body.light-mode .price-chart-legend text { fill:#555; }
-body.light-mode .price-summary-row { color:#444; }
-body.light-mode .price-summary-val { color:#2D3436; }
+/* ===== 安全出行 / 绿色出行 / 智能价格预测 — 浅色模式暴力修复 ===== */
+/* 核心策略：先全部重置为深色，再单独保留特殊色 */
+body.light-mode .safety-panel *,
+body.light-mode .safety-grid *,
+body.light-mode .carbon-section *,
+body.light-mode #pricePredictionSection * {
+  color: #2D3436 !important;
+}
+/* 保留绿色数值 */
+body.light-mode .carbon-detail-val[style*="8BA88C"],
+body.light-mode .carbon-detail-val[style*="8ba88c"],
+body.light-mode .carbon-score-value,
+body.light-mode .price-prediction-low,
+body.light-mode .price-prediction-save,
+body.light-mode .price-summary-val.highlight,
+body.light-mode .price-prediction-trend.down,
+body.light-mode .price-prediction-tip strong {
+  color: #8BA88C !important;
+}
+/* 保留红色趋势 */
+body.light-mode .price-prediction-trend.up {
+  color: #D32F2F !important;
+}
+/* 卡片背景 */
+body.light-mode .safety-card { background:rgba(0,0,0,0.03) !important; border-color:rgba(0,0,0,0.08) !important; }
+body.light-mode .safety-card:hover { background:rgba(0,0,0,0.05) !important; border-color:rgba(0,0,0,0.15) !important; }
+body.light-mode .carbon-section { background:rgba(0,0,0,0.02) !important; border-color:rgba(0,0,0,0.06) !important; }
+body.light-mode .carbon-score-inner { background:rgba(0,0,0,0.04) !important; }
+body.light-mode .safety-tip { background:rgba(139,168,140,0.08) !important; border-left-color:rgba(139,168,140,0.4) !important; }
+body.light-mode .price-prediction-card { background:rgba(0,0,0,0.02) !important; border-color:rgba(0,0,0,0.06) !important; }
+body.light-mode .price-prediction-card:hover { background:rgba(0,0,0,0.04) !important; border-color:rgba(0,0,0,0.12) !important; }
+body.light-mode .price-summary { background:rgba(0,0,0,0.02) !important; border-color:rgba(0,0,0,0.06) !important; }
+body.light-mode .price-prediction-tip { background:rgba(139,168,140,0.06) !important; }
+body.light-mode .price-prediction-trend.stable { background:rgba(0,0,0,0.04) !important; }
+body.light-mode .price-prediction-save { background:rgba(139,168,140,0.08) !important; }
+/* 环形图背景 */
+body.light-mode .carbon-score-circle { background: conic-gradient(#8BA88C var(--score-deg, 0deg), rgba(0,0,0,0.06) var(--score-deg, 0deg)) !important; }
 
 /* 语言切换 */
 body.light-mode .lang-btn { color:#555 !important; border-color:rgba(0,0,0,0.15) !important; background:rgba(0,0,0,0.04) !important; }
@@ -7302,11 +7311,14 @@ function renderPricePrediction() {
 
   // 平台比价列表
   html += '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">';
+  var isLight = document.body.classList.contains('light-mode');
   p.hotel.platformPrices.forEach(function(pp) {
     var isBest = pp.price === p.hotel.bestPlatform.price;
-    html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:10px;' + (isBest ? 'background:rgba(139,168,140,0.12);border:1px solid rgba(139,168,140,0.3)' : 'background:rgba(255,255,255,0.04)') + '">';
-    html += '<span style="font-size:14px">' + (pp.icon || '🏨') + ' <strong>' + pp.name + '</strong></span>';
-    html += '<span style="font-size:16px;font-weight:700;' + (isBest ? 'color:#8BA88C' : '') + '">¥' + pp.price.toLocaleString() + '</span>';
+    var rowBg = isBest ? 'background:rgba(139,168,140,0.12);border:1px solid rgba(139,168,140,0.3)' :
+      (isLight ? 'background:rgba(0,0,0,0.03)' : 'background:rgba(255,255,255,0.04)');
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:10px;' + rowBg + '">';
+    html += '<span style="font-size:14px;color:' + (isLight ? '#2D3436' : '') + '">' + (pp.icon || '🏨') + ' <strong>' + pp.name + '</strong></span>';
+    html += '<span style="font-size:16px;font-weight:700;' + (isBest ? 'color:#8BA88C' : (isLight ? 'color:#2D3436' : '')) + '">¥' + pp.price.toLocaleString() + '</span>';
     if (isBest) html += '<span style="font-size:11px;background:#8BA88C;color:#fff;padding:2px 8px;border-radius:10px">最低价</span>';
     html += '</div>';
   });
@@ -11502,41 +11514,43 @@ function toggleTheme() {
 // ================================================================
 function fixLightModeText() {
   var isLight = document.body.classList.contains('light-mode');
-  // 安全出行
-  var safetyCards = document.querySelectorAll('.safety-card-title, .safety-card-detail');
-  safetyCards.forEach(function(el) { el.style.color = isLight ? '#2D3436' : ''; });
-  var safetyTip = document.querySelector('.safety-tip');
-  if (safetyTip) safetyTip.style.color = isLight ? '#444' : '';
-
-  // 绿色出行
-  var carbonRows = document.querySelectorAll('.carbon-detail-row');
-  carbonRows.forEach(function(el) { el.style.color = isLight ? '#444' : ''; });
-  var carbonVals = document.querySelectorAll('.carbon-detail-val');
-  carbonVals.forEach(function(el) { el.style.color = isLight ? '#2D3436' : ''; });
-  var carbonLabel = document.querySelector('.carbon-score-label');
-  if (carbonLabel) carbonLabel.style.color = isLight ? '#555' : '';
-  var carbonTips = document.querySelectorAll('.carbon-tips, .carbon-tips li');
-  carbonTips.forEach(function(el) { el.style.color = isLight ? '#444' : ''; });
-
-  // 智能价格预测
+  if (!isLight) {
+    // 恢复暗色模式：清除所有inline颜色
+    var allEls = document.querySelectorAll('.safety-panel *, .safety-grid *, .carbon-section *, #pricePredictionSection *');
+    allEls.forEach(function(el) { el.style.color = ''; el.style.background = ''; });
+    return;
+  }
+  // 浅色模式：暴力覆盖所有文字
+  var sections = document.querySelectorAll('.safety-panel, .safety-grid, .carbon-section, #pricePredictionSection');
+  sections.forEach(function(sec) {
+    var els = sec.querySelectorAll('*');
+    els.forEach(function(el) {
+      // 跳过纯装饰性元素
+      if (el.tagName === 'BR' || el.tagName === 'HR') return;
+      // 跳过绿色/红色特殊元素
+      if (el.classList.contains('carbon-score-value') ||
+          el.classList.contains('price-prediction-low') ||
+          el.classList.contains('price-prediction-save') ||
+          el.classList.contains('price-summary-val') && el.classList.contains('highlight') ||
+          el.classList.contains('price-prediction-trend') && el.classList.contains('down') ||
+          el.tagName === 'STRONG') {
+        el.style.color = '#8BA88C';
+        return;
+      }
+      if (el.classList.contains('price-prediction-trend') && el.classList.contains('up')) {
+        el.style.color = '#D32F2F';
+        return;
+      }
+      el.style.color = '#2D3436';
+    });
+  });
+  // 卡片背景
+  var safetyCards = document.querySelectorAll('.safety-card');
+  safetyCards.forEach(function(el) { el.style.background = 'rgba(0,0,0,0.03)'; el.style.borderColor = 'rgba(0,0,0,0.08)'; });
   var ppCards = document.querySelectorAll('.price-prediction-card');
-  ppCards.forEach(function(el) { el.style.background = isLight ? 'rgba(255,255,255,0.6)' : ''; el.style.borderColor = isLight ? 'rgba(0,0,0,0.06)' : ''; });
-  var ppTitles = document.querySelectorAll('.price-prediction-title');
-  ppTitles.forEach(function(el) { el.style.color = isLight ? '#2D3436' : ''; });
-  var ppCurrents = document.querySelectorAll('.price-prediction-current');
-  ppCurrents.forEach(function(el) { el.style.color = isLight ? '#2D3436' : ''; });
-  var ppLabels = document.querySelectorAll('.price-prediction-current-label, .price-prediction-low-label');
-  ppLabels.forEach(function(el) { el.style.color = isLight ? '#555' : ''; });
-  var ppTrends = document.querySelectorAll('.price-prediction-trend');
-  ppTrends.forEach(function(el) { if (isLight) el.style.color = el.classList.contains('up') ? '#D32F2F' : el.classList.contains('down') ? '#2E7D32' : '#555'; else el.style.color = ''; });
-  var ppTips = document.querySelectorAll('.price-prediction-tip');
-  ppTips.forEach(function(el) { el.style.color = isLight ? '#444' : ''; });
-  var ppBarLabels = document.querySelectorAll('.price-prediction-bar-label');
-  ppBarLabels.forEach(function(el) { el.style.color = isLight ? '#555' : ''; });
-  var ppSummaryRows = document.querySelectorAll('.price-summary-row');
-  ppSummaryRows.forEach(function(el) { el.style.color = isLight ? '#444' : ''; });
-  var ppSummaryVals = document.querySelectorAll('.price-summary-val');
-  ppSummaryVals.forEach(function(el) { el.style.color = isLight ? '#2D3436' : ''; });
+  ppCards.forEach(function(el) { el.style.background = 'rgba(0,0,0,0.02)'; el.style.borderColor = 'rgba(0,0,0,0.06)'; });
+  var ppSummary = document.querySelectorAll('.price-summary');
+  ppSummary.forEach(function(el) { el.style.background = 'rgba(0,0,0,0.02)'; el.style.borderColor = 'rgba(0,0,0,0.06)'; });
 }
 
 // 启动时恢复主题
@@ -12749,7 +12763,9 @@ function renderCarbonFootprint() {
   var greenScore = Math.round(100 - (estimatedCO2 / (avgCO2 || 1)) * 50);
   greenScore = Math.max(20, Math.min(100, greenScore));
   
-  wrap.innerHTML = '<div class="carbon-score-circle" style="background:conic-gradient(#8BA88C ' + (greenScore * 3.6) + 'deg, rgba(255,255,255,0.12) ' + (greenScore * 3.6) + 'deg)"><div class="carbon-score-inner"><div class="carbon-score-value">' + greenScore + '</div><div class="carbon-score-label">' + t.carbonGreenScore + '</div></div></div>' +
+  var isLight = document.body.classList.contains('light-mode');
+  var unfilledColor = isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.12)';
+  wrap.innerHTML = '<div class="carbon-score-circle" style="background:conic-gradient(#8BA88C ' + (greenScore * 3.6) + 'deg, ' + unfilledColor + ' ' + (greenScore * 3.6) + 'deg)"><div class="carbon-score-inner"><div class="carbon-score-value">' + greenScore + '</div><div class="carbon-score-label">' + t.carbonGreenScore + '</div></div></div>' +
     '<div class="carbon-details">' +
     '<div class="carbon-detail-row"><span>' + t.carbonEstCO2 + '</span><span class="carbon-detail-val">' + estimatedCO2 + ' kg CO₂</span></div>' +
     '<div class="carbon-detail-row"><span>' + t.carbonCarCompare + '</span><span class="carbon-detail-val">' + avgCO2 + ' kg CO₂</span></div>' +
