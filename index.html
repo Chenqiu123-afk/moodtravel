@@ -2264,6 +2264,95 @@ body.night-mode .bg-geo { opacity:0.2; }
 .carbon-tips li { margin-bottom:4px; }
 
 /* ================================================================
+   智能价格预测 — 深度版
+   ================================================================ */
+.price-prediction-card {
+  padding:18px 20px; border-radius:16px; margin-bottom:10px;
+  background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
+  transition:all 0.35s var(--easing);
+}
+.price-prediction-card:hover {
+  background:rgba(255,255,255,0.09); border-color:rgba(255,255,255,0.2);
+  transform:translateY(-2px);
+}
+.price-prediction-header {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:12px;
+}
+.price-prediction-title {
+  font-size:15px; font-weight:600; color:rgba(255,255,255,0.85);
+  display:flex; align-items:center; gap:8px;
+}
+.price-prediction-icon { font-size:22px; }
+.price-prediction-trend {
+  font-size:12px; padding:4px 10px; border-radius:20px;
+  font-weight:500;
+}
+.price-prediction-trend.up { background:rgba(255,107,107,0.15); color:#FF6B6B; }
+.price-prediction-trend.down { background:rgba(139,168,140,0.15); color:#8BA88C; }
+.price-prediction-trend.stable { background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.6); }
+.price-prediction-body {
+  display:flex; align-items:flex-end; gap:16px;
+}
+.price-prediction-current {
+  font-size:28px; font-weight:700; color:rgba(255,255,255,0.9);
+  line-height:1;
+}
+.price-prediction-current-label {
+  font-size:11px; color:rgba(255,255,255,0.45); margin-top:4px;
+}
+.price-prediction-low {
+  font-size:18px; font-weight:600; color:#8BA88C; margin-left:auto;
+  text-align:right;
+}
+.price-prediction-low-label {
+  font-size:11px; color:rgba(255,255,255,0.45); margin-top:4px;
+}
+.price-prediction-save {
+  font-size:12px; color:#8BA88C; font-weight:500; margin-top:8px;
+  padding:6px 12px; background:rgba(139,168,140,0.08); border-radius:8px;
+  display:inline-block;
+}
+.price-prediction-chart {
+  margin-top:12px; height:60px; position:relative;
+}
+.price-prediction-chart svg { width:100%; height:100%; }
+.price-prediction-bar-group {
+  display:flex; align-items:flex-end; gap:6px; height:100%;
+  padding-top:12px;
+}
+.price-prediction-bar {
+  flex:1; border-radius:6px 6px 0 0; position:relative;
+  transition:height 0.8s var(--easing);
+  min-width:18px;
+}
+.price-prediction-bar.now { background:rgba(255,179,71,0.6); }
+.price-prediction-bar.past { background:rgba(255,255,255,0.15); }
+.price-prediction-bar.future { background:rgba(139,168,140,0.4); }
+.price-prediction-bar.best { background:rgba(139,168,140,0.7); }
+.price-prediction-bar-label {
+  font-size:10px; color:rgba(255,255,255,0.5); text-align:center;
+  margin-top:6px;
+}
+.price-prediction-tip {
+  font-size:12px; color:rgba(255,255,255,0.55); margin-top:10px;
+  padding:10px 14px; border-radius:10px;
+  background:rgba(139,168,140,0.06); line-height:1.6;
+}
+.price-prediction-tip strong { color:#8BA88C; }
+.price-summary {
+  margin-top:16px; padding:16px; border-radius:14px;
+  background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
+}
+.price-summary-row {
+  display:flex; justify-content:space-between; font-size:13px;
+  color:rgba(255,255,255,0.6); padding:6px 0;
+}
+.price-summary-row.border-top { border-top:1px solid rgba(255,255,255,0.08); padding-top:10px; margin-top:4px; }
+.price-summary-val { font-weight:600; color:rgba(255,255,255,0.85); }
+.price-summary-val.highlight { color:#8BA88C; font-size:16px; }
+
+/* ================================================================
    时间线视图
    ================================================================ */
 .timeline-toggle {
@@ -2673,6 +2762,35 @@ body.light-mode .map-container .leaflet-popup-content-wrapper {
 }
 body.light-mode .map-container .leaflet-popup-tip { background:rgba(255,255,255,0.95) !important; }
 body.light-mode .map-container .leaflet-popup-close-button { color:rgba(0,0,0,0.5) !important; }
+
+/* 安全出行 浅色模式 */
+body.light-mode .safety-card { background:rgba(255,255,255,0.7); border-color:rgba(0,0,0,0.08); }
+body.light-mode .safety-card:hover { border-color:rgba(0,0,0,0.2); background:rgba(255,255,255,0.85); }
+body.light-mode .safety-card-title { color:#2D3436; }
+body.light-mode .safety-card-detail { color:#555; }
+body.light-mode .safety-tip { color:#444; background:rgba(139,168,140,0.08); border-left-color:rgba(139,168,140,0.4); }
+
+/* 绿色出行/碳足迹 浅色模式 */
+body.light-mode .carbon-section { background:rgba(255,255,255,0.5); border-color:rgba(0,0,0,0.06); }
+body.light-mode .carbon-score-inner { background:rgba(0,0,0,0.04); }
+body.light-mode .carbon-score-label { color:#555; }
+body.light-mode .carbon-detail-row { color:#444; }
+body.light-mode .carbon-detail-val { color:#2D3436; }
+body.light-mode .carbon-tips { color:#444; }
+body.light-mode .carbon-tips li { color:#444; }
+
+/* 智能价格预测 浅色模式 */
+body.light-mode .price-prediction-card { background:rgba(255,255,255,0.6); border-color:rgba(0,0,0,0.06); }
+body.light-mode .price-prediction-card:hover { background:rgba(255,255,255,0.8); border-color:rgba(0,0,0,0.12); }
+body.light-mode .price-prediction-title { color:#2D3436; }
+body.light-mode .price-prediction-current { color:#2D3436; }
+body.light-mode .price-prediction-low { color:#8BA88C; }
+body.light-mode .price-prediction-trend { color:#555; }
+body.light-mode .price-prediction-bar-label { color:#555; }
+body.light-mode .price-prediction-tip { color:#444; background:rgba(139,168,140,0.06); }
+body.light-mode .price-chart-legend text { fill:#555; }
+body.light-mode .price-summary-row { color:#444; }
+body.light-mode .price-summary-val { color:#2D3436; }
 
 /* 语言切换 */
 body.light-mode .lang-btn { color:#555 !important; border-color:rgba(0,0,0,0.15) !important; background:rgba(0,0,0,0.04) !important; }
@@ -4651,11 +4769,11 @@ button:active:not(:disabled),
 
         <!-- 智能价格预测 -->
         <div class="section-block reveal-section" id="pricePredictionSection">
-          <div class="section-title">
-            <span>📊 智能价格预测</span>
-            <span style="font-size:12px;color:rgba(255,255,255,0.6);font-weight:400">AI 预测最佳预订时机</span>
+          <div class="section-header">
+            <h2 class="section-title">📊 智能价格预测</h2>
+            <span class="section-hint">AI 驱动 · 最佳预订时机</span>
           </div>
-          <div id="pricePredictionContent" style="padding:8px 0"></div>
+          <div id="pricePredictionContent"></div>
         </div>
 
         <!-- 旅行护照成就 -->
@@ -7060,66 +7178,169 @@ function predictBestTime() {
   var dayOfWeek = now.getDay();
   var isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
-  var predictions = {
-    hotel: { currentPrice: 0, predictedLow: 0, bestDay: '', trend: '', confidence: 0 },
-    tickets: { currentPrice: 0, predictedLow: 0, bestDay: '', trend: '', confidence: 0 },
-    transport: { currentPrice: 0, predictedLow: 0, bestDay: '', trend: '', confidence: 0 }
+  // 真实酒店价格基准
+  var hotelBase = hotel ? hotel.pricePerNight : 350;
+  var hotelBaseMin = hotel ? hotel.minPrice || hotel.pricePerNight * 0.8 : 280;
+
+  // 季节系数（基于真实旅游淡旺季）
+  var seasonMap = { 1:0.85, 2:0.95, 3:1.05, 4:1.15, 5:1.2, 6:1.1, 7:1.35, 8:1.3, 9:1.1, 10:1.4, 11:1.0, 12:0.9 };
+  var seasonMult = seasonMap[month] || 1.0;
+  if (isWeekend) seasonMult *= 1.12;
+
+  // 提前预订天数系数
+  var daysFromNow = 0;
+  var advanceMult = function(d) { return d <= 0 ? 1.0 : d <= 3 ? 1.08 : d <= 7 ? 1.05 : d <= 14 ? 0.92 : 0.88; };
+
+  // === 酒店预测 ===
+  var hotelNow = Math.round(hotelBase * seasonMult);
+  var hotelLow = Math.round(hotelBaseMin * advanceMult(14)); // 提前14天最便宜
+  var hotelTrend = seasonMult > 1.2 ? 'up' : seasonMult > 1.05 ? 'stable' : 'down';
+  var hotelBestDay = isWeekend ? '提前14天（周末价高）' : month >= 7 && month <= 8 ? '提前14天（暑期旺季）' : '提前7天';
+
+  // === 门票预测 ===
+  var ticketBase = hotel ? hotelBase * 0.35 : 200;
+  var ticketNow = Math.round(ticketBase * (isWeekend ? 1.1 : 1.0));
+  var ticketLow = Math.round(ticketBase * 0.85);
+  var ticketTrend = isWeekend ? 'up' : 'stable';
+  var ticketBestDay = '提前3天在线预订';
+
+  // === 交通预测 ===
+  var transportBase = Math.round(budget * 0.25);
+  var transportNow = Math.round(transportBase * advanceMult(daysFromNow));
+  var transportLow = Math.round(transportBase * advanceMult(14));
+  var transportTrend = daysFromNow <= 3 ? 'up' : 'stable';
+  var transportBestDay = '提前7-14天购票';
+
+  // === 生成历史价格数据（模拟最近7天+未来7天） ===
+  var generatePriceHistory = function(base, trend, volatility) {
+    var arr = [];
+    for (var i = -7; i <= 7; i++) {
+      var d = i;
+      var price = base;
+      if (trend === 'up') price = base * (1 + d * 0.015);
+      else if (trend === 'down') price = base * (1 - Math.abs(d) * 0.01);
+      else price = base * (1 + Math.sin(d * 0.5) * 0.03);
+      price += (Math.random() - 0.5) * volatility;
+      arr.push({ day: d, price: Math.round(Math.max(price * 0.85, price)) });
+    }
+    return arr;
   };
 
-  var hotelBase = hotel ? hotel.pricePerNight : 350;
-  var hotelSeasonMultiplier = 1;
-  if (month === 7 || month === 8) hotelSeasonMultiplier = 1.3;
-  if (month === 10 && dayOfWeek >= 0) hotelSeasonMultiplier = 1.4;
-  if (isWeekend) hotelSeasonMultiplier *= 1.15;
+  return {
+    seasonMult: seasonMult,
+    hotel: {
+      icon: '🏨', label: '酒店住宿',
+      currentPrice: hotelNow, predictedLow: hotelLow,
+      bestDay: hotelBestDay, trend: hotelTrend,
+      confidence: hotelTrend === 'up' ? 88 : 75,
+      history: generatePriceHistory(hotelBase, hotelTrend, hotelBase * 0.04),
+      tip: hotelTrend === 'up' ? '暑期+周末双重溢价，<strong>提前14天预订</strong>可省 ¥' + (hotelNow - hotelLow).toLocaleString() : '当前价格合理，<strong>提前7天</strong>锁定低价'
+    },
+    tickets: {
+      icon: '🎫', label: '景点门票',
+      currentPrice: ticketNow, predictedLow: ticketLow,
+      bestDay: ticketBestDay, trend: ticketTrend,
+      confidence: 72,
+      history: generatePriceHistory(ticketBase, ticketTrend, ticketBase * 0.02),
+      tip: '提前在线预订通常<strong>省15%起</strong>，部分平台有早鸟票折扣'
+    },
+    transport: {
+      icon: '🚄', label: '交通出行',
+      currentPrice: transportNow, predictedLow: transportLow,
+      bestDay: transportBestDay, trend: transportTrend,
+      confidence: 90,
+      history: generatePriceHistory(transportBase, transportTrend, transportBase * 0.03),
+      tip: '高铁/机票<strong>提前7-14天</strong>购买最划算，<strong>临近出发涨20%+</strong>'
+    }
+  };
+}
 
-  predictions.hotel.currentPrice = Math.round(hotelBase * hotelSeasonMultiplier);
-  predictions.hotel.predictedLow = Math.round(hotelBase * 0.85);
-  predictions.hotel.bestDay = isWeekend ? '下周二' : '今天';
-  predictions.hotel.trend = hotelSeasonMultiplier > 1.2 ? '📈 旺季上涨' : '📉 价格平稳';
-  predictions.hotel.confidence = 85;
+function renderPriceChart(history, trend) {
+  var now = new Date();
+  var days = ['日','一','二','三','四','五','六'];
+  var maxPrice = Math.max.apply(null, history.map(function(h) { return h.price; }));
+  var minPrice = Math.min.apply(null, history.map(function(h) { return h.price; }));
+  var range = maxPrice - minPrice || 1;
 
-  var ticketBase = stats ? (stats.totalCost / (days || 2)) * 0.3 : 200;
-  predictions.tickets.currentPrice = Math.round(ticketBase);
-  predictions.tickets.predictedLow = Math.round(ticketBase * 0.9);
-  predictions.tickets.bestDay = '提前3天预订';
-  predictions.tickets.trend = '📊 价格稳定';
-  predictions.tickets.confidence = 72;
+  var html = '<div class="price-prediction-bar-group">';
+  history.forEach(function(h) {
+    var height = ((h.price - minPrice) / range) * 70 + 10;
+    var cls = 'price-prediction-bar ';
+    if (h.day === 0) cls += 'now';
+    else if (h.day < 0) cls += 'past';
+    else if (h.price === minPrice) cls += 'best';
+    else cls += 'future';
 
-  predictions.transport.currentPrice = Math.round(budget * 0.25);
-  predictions.transport.predictedLow = Math.round(budget * 0.2);
-  predictions.transport.bestDay = '提前7天';
-  predictions.transport.trend = '📈 临近出发上涨';
-  predictions.transport.confidence = 90;
-
-  return predictions;
+    var date = new Date(now);
+    date.setDate(date.getDate() + h.day);
+    var label = h.day === 0 ? '今天' : (h.day < 0 ? -h.day + '天前' : '+' + h.day + '天');
+    html += '<div style="flex:1;text-align:center">';
+    html += '<div class="' + cls + '" style="height:' + height + 'px" title="¥' + h.price + ' - ' + label + '"></div>';
+    html += '<div class="price-prediction-bar-label">' + label + '</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+  return html;
 }
 
 function renderPricePrediction() {
   var section = document.getElementById('pricePredictionSection');
-  if (!section) return;
+  var content = document.getElementById('pricePredictionContent');
+  if (!section || !content) return;
   section.classList.add('show');
 
   var predictions = predictBestTime();
-  var cards = [
-    { icon:'🏨', label:'酒店住宿', p: predictions.hotel },
-    { icon:'🎫', label:'景点门票', p: predictions.tickets },
-    { icon:'🚄', label:'交通出行', p: predictions.transport }
-  ];
+  var cards = [predictions.hotel, predictions.tickets, predictions.transport];
+  if (hotel) {
+    cards.push({
+      icon: '🍽️', label: '餐饮预算',
+      currentPrice: Math.round(budget * 0.2 / (days || 1)),
+      predictedLow: Math.round(budget * 0.15 / (days || 1)),
+      bestDay: '本地餐厅更实惠', trend: 'stable', confidence: 65,
+      history: (function() { var arr = []; var base = Math.round(budget * 0.2 / (days || 1)); for (var i = -7; i <= 7; i++) arr.push({ day: i, price: Math.round(base * (1 + Math.sin(i * 0.4) * 0.05)) }); return arr; })(),
+      tip: '选择<strong>本地人推荐</strong>的餐厅，比景区内<strong>便宜30-50%</strong>'
+    });
+  }
 
   var html = '';
   cards.forEach(function(c) {
-    var saving = c.p.currentPrice - c.p.predictedLow;
-    html += '<div class="carbon-detail-row" style="padding:14px 0">';
-    html += '<span>' + c.icon + ' ' + c.label + '</span>';
-    html += '<span class="carbon-detail-val">' + c.p.trend + '</span>';
+    var saving = c.currentPrice - c.predictedLow;
+    var trendClass = c.trend === 'up' ? 'up' : c.trend === 'down' ? 'down' : 'stable';
+    var trendText = c.trend === 'up' ? '📈 上涨中' : c.trend === 'down' ? '📉 下降中' : '📊 平稳';
+
+    html += '<div class="price-prediction-card">';
+    html += '<div class="price-prediction-header">';
+    html += '<div class="price-prediction-title"><span class="price-prediction-icon">' + c.icon + '</span>' + c.label + '</div>';
+    html += '<span class="price-prediction-trend ' + trendClass + '">' + trendText + '</span>';
     html += '</div>';
-    html += '<div class="carbon-detail-row" style="font-size:12px;color:rgba(255,255,255,0.55)">';
-    html += '<span>最佳预订：' + c.p.bestDay + '</span>';
-    html += '<span style="color:#8BA88C">可省 ¥' + saving.toLocaleString() + '</span>';
+
+    html += '<div class="price-prediction-body">';
+    html += '<div><div class="price-prediction-current">¥' + c.currentPrice.toLocaleString() + '</div><div class="price-prediction-current-label">当前价格</div></div>';
+    html += '<div><div class="price-prediction-low">¥' + c.predictedLow.toLocaleString() + '</div><div class="price-prediction-low-label">最低可至</div></div>';
+    html += '</div>';
+
+    if (saving > 0) {
+      html += '<div class="price-prediction-save">💡 最高可省 ¥' + saving.toLocaleString() + ' · ' + c.bestDay + '</div>';
+    }
+
+    html += '<div class="price-prediction-chart">' + renderPriceChart(c.history, c.trend) + '</div>';
+
+    html += '<div class="price-prediction-tip">' + c.tip + '</div>';
     html += '</div>';
   });
 
-  document.getElementById('pricePredictionContent').innerHTML = html;
+  // 总体预算优化汇总
+  var totalNow = cards.reduce(function(s, c) { return s + c.currentPrice; }, 0);
+  var totalLow = cards.reduce(function(s, c) { return s + c.predictedLow; }, 0);
+  var totalSave = totalNow - totalLow;
+  html += '<div class="price-summary">';
+  html += '<div class="price-summary-row"><span>📊 当前预估总花费</span><span class="price-summary-val">¥' + totalNow.toLocaleString() + '</span></div>';
+  html += '<div class="price-summary-row"><span>🎯 优化后最低花费</span><span class="price-summary-val">¥' + totalLow.toLocaleString() + '</span></div>';
+  html += '<div class="price-summary-row border-top"><span>💰 最多可节省</span><span class="price-summary-val highlight">¥' + totalSave.toLocaleString() + '</span></div>';
+  html += '<div class="price-prediction-tip" style="margin-top:10px">🕐 <strong>最佳预订策略：</strong>' + (predictions.seasonMult > 1.15 ? '当前为旺季，建议提前14天规划并预订所有项目，可获得最大折扣' : '当前价格合理，提前7天预订即可锁定优惠，无需过度提前') + '</div>';
+  html += '</div>';
+
+  content.innerHTML = html;
 }
 
 document.addEventListener('DOMContentLoaded', function() {
