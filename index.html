@@ -9,7 +9,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MoodTravel · 情绪旅行</title>
-<meta name="description" content="情绪驱动的智能旅行规划 — 感知你的心情，生成专属浙江旅行路线">
+<meta name="description" content="情绪驱动的AI智能旅行规划 — 感知你的心情，生成专属长三角14城旅行路线。5个AI Agent并行分析，4层漏斗算法精准推荐">
 <meta name="theme-color" content="#8BA88C">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -3873,7 +3873,7 @@ button:active:not(:disabled),
       </div>
       <span class="onboarding-icon" id="onboardingIcon">🎭</span>
       <div class="onboarding-title" id="onboardingTitle">选择你的心情</div>
-      <div class="onboarding-desc" id="onboardingDesc">MoodTravel 会感知你的情绪，为你量身定制专属的浙江旅行路线。先从选择此刻的心情开始吧。</div>
+      <div class="onboarding-desc" id="onboardingDesc">MoodTravel 会感知你的情绪，为你量身定制专属的长三角旅行路线。覆盖上海、杭州、南京、苏州等14个城市。先从选择此刻的心情开始吧。</div>
       <div class="onboarding-actions">
         <button class="onboarding-btn primary" id="onboardingNextBtn" onclick="nextOnboarding()">下一步</button>
         <button class="onboarding-btn secondary" id="onboardingPrevBtn" onclick="prevOnboarding()" style="display:none">上一步</button>
@@ -4929,7 +4929,7 @@ async function generateAiItinerary() {
     return p.name + '（' + p.city + '，' + (p.tags||[]).join('/') + '，¥' + (p.ticketPrice||0) + '）';
   }).join('；');
   
-  var prompt = '你是旅行规划专家。请根据以下条件，为用户生成一个' + days + '天的浙江旅行行程。\n\n' +
+  var prompt = '你是旅行规划专家。请根据以下条件，为用户生成一个' + days + '天的长三角旅行行程。\n\n' +
     '用户状态：心情=' + moodLabel + '，旅伴=' + companionLabel + '，模式=' + modeLabel + '，预算=¥' + budget + '\n' +
     '约束：每天最多' + maxPerDay + '个景点，必须包含午餐，总花费不超过预算\n' +
     '可选景点：' + poiSummary + '\n\n' +
@@ -5322,7 +5322,19 @@ var POIS = [
   { id:901, name:'江郎山', category:'scenic', energyLevel:4, crowdednessLevel:2, weatherSensitivity:'outdoor', ticketPrice:100, kidsFriendly:false, elderlyFriendly:false, minAge:10, romanticLevel:2, hasPhotoSpot:true, hasNursingRoom:false, strollerFriendly:false, wheelchairAccessible:false, restSeats:1, nearMedical:false, moodScores:{tired:2,anxious:3,sad:4,calm:5,excited:10,happy:8}, tags:['登山','奇峰','户外'], estimatedDuration:300, mapX:30, mapY:60, city:'衢州' },
   // === 台州 ===
   { id:1001, name:'天台山国清寺', category:'temple', energyLevel:2, crowdednessLevel:2, weatherSensitivity:'outdoor', ticketPrice:0, kidsFriendly:true, elderlyFriendly:true, minAge:3, romanticLevel:3, hasPhotoSpot:true, hasNursingRoom:false, strollerFriendly:false, wheelchairAccessible:false, restSeats:3, nearMedical:false, moodScores:{tired:7,anxious:8,sad:8,calm:9,excited:5,happy:7}, tags:['佛教','免费','古刹'], estimatedDuration:120, mapX:60, mapY:60, city:'台州' },
-  { id:1002, name:'神仙居', category:'scenic', energyLevel:3, crowdednessLevel:2, weatherSensitivity:'outdoor', ticketPrice:110, kidsFriendly:true, elderlyFriendly:false, minAge:5, romanticLevel:4, hasPhotoSpot:true, hasNursingRoom:false, strollerFriendly:false, wheelchairAccessible:false, restSeats:2, nearMedical:false, moodScores:{tired:3,anxious:4,sad:5,calm:6,excited:9,happy:8}, tags:['仙境','栈道','拍照'], estimatedDuration:240, mapX:62, mapY:62, city:'台州' }
+  { id:1002, name:'神仙居', category:'scenic', energyLevel:3, crowdednessLevel:2, weatherSensitivity:'outdoor', ticketPrice:110, kidsFriendly:true, elderlyFriendly:false, minAge:5, romanticLevel:4, hasPhotoSpot:true, hasNursingRoom:false, strollerFriendly:false, wheelchairAccessible:false, restSeats:2, nearMedical:false, moodScores:{tired:3,anxious:4,sad:5,calm:6,excited:9,happy:8}, tags:['仙境','栈道','拍照'], estimatedDuration:240, mapX:62, mapY:62, city:'台州' },
+  // === 上海 ===
+  { id:1101, name:'外滩·万国建筑群', category:'scenic', energyLevel:2, crowdednessLevel:4, weatherSensitivity:'outdoor', ticketPrice:0, kidsFriendly:true, elderlyFriendly:true, minAge:0, romanticLevel:5, hasPhotoSpot:true, hasNursingRoom:true, strollerFriendly:true, wheelchairAccessible:true, restSeats:4, nearMedical:true, moodScores:{tired:5,anxious:4,sad:6,calm:7,excited:8,happy:9}, tags:['夜景','免费','地标'], estimatedDuration:120, mapX:72, mapY:12, city:'上海' },
+  { id:1102, name:'迪士尼乐园', category:'theme_park', energyLevel:5, crowdednessLevel:5, weatherSensitivity:'mixed', ticketPrice:475, kidsFriendly:true, elderlyFriendly:true, minAge:3, romanticLevel:4, hasPhotoSpot:true, hasNursingRoom:true, strollerFriendly:true, wheelchairAccessible:true, restSeats:5, nearMedical:true, moodScores:{tired:1,anxious:2,sad:2,calm:3,excited:10,happy:10}, tags:['童话','烟花','童年'], estimatedDuration:480, mapX:68, mapY:14, city:'上海' },
+  { id:1103, name:'武康路·安福路', category:'leisure', energyLevel:1, crowdednessLevel:3, weatherSensitivity:'outdoor', ticketPrice:0, kidsFriendly:true, elderlyFriendly:true, minAge:0, romanticLevel:4, hasPhotoSpot:true, hasNursingRoom:false, strollerFriendly:true, wheelchairAccessible:true, restSeats:4, nearMedical:true, moodScores:{tired:7,anxious:6,sad:7,calm:9,excited:6,happy:8}, tags:['梧桐','咖啡','文艺'], estimatedDuration:90, mapX:70, mapY:13, city:'上海' },
+  // === 南京 ===
+  { id:1201, name:'中山陵·明孝陵', category:'scenic', energyLevel:3, crowdednessLevel:3, weatherSensitivity:'outdoor', ticketPrice:0, kidsFriendly:true, elderlyFriendly:false, minAge:5, romanticLevel:2, hasPhotoSpot:true, hasNursingRoom:false, strollerFriendly:false, wheelchairAccessible:false, restSeats:3, nearMedical:false, moodScores:{tired:3,anxious:3,sad:5,calm:6,excited:7,happy:7}, tags:['历史','免费','陵园'], estimatedDuration:180, mapX:52, mapY:10, city:'南京' },
+  { id:1202, name:'夫子庙·秦淮河', category:'scenic', energyLevel:2, crowdednessLevel:4, weatherSensitivity:'outdoor', ticketPrice:0, kidsFriendly:true, elderlyFriendly:true, minAge:0, romanticLevel:5, hasPhotoSpot:true, hasNursingRoom:true, strollerFriendly:true, wheelchairAccessible:true, restSeats:4, nearMedical:true, moodScores:{tired:6,anxious:4,sad:6,calm:7,excited:8,happy:9}, tags:['夜游','画舫','小吃'], estimatedDuration:120, mapX:54, mapY:12, city:'南京' },
+  { id:1203, name:'牛首山·佛顶宫', category:'temple', energyLevel:2, crowdednessLevel:3, weatherSensitivity:'mixed', ticketPrice:98, kidsFriendly:true, elderlyFriendly:true, minAge:3, romanticLevel:3, hasPhotoSpot:true, hasNursingRoom:true, strollerFriendly:true, wheelchairAccessible:true, restSeats:4, nearMedical:false, moodScores:{tired:7,anxious:8,sad:8,calm:9,excited:6,happy:7}, tags:['佛教','建筑','震撼'], estimatedDuration:150, mapX:50, mapY:11, city:'南京' },
+  // === 苏州 ===
+  { id:1301, name:'拙政园·苏州园林', category:'scenic', energyLevel:2, crowdednessLevel:3, weatherSensitivity:'outdoor', ticketPrice:80, kidsFriendly:true, elderlyFriendly:true, minAge:0, romanticLevel:5, hasPhotoSpot:true, hasNursingRoom:true, strollerFriendly:true, wheelchairAccessible:true, restSeats:5, nearMedical:true, moodScores:{tired:7,anxious:8,sad:8,calm:9,excited:6,happy:8}, tags:['园林','世界遗产','精致'], estimatedDuration:120, mapX:58, mapY:16, city:'苏州' },
+  { id:1302, name:'平江路·山塘街', category:'leisure', energyLevel:1, crowdednessLevel:3, weatherSensitivity:'outdoor', ticketPrice:0, kidsFriendly:true, elderlyFriendly:true, minAge:0, romanticLevel:4, hasPhotoSpot:true, hasNursingRoom:false, strollerFriendly:true, wheelchairAccessible:true, restSeats:3, nearMedical:true, moodScores:{tired:8,anxious:7,sad:7,calm:9,excited:5,happy:7}, tags:['水巷','茶馆','慢生活'], estimatedDuration:90, mapX:60, mapY:17, city:'苏州' },
+  { id:1303, name:'苏州博物馆·贝聿铭', category:'museum', energyLevel:1, crowdednessLevel:3, weatherSensitivity:'indoor', ticketPrice:0, kidsFriendly:true, elderlyFriendly:true, minAge:3, romanticLevel:3, hasPhotoSpot:true, hasNursingRoom:true, strollerFriendly:true, wheelchairAccessible:true, restSeats:4, nearMedical:true, moodScores:{tired:7,anxious:7,sad:6,calm:9,excited:6,happy:7}, tags:['建筑','免费','艺术'], estimatedDuration:90, mapX:59, mapY:16, city:'苏州' }
 ];
 
 // ================================================================
@@ -10931,7 +10943,7 @@ function downloadShareCard() {
 }
 
 function copyShareLink() {
-  var text = '✨ 我在 MoodTravel 生成了一条' + days + '天浙江旅行路线！\n';
+  var text = '✨ 我在 MoodTravel 生成了一条' + days + '天长三角旅行路线！\n';
   text += '心情：' + ((MOODS.find(function(m) { return m.key === activeMood; }) || {}).label || '') + '\n';
   text += '旅伴：' + ((COMPANION_TYPES.find(function(c) { return c.key === companionType; }) || {}).label || '') + '\n';
   if (itinerary) {
@@ -11639,7 +11651,7 @@ generatePlan = function() {
 //  新手引导
 // ================================================================
 var onboardingSteps = [
-  { icon:'🎭', title:'选择你的心情', desc:'MoodTravel 会感知你的情绪，为你量身定制专属的浙江旅行路线。先从选择此刻的心情开始吧。' },
+  { icon:'🎭', title:'选择你的心情', desc:'MoodTravel 会感知你的情绪，为你量身定制专属的长三角旅行路线。覆盖14个城市，先从选择此刻的心情开始吧。' },
   { icon:'💰', title:'设定旅行预算', desc:'拖动右侧的预算滑块，或直接输入金额。AI 会根据预算为你推荐最合适的景点和酒店。' },
   { icon:'✨', title:'一键生成行程', desc:'点击"智能生成行程"按钮，4层漏斗引擎会立即为你编排最优路线，包含景点、餐饮、酒店和交通方案。' }
 ];
@@ -12961,7 +12973,19 @@ var i18nData = {
     '武义温泉': { en: 'Wuyi Hot Spring', ja: '武義温泉' },
     '江郎山': { en: 'Jianglang Mountain', ja: '江郎山' },
     '天台山国清寺': { en: 'Tiantai Guoqing Temple', ja: '天台山国清寺' },
-    '神仙居': { en: 'Shenxianju Scenic Area', ja: '神仙居' }
+    '神仙居': { en: 'Shenxianju Scenic Area', ja: '神仙居' },
+    // 上海
+    '外滩·万国建筑群': { en: 'The Bund', ja: '外灘・バンド' },
+    '迪士尼乐园': { en: 'Shanghai Disneyland', ja: '上海ディズニーランド' },
+    '武康路·安福路': { en: 'Wukang & Anfu Road', ja: '武康路・安福路' },
+    // 南京
+    '中山陵·明孝陵': { en: 'Sun Yat-sen Mausoleum', ja: '中山陵・明孝陵' },
+    '夫子庙·秦淮河': { en: 'Confucius Temple & Qinhuai River', ja: '夫子廟・秦淮河' },
+    '牛首山·佛顶宫': { en: 'Niushoushan Buddha Palace', ja: '牛首山・仏頂宮' },
+    // 苏州
+    '拙政园·苏州园林': { en: 'Humble Administrator\'s Garden', ja: '拙政園・蘇州庭園' },
+    '平江路·山塘街': { en: 'Pingjiang Road & Shantang Street', ja: '平江路・山塘街' },
+    '苏州博物馆·贝聿铭': { en: 'Suzhou Museum by I.M. Pei', ja: '蘇州博物館・I.M.ペイ' }
   },
   poiTags: {
     '高端': { en: 'Premium', ja: '高級' },
@@ -13030,6 +13054,28 @@ var i18nData = {
     '登山': { en: 'Mountaineering', ja: '登山' },
     '古刹': { en: 'Ancient Temple', ja: '古刹' },
     '仙境': { en: 'Fairyland', ja: '仙境' },
+    // 新增标签
+    '夜景': { en: 'Night View', ja: '夜景' },
+    '地标': { en: 'Landmark', ja: 'ランドマーク' },
+    '童话': { en: 'Fairytale', ja: 'おとぎ話' },
+    '烟花': { en: 'Fireworks', ja: '花火' },
+    '童年': { en: 'Childhood', ja: '子供時代' },
+    '梧桐': { en: 'Plane Trees', ja: 'プラタナス' },
+    '咖啡': { en: 'Coffee', ja: 'コーヒー' },
+    '历史': { en: 'History', ja: '歴史' },
+    '陵园': { en: 'Mausoleum', ja: '陵園' },
+    '夜游': { en: 'Night Cruise', ja: '夜遊び' },
+    '画舫': { en: 'Painted Boat', ja: '遊覧船' },
+    '小吃': { en: 'Street Food', ja: 'ストリートフード' },
+    '震撼': { en: 'Spectacular', ja: '圧巻' },
+    '园林': { en: 'Classical Garden', ja: '庭園' },
+    '世界遗产': { en: 'World Heritage', ja: '世界遺産' },
+    '精致': { en: 'Exquisite', ja: '精巧' },
+    '水巷': { en: 'Water Alley', ja: '水の路地' },
+    '茶馆': { en: 'Tea House', ja: '茶館' },
+    '慢生活': { en: 'Slow Living', ja: 'スローライフ' },
+    '建筑': { en: 'Architecture', ja: '建築' },
+    '艺术': { en: 'Art', ja: 'アート' },
     '栈道': { en: 'Plank Road', ja: '桟道' }
   },
   hotelNames: {
@@ -13137,7 +13183,10 @@ var i18nData = {
     '丽水': { en: 'Lishui', ja: '麗水' },
     '金华': { en: 'Jinhua', ja: '金華' },
     '衢州': { en: 'Quzhou', ja: '衢州' },
-    '台州': { en: 'Taizhou', ja: '台州' }
+    '台州': { en: 'Taizhou', ja: '台州' },
+    '上海': { en: 'Shanghai', ja: '上海' },
+    '南京': { en: 'Nanjing', ja: '南京' },
+    '苏州': { en: 'Suzhou', ja: '蘇州' }
   },
   moodLabels: {
     '活力出行': { en: 'Energetic Outing', ja: '元気な外出' },

@@ -1,0 +1,12 @@
+[build]
+  command = ""
+  publish = "."
+
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = []
+
+[[redirects]]
+  from = "/api/agents/*"
+  to = "/.netlify/functions/ai-agents"
+  status = 200
