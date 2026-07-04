@@ -67,16 +67,16 @@ html, body {
   -webkit-font-smoothing: antialiased;
   font-weight: 300; line-height: 1.6; letter-spacing: 0.5px;
   /* 极细硬描边 — 清晰锐利，不发虚 */
-  -webkit-text-stroke: 0.45px rgba(0,0,0,0.6);
-  text-shadow: 0 0 1px rgba(0,0,0,0.45);
+  -webkit-text-stroke: 0.55px rgba(0,0,0,0.7);
+  text-shadow: 0 0 2px rgba(0,0,0,0.5);
 }
 
 body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background: rgba(5,5,15,0.92);
-  z-index: -1;
+  background: rgba(5,5,15,0.75);
+  z-index: 1;
   pointer-events: none;
 }
 
@@ -99,13 +99,13 @@ body.light-mode::before { background: transparent !important; }
 .premium-page {
   width: 100vw; height: 100vh;
   overflow: hidden;
-  position: relative;
+  position: relative; z-index: 2;
 }
 
 /* ================================================================
    背景层 — 固定全屏，多层 CSS 动画
    ================================================================ */
-.bg-layer { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
+.bg-layer { position: fixed; inset: 0; z-index: -2; overflow: hidden; }
 
 .bg-sky {
   position: absolute; inset: 0;
@@ -944,10 +944,12 @@ input, select, textarea, .budget-slider, .slider-track {
 .hot-routes-scroll {
   display:flex; gap:20px; overflow-x:auto; padding-bottom:8px;
   scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
+  scrollbar-width: thin; scrollbar-color: rgba(139,168,140,0.7) rgba(0,0,0,0.15);
 }
-.hot-routes-scroll::-webkit-scrollbar { height:3px; }
-.hot-routes-scroll::-webkit-scrollbar-track { background:transparent; }
-.hot-routes-scroll::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.35); border-radius:2px; }
+.hot-routes-scroll::-webkit-scrollbar { height:6px; }
+.hot-routes-scroll::-webkit-scrollbar-track { background:rgba(0,0,0,0.15); border-radius:3px; }
+.hot-routes-scroll::-webkit-scrollbar-thumb { background:rgba(139,168,140,0.7); border-radius:3px; }
+.hot-routes-scroll::-webkit-scrollbar-thumb:hover { background:rgba(139,168,140,0.9); }
 .hot-route-card {
   flex:0 0 220px; padding:0; overflow:hidden; cursor:pointer;
   scroll-snap-align:start; transition:all 0.35s var(--easing);
@@ -2490,6 +2492,9 @@ body.light-mode .ai-insight-card { background:rgba(0,0,0,0.03); border-color:rgb
 body.light-mode .ai-insight-card:hover { background:rgba(0,0,0,0.06); border-color:rgba(0,0,0,0.12); }
 body.light-mode .hot-route-item { background:rgba(255,255,255,0.5); border-color:rgba(0,0,0,0.06); }
 body.light-mode .hot-route-item:hover { background:rgba(255,255,255,0.75); border-color:rgba(0,0,0,0.15); }
+body.light-mode .hot-routes-scroll::-webkit-scrollbar-track { background:rgba(0,0,0,0.08); }
+body.light-mode .hot-routes-scroll::-webkit-scrollbar-thumb { background:rgba(0,0,0,0.25); }
+body.light-mode .hot-routes-scroll::-webkit-scrollbar-thumb:hover { background:rgba(0,0,0,0.4); }
 body.light-mode .expense-item { background:rgba(255,255,255,0.5); border-color:rgba(0,0,0,0.06); }
 body.light-mode .map-container { background:linear-gradient(180deg, #E8F0F4 0%, #F0F4F0 40%, #F4F4EC 100%); }
 body.light-mode .right-panel { background:transparent; }
