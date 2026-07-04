@@ -2771,19 +2771,19 @@ body.light-mode .carbon-section *,
 body.light-mode #pricePredictionSection * {
   color: #2D3436 !important;
 }
-/* 保留绿色数值 */
+/* 保留绿色数值（提高特异性以覆盖 #pricePredictionSection *） */
 body.light-mode .carbon-detail-val[style*="8BA88C"],
 body.light-mode .carbon-detail-val[style*="8ba88c"],
-body.light-mode .carbon-score-value,
-body.light-mode .price-prediction-low,
-body.light-mode .price-prediction-save,
-body.light-mode .price-summary-val.highlight,
-body.light-mode .price-prediction-trend.down,
-body.light-mode .price-prediction-tip strong {
+body.light-mode .carbon-section .carbon-score-value,
+body.light-mode #pricePredictionSection .price-prediction-low,
+body.light-mode #pricePredictionSection .price-prediction-save,
+body.light-mode #pricePredictionSection .price-summary-val.highlight,
+body.light-mode #pricePredictionSection .price-prediction-trend.down,
+body.light-mode #pricePredictionSection .price-prediction-tip strong {
   color: #8BA88C !important;
 }
 /* 保留红色趋势 */
-body.light-mode .price-prediction-trend.up {
+body.light-mode #pricePredictionSection .price-prediction-trend.up {
   color: #D32F2F !important;
 }
 /* 卡片背景 */
@@ -11505,6 +11505,8 @@ function toggleTheme() {
   setTimeout(function() { if (leafletMap) leafletMap.invalidateSize(); }, 200);
   // 强制修复浅色模式文字
   fixLightModeText();
+  // 重新应用语言，防止切换模式后语言错乱
+  if (typeof currentLang !== 'undefined' && currentLang) switchLanguage(currentLang);
 }
 
 // ================================================================
@@ -13985,6 +13987,8 @@ function switchLanguage(lang) {
   if (journalSection && journalSection.classList.contains('show')) renderTravelJournal();
   var carbonSection = document.getElementById('carbonSection');
   if (carbonSection && carbonSection.classList.contains('show')) renderCarbonFootprint();
+  var priceSection = document.getElementById('pricePredictionSection');
+  if (priceSection && priceSection.classList.contains('show')) renderPricePrediction();
   
   // --- 更新问候语 ---
   updateGreeting();
