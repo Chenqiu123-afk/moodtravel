@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>高德 API 封装测试 | MoodTravel</title>
+<style>
+:root{--sage:#A3B5A6;--text:#4A4640;--text-light:#7A7670;--bg:#F5F2ED;--card:#FFFCF8;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:#EDE8E0;min-height:100vh;padding:20px;color:var(--text)}
+.container{max-width:700px;margin:0 auto}
+h1{font-size:22px;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+h1 span{font-size:14px;font-weight:400;color:var(--text-light)}
+.subtitle{font-size:13px;color:var(--text-light);margin-bottom:20px}
+.card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.03)}
+.search-bar{display:flex;gap:8px;margin-bottom:16px}
+.search-bar input{flex:1;padding:10px 14px;border:1px solid #E0DCD4;border-radius:var(--radius);font-size:14px;font-family:inherit;outline:none;background:var(--card)}
+.search-bar input:focus{border-color:var(--sage)}
+.search-bar button{padding:10px 20px;background:var(--sage);color:#fff;border:none;border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+.search-bar button:active{opacity:.8}
+.preset-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.preset-tag{padding:5px 12px;border-radius:16px;font-size:12px;font-weight:600;background:#F0EDE8;color:var(--text);cursor:pointer;border:none;font-family:inherit}
+.preset-tag:active{background:var(--sage);color:#fff}
+.preset-tag.active{background:var(--sage);color:#fff}
+.result-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #F0EDE8;animation:fadeIn .3s ease-out both}
+.result-item:last-child{border-bottom:none}
+.result-item:nth-child(1){animation-delay:0s}
+.result-item:nth-child(2){animation-delay:.05s}
+.result-item:nth-child(3){animation-delay:.1s}
+.result-item:nth-child(4){animation-delay:.15s}
+.result-item:nth-child(5){animation-delay:.2s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.result-cover{width:64px;height:64px;border-radius:var(--radius);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:24px}
+.result-info{flex:1;min-width:0}
+.result-name{font-size:15px;font-weight:700;margin-bottom:2px}
+.result-addr{font-size:12px;color:var(--text-light);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.result-tags{display:flex;flex-wrap:wrap;gap:4px}
+.result-tag{padding:2px 8px;border-radius:8px;font-size:10px;font-weight:600}
+.result-meta{display:flex;gap:12px;margin-top:4px;font-size:11px;color:var(--text-light)}
+.result-meta span{display:flex;align-items:center;gap:3px}
+.loading{text-align:center;padding:30px;color:var(--text-light);font-size:14px}
+.loading .spinner{display:inline-block;width:20px;height:20px;border:3px solid #E0DCD4;border-top-color:var(--sage);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.raw-section{margin-top:16px}
+.raw-section summary{font-size:13px;font-weight:600;color:var(--sage);cursor:pointer;margin-bottom:8px}
+.raw-section pre{background:#F8F6F2;padding:12px;border-radius:var(--radius);font-size:11px;overflow-x:auto;line-height:1.6;max-height:300px;overflow-y:auto}
+.stats{font-size:12px;color:var(--text-light);margin-bottom:12px}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>🗺️ 高德 API 封装测试 <span>MoodTravel</span></h1>
+  <p class="subtitle">🟢 已接入高德地图真实 API | 数据实时来自高德 POI 搜索</p>
+
+  <!-- 搜索栏 -->
+  <div class="card">
+    <div class="search-bar">
+      <input id="cityInput" value="杭州" placeholder="城市名">
+      <input id="moodInput" value="适合一个人发呆" placeholder="心情描述" style="flex:2">
+      <button onclick="doSearch()">🔍 搜索</button>
+    </div>
+    <div class="preset-tags" id="presetTags">
+      <button class="preset-tag" onclick="setMood('适合一个人发呆')">😌 发呆</button>
+      <button class="preset-tag" onclick="setMood('开心想去玩')">😄 开心</button>
+      <button class="preset-tag" onclick="setMood('疲惫需要放松')">😴 疲惫</button>
+      <button class="preset-tag" onclick="setMood('带小孩亲子游')">👶 亲子</button>
+      <button class="preset-tag" onclick="setMood('焦虑需要治愈')">😰 焦虑</button>
+      <button class="preset-tag" onclick="setMood('低预算省钱')">💰 低预算</button>
+      <button class="preset-tag" onclick="setMood('减肥健康餐')">🥗 减肥</button>
+    </div>
+  </div>
+
+  <!-- 结果 -->
+  <div class="card" id="resultCard">
+    <div class="stats" id="stats"></div>
+    <div id="results"><p style="text-align:center;color:var(--text-light);padding:20px">点击搜索按钮或选择心情标签开始</p></div>
+  </div>
+
+  <!-- 转换后的 JSON -->
+  <div class="card" id="rawCard" style="display:none">
+    <details class="raw-section" open>
+      <summary>📋 App 格式 JSON（转换后）</summary>
+      <pre id="rawJson"></pre>
+    </details>
+  </div>
+
+</div>
+
+<script>
+// ====================================================================
+// 高德地图 Web API - 真实数据
+// Key: 266de1ff51d786530d80c9f6d950a853
+// ====================================================================
+var AMAP_KEY = '266de1ff51d786530d80c9f6d950a853';
+var AMAP_BASE = 'https://restapi.amap.com/v3';
+
+// 城市坐标缓存，避免重复请求地理编码
+var cityCache = {};
+
+// ====================================================================
+// 心情关键词 → 搜索词拆分（与 amap.js 中 moodToKeywords 逻辑一致）
+// ====================================================================
+function moodToKeywords(moodQuery){
+  var map = {
+    '发呆':['书店','咖啡馆','公园','湖边','茶馆'],
+    '治愈':['书店','茶馆','咖啡厅','美术馆','博物馆','寺庙'],
+    '安静':['书店','茶馆','博物馆','美术馆','图书馆'],
+    '放松':['公园','咖啡馆','茶馆','SPA','湖边'],
+    '一个人':['书店','咖啡馆','公园','美术馆','博物馆'],
+    '开心':['游乐园','步行街','美食','公园','购物中心'],
+    '兴奋':['游乐园','密室逃脱','KTV','酒吧'],
+    '焦虑':['书店','茶馆','咖啡厅','公园','博物馆','寺庙','步道'],
+    '疲惫':['SPA','咖啡馆','茶馆','公园','按摩'],
+    '低落':['书店','咖啡厅','公园','湖边','美术馆'],
+    '亲子':['动物园','游乐园','博物馆','公园','科技馆'],
+    '减肥':['轻食','沙拉','公园','健身房'],
+    '低预算':['公园','博物馆','免费','步行街','图书馆'],
+    '省钱':['公园','博物馆','免费','步行街','图书馆'],
+    '拍照':['网红','打卡','景点','公园','创意园'],
+    '美食':['餐厅','小吃','本地菜'],
+  };
+  var matched = [];
+  for(var key in map){
+    if(moodQuery.includes(key)) matched = matched.concat(map[key]);
+  }
+  return matched.length > 0 ? [...new Set(matched)].slice(0,5) : ['景点','公园','咖啡馆'];
+}
+
+// ====================================================================
+// 数据格式转换（与 amap.js 中 transformToAppFormat 一致）
+// ====================================================================
+function mapCategory(amapType){
+  if(!amapType) return 'other';
+  var type = amapType.split(';')[0] || '';
+  var mapping = {
+    '风景名胜':'scenic','公园广场':'park','博物馆':'museum','展览馆':'museum','美术馆':'museum',
+    '图书馆':'museum','科技馆':'museum','餐饮服务':'restaurant','中餐厅':'restaurant',
+    '咖啡厅':'cafe','茶艺馆':'cafe','购物服务':'shopping','商场':'shopping','步行街':'shopping',
+    '住宿服务':'hotel','游乐园':'theme_park','动物园':'theme_park','寺庙道观':'temple',
+    '休闲场所':'leisure','SPA':'spa','运动场所':'sport','娱乐场所':'entertainment','酒吧':'nightlife',
+    '图书':'museum','书店':'museum','文化':'museum','主题公园':'theme_park','宗教':'temple',
+    '西餐厅':'restaurant','徒步':'sport',
+  };
+  return mapping[type] || 'other';
+}
+
+function getTags(poi){
+  var tags = [];
+  // 高德 real API 中 tag 可能是数组、字符串或 undefined
+  if(Array.isArray(poi.tag)) tags = poi.tag;
+  else if(typeof poi.tag === 'string') tags = poi.tag.split(';').filter(Boolean);
+  // 补充 atag 和 keytag
+  if(typeof poi.atag === 'string') tags.push(poi.atag);
+  if(typeof poi.keytag === 'string') tags.push(poi.keytag);
+  return tags.filter(Boolean);
+}
+
+function transformToAppFormat(amapPOI, moodQuery){
+  return {
+    poi_id: amapPOI.id,
+    name: amapPOI.name,
+    category: mapCategory(amapPOI.type),
+    sub_category: (amapPOI.type || '').split(';')[1] || '',
+    city: '杭州',
+    district: amapPOI.address?.split('区')[0] + '区' || '',
+    address: amapPOI.address || '',
+    coordinates: {
+      lat: parseFloat((amapPOI.location || '').split(',')[1] || 0),
+      lng: parseFloat((amapPOI.location || '').split(',')[0] || 0)
+    },
+    rating: parseFloat(amapPOI.biz_ext?.rating || 0) || 0,
+    ticket_price: amapPOI.biz_ext?.cost ? parseInt(amapPOI.biz_ext.cost) : 0,
+    opening_hours: amapPOI.biz_ext?.opentime || '暂无数据',
+    search_matched: moodQuery,
+    photos: (amapPOI.photos || []).slice(0,3),
+    tags: getTags(amapPOI),
+    distance: parseInt(amapPOI.distance || 0),
+    _raw: {type:amapPOI.type,typecode:amapPOI.typecode}
+  };
+}
+
+// ====================================================================
+// 获取城市中心坐标（真实 API）
+// ====================================================================
+async function getCityCenter(cityName){
+  if(cityCache[cityName]) return cityCache[cityName];
+  try{
+    var url = AMAP_BASE + '/geocode/geo?key=' + AMAP_KEY + '&address=' + encodeURIComponent(cityName);
+    var res = await fetch(url);
+    var data = await res.json();
+    if(data.status === '1' && data.geocodes.length > 0){
+      cityCache[cityName] = data.geocodes[0].location;
+      return data.geocodes[0].location;
+    }
+  }catch(e){ console.error('获取城市坐标失败：', e); }
+  return null;
+}
+
+// ====================================================================
+// 搜索 + 展示（真实 API）
+// ====================================================================
+var categoryIcons = {
+  scenic:'🏞️', museum:'🏛️', cafe:'☕', restaurant:'🍽️', shopping:'🛍️',
+  hotel:'🏨', theme_park:'🎢', temple:'🏯', spa:'💆', sport:'🏃',
+  leisure:'🌿', entertainment:'🎭', nightlife:'🌙', other:'📍'
+};
+var categoryColors = {
+  scenic:'#E8F0EA', museum:'#F0EDF5', cafe:'#FDF3E6', restaurant:'#F5ECEE',
+  shopping:'#ECF0F5', hotel:'#E8F0EA', theme_park:'#F5ECEE', temple:'#F0EDF5',
+  spa:'#FDF3E6', sport:'#E8F0EA', leisure:'#E8F0EA', entertainment:'#F5ECEE',
+  nightlife:'#F0EDF5', other:'#F5F2ED'
+};
+
+async function doSearch(){
+  var city = document.getElementById('cityInput').value || '杭州';
+  var mood = document.getElementById('moodInput').value || '适合一个人发呆';
+  var resultsDiv = document.getElementById('results');
+  var statsDiv = document.getElementById('stats');
+
+  // 显示加载
+  resultsDiv.innerHTML = '<div class="loading"><span class="spinner"></span>正在搜索「'+city+'」的「'+mood+'」相关地点...</div>';
+  statsDiv.textContent = '';
+
+  // 获取城市中心坐标
+  var center = await getCityCenter(city);
+  if(!center){
+    resultsDiv.innerHTML = '<p style="text-align:center;color:var(--rose);padding:20px">未找到城市「'+city+'」，请检查城市名</p>';
+    return;
+  }
+
+  // 拆分关键词
+  var keywords = moodToKeywords(mood);
+  statsDiv.textContent = '📍 城市中心：'+center+' | 心情关键词拆分：' + keywords.join('、') + ' | 正在搜索...';
+
+  // 真实 API 搜索
+  var allResults = [];
+  for(var i = 0; i < keywords.length; i++){
+    var kw = keywords[i];
+    try{
+      var url = AMAP_BASE + '/place/around?key=' + AMAP_KEY + '&location=' + center + '&keywords=' + encodeURIComponent(kw) + '&radius=50000&offset=5&page=1&extensions=all';
+      var res = await fetch(url);
+      var data = await res.json();
+      if(data.status === '1' && data.pois){
+        allResults = allResults.concat(data.pois);
+      }
+    }catch(e){ console.error('搜索「'+kw+'」失败：', e); }
+  }
+
+  // 去重
+  var seen = new Set();
+  var unique = allResults.filter(function(p){
+    if(seen.has(p.id)) return false;
+    seen.add(p.id);
+    return true;
+  });
+
+  // 转换为 App 格式
+  var appFormat = unique.map(function(p){ return transformToAppFormat(p, mood); });
+
+  // 渲染
+  if(appFormat.length === 0){
+    resultsDiv.innerHTML = '<p style="text-align:center;color:var(--text-light);padding:20px">未找到匹配的地点，请尝试其他关键词</p>';
+    document.getElementById('rawCard').style.display = 'none';
+    return;
+  }
+
+  statsDiv.textContent = '📍 城市中心：'+center+' | 关键词：' + keywords.join('、') + ' | 去重后 ' + appFormat.length + ' 个结果（来自高德地图真实数据）';
+
+  var html = '';
+  appFormat.forEach(function(poi, i){
+    var bg = categoryColors[poi.category] || '#F5F2ED';
+    var icon = categoryIcons[poi.category] || '📍';
+    html += '<div class="result-item">';
+    html += '<div class="result-cover" style="background:'+bg+'">'+icon+'</div>';
+    html += '<div class="result-info">';
+    html += '<div class="result-name">'+(i+1)+'. '+poi.name+'</div>';
+    html += '<div class="result-addr">📍 '+poi.address+'</div>';
+    html += '<div class="result-tags">';
+    if(poi.tags.length > 0){
+      poi.tags.forEach(function(t){
+        html += '<span class="result-tag" style="background:'+bg+'">'+t+'</span>';
+      });
+    }
+    html += '<span class="result-tag" style="background:#E8F0EA;color:#6B8A76">'+poi.category+'</span>';
+    html += '</div>';
+    html += '<div class="result-meta">';
+    html += '<span>⭐ '+poi.rating+'</span>';
+    html += '<span>🕐 '+poi.opening_hours+'</span>';
+    html += '<span>💰 '+(poi.ticket_price === 0 ? '免费' : '¥'+poi.ticket_price)+'</span>';
+    html += '<span>📏 '+poi.distance+'m</span>';
+    html += '</div>';
+    html += '</div></div>';
+  });
+  resultsDiv.innerHTML = html;
+
+  // 显示 JSON
+  document.getElementById('rawCard').style.display = 'block';
+  document.getElementById('rawJson').textContent = JSON.stringify(appFormat, null, 2);
+}
+
+function setMood(mood){
+  document.getElementById('moodInput').value = mood;
+  document.querySelectorAll('.preset-tag').forEach(function(t){ t.classList.remove('active'); });
+  event.target.classList.add('active');
+  doSearch();
+}
+
+// 页面加载时自动搜索
+window.onload = function(){
+  doSearch();
+};
+</script>
+</body>
+</html>

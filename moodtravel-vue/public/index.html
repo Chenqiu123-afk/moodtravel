@@ -1,0 +1,3713 @@
+<!--
+  MoodTravel 全屏沉浸版 — 从零编写的纯 HTML + CSS + JS
+  全屏 42/58 分栏 · 5 层 CSS 动画背景 · 玻璃拟态 · 零外部 JS 依赖
+  已整合全部业务逻辑：4层漏斗引擎 · 酒店比价 · 同伴系统 · 长者模式 · 日常场景 · 关怀信
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MoodTravel · 情绪旅行</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   CSS 变量 & 全局重置
+   ================================================================ */
+:root {
+  --easing: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --easing-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --font-display: 'Playfair Display', 'Noto Serif SC', 'Georgia', serif;
+  --font-body: 'Inter', 'PingFang SC', 'Hiragino Sans GB', system-ui, sans-serif;
+  --font-title: 'Montserrat', 'Inter', system-ui, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100vw; height: 100vh;
+  overflow: hidden;
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  font-weight: 300; line-height: 1.6; letter-spacing: 0.5px;
+}
+
+.premium-page {
+  width: 100vw; height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ================================================================
+   背景层 — 固定全屏，多层 CSS 动画
+   ================================================================ */
+.bg-layer { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
+
+.bg-sky {
+  position: absolute; inset: 0;
+  transition: background 1.2s var(--easing);
+}
+.bg-sky.sky-calm    { background: linear-gradient(180deg, #A8D8EA 0%, #C9E8D4 40%, #F0E6D3 80%, #E8D5C4 100%); }
+.bg-sky.sky-happy   { background: linear-gradient(180deg, #FFD89B 0%, #F7C89C 30%, #F5D5A0 60%, #E8C89A 100%); }
+.bg-sky.sky-sad     { background: linear-gradient(180deg, #FFB7B2 0%, #FFDAC1 30%, #E2F0CB 70%, #B5EAD7 100%); }
+.bg-sky.sky-anxious { background: linear-gradient(180deg, #A8C8E8 0%, #C8DCE8 40%, #D8E8D8 80%, #C8D8C8 100%); }
+.bg-sky.sky-excited { background: linear-gradient(180deg, #FF9A9E 0%, #FECFEF 30%, #FEE599 60%, #A1C4FD 100%); }
+.bg-sky.sky-tired   { background: linear-gradient(180deg, #C8B8D8 0%, #D8C8E8 40%, #E0D0E8 80%, #D0C0D8 100%); }
+.bg-sky.sky-insomnia { background: linear-gradient(180deg, #0a0a1a 0%, #141428 30%, #1a1a2e 60%, #16213e 100%); }
+
+/* 浮云 */
+.bg-clouds { position: absolute; inset: 0; }
+.cloud {
+  position: absolute; background: rgba(255,255,255,0.35); border-radius: 50%;
+  will-change: transform;
+}
+.cloud::before, .cloud::after { content: ''; position: absolute; background: inherit; border-radius: 50%; }
+.cloud-1 { width:180px; height:60px; top:12%; animation:cloudDrift1 32s linear infinite; }
+.cloud-1::before { width:70px; height:70px; top:-35px; left:30px; }
+.cloud-1::after  { width:90px; height:90px; top:-40px; left:80px; }
+.cloud-2 { width:140px; height:50px; top:28%; animation:cloudDrift2 28s linear infinite; }
+.cloud-2::before { width:55px; height:55px; top:-28px; left:25px; }
+.cloud-2::after  { width:70px; height:70px; top:-32px; left:60px; }
+.cloud-3 { width:200px; height:65px; top:45%; animation:cloudDrift1 35s linear infinite; animation-delay:-8s; }
+.cloud-3::before { width:80px; height:80px; top:-38px; left:35px; }
+.cloud-3::after  { width:100px; height:100px; top:-45px; left:90px; }
+.cloud-4 { width:120px; height:40px; top:62%; animation:cloudDrift2 30s linear infinite; animation-delay:-12s; }
+.cloud-4::before { width:50px; height:50px; top:-24px; left:20px; }
+.cloud-4::after  { width:60px; height:60px; top:-28px; left:50px; }
+.cloud-5 { width:160px; height:55px; top:75%; animation:cloudDrift1 33s linear infinite; animation-delay:-18s; }
+.cloud-5::before { width:65px; height:65px; top:-30px; left:28px; }
+.cloud-5::after  { width:80px; height:80px; top:-35px; left:70px; }
+
+@keyframes cloudDrift1 {
+  from { transform: translateX(-220px); opacity:0.6; }
+  50%  { opacity:0.9; }
+  to   { transform: translateX(calc(100vw + 220px)); opacity:0.6; }
+}
+@keyframes cloudDrift2 {
+  from { transform: translateX(calc(100vw + 160px)); opacity:0.5; }
+  50%  { opacity:0.85; }
+  to   { transform: translateX(-160px); opacity:0.5; }
+}
+
+/* 热气球 */
+.bg-balloons { position: absolute; inset: 0; }
+.balloon { position: absolute; animation: balloonFloat 18s ease-in-out infinite; will-change: transform; }
+.balloon-1 { left:15%; animation-duration:20s; animation-delay:-3s; }
+.balloon-2 { right:12%; animation-duration:22s; animation-delay:-8s; }
+.balloon-envelope {
+  width:60px; height:75px; border-radius: 50% 50% 45% 45%;
+  background: radial-gradient(ellipse at 50% 30%, #FF6B6B, #E85555 60%, #D44 100%);
+  box-shadow: inset 0 -8px 16px rgba(0,0,0,0.1), 0 4px 12px rgba(0,0,0,0.08);
+}
+.balloon-2 .balloon-envelope {
+  background: radial-gradient(ellipse at 50% 30%, #6BB5FF, #4A90D9 60%, #357ABD 100%);
+}
+.balloon-basket {
+  width:20px; height:16px; background:#8B6914; border-radius:0 0 4px 4px;
+  margin:-2px auto 0; position:relative;
+}
+.balloon-basket::before {
+  content:''; position:absolute; top:-14px; left:4px; width:1px; height:14px;
+  background:rgba(0,0,0,0.2); box-shadow:12px 0 0 rgba(0,0,0,0.2);
+}
+@keyframes balloonFloat {
+  0%,100% { transform: translateY(0) rotate(-1deg); }
+  25%     { transform: translateY(-20px) rotate(1deg); }
+  50%     { transform: translateY(-10px) rotate(-0.5deg); }
+  75%     { transform: translateY(-30px) rotate(0.5deg); }
+}
+
+/* 飞机 */
+.bg-airplane { position:absolute; top:8%; left:-80px; animation:airplaneFly 18s linear infinite; will-change:transform; z-index:2; }
+.airplane-icon { font-size:32px; display:block; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+.airplane-trail {
+  position:absolute; top:50%; right:100%; width:60px; height:2px;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,0.5), rgba(255,255,255,0.8));
+  border-radius:1px; animation:trailPulse 1.5s ease-in-out infinite;
+}
+@keyframes airplaneFly {
+  0%   { transform: translateX(0) translateY(0); }
+  25%  { transform: translateX(calc(100vw + 80px)) translateY(-15px); }
+  50%  { transform: translateX(calc(100vw + 80px)) translateY(0); }
+  50.01% { transform: translateX(-80px) translateY(0); }
+  100% { transform: translateX(0) translateY(0); }
+}
+@keyframes trailPulse { 0%,100% { opacity:0.3; } 50% { opacity:0.8; } }
+
+/* 粒子 */
+.bg-particles { position: absolute; inset: 0; }
+.particle {
+  position:absolute; bottom:-10px; background:rgba(255,255,255,0.5); border-radius:50%;
+  animation:particleRise linear infinite; will-change:transform,opacity;
+}
+@keyframes particleRise {
+  0%{transform:translateY(0) scale(1);opacity:0} 10%{opacity:.8} 90%{opacity:.3} 100%{transform:translateY(-100vh) scale(.3);opacity:0}
+}
+
+/* 底部山峦 */
+.bg-mountains { position:absolute; bottom:0; left:0; right:0; height:25vh; pointer-events:none; }
+.mountain { position:absolute; bottom:0; border-radius:50% 50% 0 0; }
+.mountain-1 { left:-5%; width:45%; height:100%; background:rgba(139,168,140,0.15); }
+.mountain-2 { left:25%; width:50%; height:80%; background:rgba(107,143,163,0.12); }
+.mountain-3 { right:-5%; width:40%; height:90%; background:rgba(139,168,140,0.1); }
+
+/* ================================================================
+   主布局：左右分栏
+   ================================================================ */
+.main-layout {
+  position:relative; z-index:1; display:flex; width:100%; height:100vh;
+}
+
+/* 左侧面板 42% */
+.left-panel {
+  width:42%; min-width:480px; display:flex; align-items:center; justify-content:center;
+  padding:48px 48px 48px 64px; position:relative; z-index:2;
+}
+.left-content { display:flex; flex-direction:column; align-items:flex-start; gap:40px; width:100%; }
+
+.brand-section { text-align:left; will-change:transform,opacity; }
+.brand-icon {
+  font-size:48px; color:rgba(255,255,255,0.85); margin-bottom:16px;
+  animation:brandGlow 3s ease-in-out infinite;
+}
+@keyframes brandGlow { 0%,100%{opacity:.7;transform:scale(1)} 50%{opacity:1;transform:scale(1.08)} }
+.brand-name {
+  font-family:var(--font-title); font-size:52px; font-weight:800;
+  color:#FFFFFF; letter-spacing:3px; margin:0 0 20px; text-shadow:0 2px 24px rgba(0,0,0,0.15);
+}
+.brand-slogan {
+  font-family:var(--font-display); font-size:40px; font-weight:600;
+  color:#FFFFFF; line-height:1.35; margin:0 0 14px; text-shadow:0 1px 12px rgba(0,0,0,0.1);
+}
+.brand-sub {
+  font-family:var(--font-body); font-size:18px; font-weight:300;
+  color:rgba(255,255,255,0.6); letter-spacing:3px; margin:0;
+}
+
+/* 心情选择器 */
+.mood-section { width:100%; }
+.mood-section-title {
+  font-family:var(--font-body); font-size:14px; font-weight:500;
+  color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:3px;
+  margin:0 0 20px; text-align:left;
+}
+.mood-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.mood-btn {
+  display:flex; flex-direction:column; align-items:center; gap:10px;
+  padding:24px 16px 20px; border-radius:20px;
+  border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  color:rgba(255,255,255,0.75); cursor:pointer;
+  transition:all 0.35s var(--easing); will-change:transform;
+}
+.mood-btn:hover {
+  background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.35);
+  transform:translateY(-6px); box-shadow:0 16px 40px rgba(0,0,0,0.18);
+}
+.mood-btn.active { font-weight:500; }
+.mood-btn-emoji { font-size:36px; transition:transform 0.4s var(--easing); display:inline-block; line-height:1; }
+.mood-btn-emoji.wiggle { animation:moodWiggle 0.6s var(--easing); }
+@keyframes moodWiggle {
+  0%,100%{transform:rotate(0)} 20%{transform:rotate(-8deg) scale(1.2)}
+  40%{transform:rotate(6deg)} 60%{transform:rotate(-4deg)} 80%{transform:rotate(2deg)}
+}
+.mood-btn-label { font-family:var(--font-body); font-size:16px; font-weight:500; }
+
+/* 同伴选择 */
+.companion-section { width:100%; }
+.companion-chips { display:flex; gap:10px; flex-wrap:wrap; }
+.companion-chip {
+  padding:10px 18px; border-radius:20px; border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.65);
+  font-family:var(--font-body); font-size:14px; font-weight:500; cursor:pointer;
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  transition:all 0.25s var(--easing);
+}
+.companion-chip:hover { background:rgba(255,255,255,0.12); color:#fff; }
+.companion-chip.active { font-weight:600; }
+
+/* 长者模式开关 */
+.elderly-toggle-wrap { display:flex; align-items:center; gap:10px; }
+.elderly-toggle-label { font-size:14px; color:rgba(255,255,255,0.5); }
+.elderly-toggle {
+  position:relative; width:44px; height:24px; cursor:pointer;
+}
+.elderly-toggle input { display:none; }
+.elderly-toggle .toggle-track {
+  width:100%; height:100%; border-radius:12px; background:rgba(255,255,255,0.15);
+  transition:background 0.3s;
+}
+.elderly-toggle input:checked + .toggle-track { background:rgba(139,168,140,0.5); }
+.elderly-toggle .toggle-thumb {
+  position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%;
+  background:#fff; transition:transform 0.3s var(--easing); box-shadow:0 1px 4px rgba(0,0,0,0.2);
+}
+.elderly-toggle input:checked ~ .toggle-thumb { transform:translateX(20px); }
+
+.left-quick { will-change:opacity; display:flex; gap:12px; }
+.quick-link {
+  background:none; border:1px solid rgba(255,255,255,0.2); border-radius:28px;
+  padding:14px 36px; color:rgba(255,255,255,0.7); font-family:var(--font-body);
+  font-size:16px; cursor:pointer; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  transition:all 0.3s var(--easing);
+}
+.quick-link:hover { border-color:rgba(255,255,255,0.4); color:#FFFFFF; background:rgba(255,255,255,0.1); }
+
+/* 右侧面板 58% — 可滚动 */
+.right-panel {
+  width:58%; overflow-y:auto; overflow-x:hidden; padding:48px 64px 48px 0;
+  scroll-behavior:smooth; -webkit-overflow-scrolling:touch;
+}
+.right-panel::-webkit-scrollbar { width:4px; }
+.right-panel::-webkit-scrollbar-track { background:transparent; }
+.right-panel::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.2); border-radius:2px; }
+.right-content { display:flex; flex-direction:column; gap:40px; }
+
+/* 玻璃拟态面板 */
+.glass-panel {
+  background:rgba(255,255,255,0.08); backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,0.15); border-radius:24px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.06); transition:all 0.35s var(--easing);
+}
+.glass-panel:hover { border-color:rgba(255,255,255,0.25); box-shadow:0 12px 40px rgba(0,0,0,0.1); }
+
+/* 场景选择器 */
+.scene-section { width:100%; will-change:transform,opacity; }
+.scene-toggle {
+  display:flex; gap:0; border-radius:20px; overflow:hidden;
+  border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04);
+}
+.scene-btn {
+  flex:1; padding:20px 24px; border:none; background:transparent;
+  color:rgba(255,255,255,0.5); font-family:var(--font-body); font-size:16px; font-weight:500;
+  cursor:pointer; transition:all 0.35s var(--easing); position:relative;
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+}
+.scene-btn:first-child { border-right:1px solid rgba(255,255,255,0.08); }
+.scene-btn:hover { color:rgba(255,255,255,0.8); background:rgba(255,255,255,0.04); }
+.scene-btn.active {
+  color:#fff; font-weight:600; background:rgba(255,255,255,0.12);
+  box-shadow:inset 0 0 24px rgba(255,255,255,0.05);
+}
+.scene-btn .scene-icon { font-size:28px; }
+.scene-btn .scene-label { font-size:14px; opacity:0.8; }
+.scene-btn .scene-desc { font-size:11px; opacity:0.4; font-weight:300; }
+
+/* 行前清单 */
+.checklist-section { display:none; }
+.checklist-section.show { display:block; }
+.checklist-card { padding:28px; }
+.checklist-title { font-size:18px; font-weight:600; color:#fff; margin-bottom:6px; display:flex; align-items:center; gap:8px; }
+.checklist-sub { font-size:13px; color:rgba(255,255,255,0.4); margin-bottom:18px; }
+.checklist-items { display:flex; flex-direction:column; gap:8px; }
+.checklist-item {
+  display:flex; align-items:center; gap:12px; padding:12px 16px;
+  border-radius:12px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06);
+  cursor:pointer; transition:all 0.25s var(--easing);
+}
+.checklist-item:hover { background:rgba(255,255,255,0.08); }
+.checklist-item.checked { background:rgba(139,168,140,0.08); border-color:rgba(139,168,140,0.15); }
+.checklist-item.checked .checklist-text { color:rgba(255,255,255,0.4); text-decoration:line-through; }
+.checklist-cb {
+  width:20px; height:20px; border-radius:6px; border:2px solid rgba(255,255,255,0.2);
+  flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  transition:all 0.25s var(--easing); font-size:12px; color:transparent;
+}
+.checklist-item.checked .checklist-cb { background:#8BA88C; border-color:#8BA88C; color:#fff; }
+.checklist-text { font-size:14px; color:rgba(255,255,255,0.7); transition:all 0.25s; }
+.checklist-category { font-size:12px; font-weight:600; color:rgba(255,255,255,0.3); padding:8px 0 4px; text-transform:uppercase; letter-spacing:2px; }
+.checklist-progress { font-size:13px; color:rgba(255,255,255,0.35); margin-top:14px; }
+
+/* 预算面板 */
+.budget-section { will-change:transform,opacity; }
+.budget-panel { padding:44px 40px; }
+.budget-header { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:32px; }
+.budget-label {
+  font-family:var(--font-body); font-size:18px; font-weight:500;
+  color:rgba(255,255,255,0.85); text-transform:uppercase; letter-spacing:2px;
+}
+.budget-hint { font-family:var(--font-body); font-size:14px; color:rgba(255,255,255,0.35); }
+.budget-display { display:flex; align-items:baseline; justify-content:center; gap:8px; margin-bottom:36px; }
+.budget-currency { font-family:var(--font-display); font-size:36px; font-weight:400; color:rgba(255,255,255,0.5); }
+.budget-number {
+  font-family:var(--font-title); font-size:88px; font-weight:700;
+  color:#FFFFFF; letter-spacing:-3px; line-height:1; font-variant-numeric:tabular-nums;
+  text-shadow:0 2px 24px rgba(0,0,0,0.12); transition:color 0.6s var(--easing);
+}
+.budget-slider-wrap { position:relative; margin-bottom:28px; }
+.budget-slider-track { height:8px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden; }
+.budget-slider-fill {
+  height:100%; border-radius:4px; transition:width 0.05s linear, background 0.6s var(--easing);
+  position:relative;
+}
+.budget-slider-fill.glowing::after {
+  content:''; position:absolute; inset:-4px 0; background:inherit;
+  filter:blur(12px); opacity:0.6; animation:glowPulse 0.8s ease-in-out infinite alternate;
+}
+@keyframes glowPulse { from{opacity:.4} to{opacity:.8} }
+.budget-slider-input {
+  position:absolute; top:50%; left:0; right:0; width:100%; height:40px;
+  transform:translateY(-50%); -webkit-appearance:none; appearance:none;
+  background:transparent; cursor:pointer; z-index:2;
+}
+.budget-slider-input::-webkit-slider-thumb {
+  -webkit-appearance:none; width:32px; height:32px; border-radius:50%;
+  background:#FFFFFF; border:3px solid rgba(255,255,255,0.9);
+  box-shadow:0 3px 18px rgba(0,0,0,0.25); cursor:grab;
+  transition:transform 0.2s var(--easing), box-shadow 0.2s var(--easing);
+}
+.budget-slider-input::-webkit-slider-thumb:active { cursor:grabbing; transform:scale(1.25); box-shadow:0 6px 28px rgba(0,0,0,0.35); }
+.budget-range-labels { display:flex; justify-content:space-between; margin-top:10px; font-size:13px; color:rgba(255,255,255,0.3); font-weight:300; }
+.budget-controls { display:flex; flex-direction:column; gap:12px; }
+.budget-presets { display:flex; gap:8px; }
+.preset-chip {
+  flex:1; padding:12px 10px; border-radius:14px; border:1px solid rgba(255,255,255,0.1);
+  background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.65);
+  font-family:var(--font-title); font-size:16px; font-weight:500; cursor:pointer;
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); transition:all 0.25s var(--easing);
+}
+.preset-chip:hover { background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.28); color:#FFFFFF; transform:translateY(-1px); }
+.preset-chip.active { font-weight:600; }
+.budget-custom-wrap {
+  display:flex; align-items:center; background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:0 14px;
+  transition:all 0.3s var(--easing);
+}
+.budget-custom-wrap:focus-within { border-color:rgba(255,255,255,0.35); background:rgba(255,255,255,0.1); transform:scale(1.02); }
+.budget-custom-prefix { font-size:18px; color:rgba(255,255,255,0.4); margin-right:6px; }
+.budget-custom-input {
+  flex:1; background:none; border:none; outline:none; padding:13px 0;
+  font-family:var(--font-title); font-size:18px; font-weight:500; color:#FFFFFF;
+}
+.budget-custom-input::placeholder { color:rgba(255,255,255,0.25); font-weight:300; }
+
+/* 日常场景 */
+.daily-section { width:100%; }
+.daily-scenarios-scroll { display:flex; gap:12px; overflow-x:auto; padding-bottom:4px; }
+.daily-scenarios-scroll::-webkit-scrollbar { height:3px; }
+.daily-scenarios-scroll::-webkit-scrollbar-track { background:transparent; }
+.daily-scenarios-scroll::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.15); border-radius:2px; }
+.daily-scenario-chip {
+  flex:0 0 auto; padding:12px 20px; border-radius:20px; border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.65);
+  font-family:var(--font-body); font-size:14px; font-weight:500; cursor:pointer;
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  transition:all 0.25s var(--easing); white-space:nowrap;
+}
+.daily-scenario-chip:hover { background:rgba(255,255,255,0.12); color:#fff; }
+.daily-scenario-chip.active { font-weight:600; }
+.daily-spots-container { margin-top:12px; display:flex; flex-direction:column; gap:8px; }
+.daily-spot-card {
+  padding:14px 18px; border-radius:16px; background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.08); display:flex; align-items:center; gap:12px;
+  transition:all 0.25s var(--easing);
+}
+.daily-spot-card:hover { background:rgba(255,255,255,0.1); }
+.daily-spot-emoji { font-size:24px; flex-shrink:0; }
+.daily-spot-info { flex:1; min-width:0; }
+.daily-spot-title { font-size:15px; font-weight:600; color:#fff; }
+.daily-spot-desc { font-size:12px; color:rgba(255,255,255,0.45); margin-top:2px; }
+.daily-spot-dist { font-size:13px; color:rgba(255,255,255,0.4); flex-shrink:0; }
+
+/* 热门路线 — 横向滚动 */
+.hot-routes-section { will-change:transform,opacity; }
+.section-header { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:20px; }
+.section-title {
+  font-family:var(--font-display); font-size:36px; font-weight:600; color:#FFFFFF;
+  margin:0; text-shadow:0 1px 8px rgba(0,0,0,0.1);
+}
+.section-hint { font-family:var(--font-body); font-size:13px; color:rgba(255,255,255,0.35); letter-spacing:1px; }
+.section-count {
+  font-family:var(--font-body); font-size:16px; font-weight:500; padding:6px 16px;
+  border-radius:12px; transition:all 0.6s var(--easing);
+}
+.hot-routes-scroll {
+  display:flex; gap:20px; overflow-x:auto; padding-bottom:8px;
+  scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
+}
+.hot-routes-scroll::-webkit-scrollbar { height:3px; }
+.hot-routes-scroll::-webkit-scrollbar-track { background:transparent; }
+.hot-routes-scroll::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.15); border-radius:2px; }
+.hot-route-card {
+  flex:0 0 220px; padding:0; overflow:hidden; cursor:pointer;
+  scroll-snap-align:start; transition:all 0.35s var(--easing);
+}
+.hot-route-card:hover { transform:translateY(-6px); box-shadow:0 20px 48px rgba(0,0,0,0.15); }
+.hot-route-img { height:150px; display:flex; align-items:center; justify-content:center; }
+.hot-route-emoji { font-size:52px; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.15)); }
+.hot-route-info { padding:18px 20px; display:flex; flex-direction:column; gap:6px; }
+.hot-route-title { font-family:var(--font-body); font-size:16px; font-weight:600; color:#FFFFFF; }
+.hot-route-meta { font-family:var(--font-body); font-size:13px; color:rgba(255,255,255,0.5); }
+
+/* 方案卡片瀑布流 */
+.plans-section { will-change:transform,opacity; }
+.plans-waterfall { display:flex; flex-direction:column; gap:20px; }
+.plan-card {
+  padding:28px; opacity:0; transform:translateY(30px);
+  transition:opacity 0.6s var(--easing), transform 0.6s var(--easing), border-color 0.35s var(--easing), box-shadow 0.35s var(--easing);
+  cursor:default;
+}
+.plan-card.visible { opacity:1; transform:translateY(0); }
+.plan-card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+.plan-card-mood {
+  font-family:var(--font-body); font-size:14px; font-weight:600; padding:6px 16px; border-radius:10px;
+}
+.plan-card-switch {
+  font-family:var(--font-body); font-size:13px; font-weight:500; padding:6px 14px;
+  border-radius:10px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.05);
+  cursor:pointer; transition:all 0.25s var(--easing);
+}
+.plan-card-switch:hover { background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.3); }
+.plan-card-route { display:flex; flex-direction:column; gap:0; padding-left:2px; }
+.plan-route-step { display:flex; align-items:center; gap:16px; padding:6px 0; position:relative; }
+.plan-route-step:not(:last-child)::after {
+  content:''; position:absolute; left:10px; top:30px; width:1.5px; height:calc(100% + 2px);
+  background:rgba(255,255,255,0.08); border-radius:1px;
+}
+.plan-step-time { font-family:var(--font-title); font-size:15px; font-weight:500; color:rgba(255,255,255,0.55); width:48px; flex-shrink:0; font-variant-numeric:tabular-nums; }
+.plan-step-dot { width:14px; height:14px; border-radius:50%; flex-shrink:0; box-shadow:0 0 0 4px rgba(255,255,255,0.1); z-index:1; }
+.plan-step-name { font-family:var(--font-body); font-size:17px; font-weight:500; color:#FFFFFF; }
+.plan-card-footer { display:flex; align-items:center; justify-content:space-between; padding-top:16px; margin-top:12px; border-top:1px solid rgba(255,255,255,0.08); }
+.plan-card-stats { display:flex; gap:20px; font-size:14px; font-weight:500; color:rgba(255,255,255,0.5); }
+.plan-card-book {
+  padding:9px 24px; border-radius:12px; border:none; color:#FFFFFF;
+  font-family:var(--font-title); font-size:14px; font-weight:600; cursor:pointer;
+  transition:all 0.25s var(--easing); box-shadow:0 4px 16px rgba(0,0,0,0.14);
+}
+.plan-card-book:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(0,0,0,0.18); }
+.plan-card-book:active { transform:scale(0.95); }
+
+.load-more-wrap { display:flex; justify-content:center; padding:8px 0 0; }
+.load-more-btn {
+  padding:16px 48px; border:none; font-family:var(--font-body); font-size:16px;
+  font-weight:500; color:rgba(255,255,255,0.7); cursor:pointer; transition:all 0.25s var(--easing);
+}
+.load-more-btn:hover:not(:disabled) { color:#FFFFFF; border-color:rgba(255,255,255,0.3); transform:translateY(-2px); }
+.load-more-btn:disabled { opacity:0.4; cursor:not-allowed; }
+.loading-dots { display:flex; gap:5px; align-items:center; }
+.loading-dots .dot { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,0.5); animation:dotPulse 0.6s ease-in-out infinite alternate; }
+.loading-dots .dot:nth-child(2) { animation-delay:0.15s; }
+.loading-dots .dot:nth-child(3) { animation-delay:0.3s; }
+@keyframes dotPulse { from{transform:translateY(0);opacity:.3} to{transform:translateY(-6px);opacity:1} }
+
+/* 生成按钮 */
+.generate-btn {
+  width:100%; padding:20px; border-radius:18px; border:none;
+  font-family:var(--font-body); font-size:20px; font-weight:600; color:#fff; cursor:pointer;
+  transition:all 0.35s var(--easing); box-shadow:0 6px 20px rgba(0,0,0,0.15);
+  letter-spacing:1px;
+}
+.generate-btn:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 10px 30px rgba(0,0,0,0.2); }
+.generate-btn:disabled { opacity:0.5; cursor:not-allowed; }
+
+/* 行程展示 */
+.itinerary-section { display:none; }
+.itinerary-section.show { display:block; }
+.day-header {
+  padding:14px 20px; border-radius:14px; margin-bottom:16px; margin-top:8px;
+  display:flex; justify-content:space-between; font-weight:600; font-size:15px;
+}
+.timeline { display:flex; flex-direction:column; gap:0; padding-left:4px; }
+.timeline-item { display:flex; align-items:flex-start; gap:14px; padding:8px 0; position:relative; }
+.timeline-item:not(:last-child)::after {
+  content:''; position:absolute; left:11px; top:28px; width:1.5px; height:calc(100% + 2px);
+  background:rgba(255,255,255,0.08); border-radius:1px;
+}
+.timeline-dot { width:16px; height:16px; border-radius:50%; flex-shrink:0; margin-top:4px; box-shadow:0 0 0 4px rgba(255,255,255,0.1); z-index:1; }
+.timeline-card { flex:1; padding:14px 18px; border-radius:14px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); }
+.time-row { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+.time { font-family:var(--font-title); font-size:13px; color:rgba(255,255,255,0.45); }
+.category { font-size:12px; padding:2px 10px; border-radius:8px; background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.5); }
+.poi-name { font-size:16px; font-weight:600; color:#fff; display:block; }
+.poi-desc { font-size:13px; color:rgba(255,255,255,0.4); margin-top:4px; display:block; }
+.reason-bar { font-size:12px; color:rgba(255,255,255,0.4); margin-top:6px; }
+.tags { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+.tag { font-size:11px; padding:3px 10px; border-radius:8px; background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.5); }
+.booking-row { display:flex; align-items:center; justify-content:space-between; margin-top:10px; }
+.price-tag { font-size:16px; font-weight:700; }
+.book-btn {
+  padding:8px 20px; border-radius:12px; border:none; color:#fff;
+  font-family:var(--font-title); font-size:14px; font-weight:600; cursor:pointer;
+  transition:all 0.25s var(--easing); box-shadow:0 4px 16px rgba(0,0,0,0.14);
+}
+.book-btn:hover { transform:translateY(-1px); }
+.book-btn:active { transform:scale(0.95); }
+.book-btn.loading { opacity:0.7; }
+.compare-inline { display:flex; align-items:center; gap:6px; margin-top:8px; font-size:12px; color:rgba(255,255,255,0.4); }
+.compare-inline-save { color:#8BA88C; font-weight:600; }
+
+/* 酒店推荐 */
+.hotel-section { display:none; }
+.hotel-section.show { display:block; }
+.hotel-card { padding:28px; }
+.hotel-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.hotel-info { display:flex; flex-direction:column; gap:4px; }
+.hotel-name { font-size:20px; font-weight:700; color:#fff; }
+.hotel-rating { font-size:14px; color:rgba(255,255,255,0.5); }
+.hotel-price { font-size:28px; font-weight:800; }
+.hotel-reason { font-size:13px; color:rgba(255,255,255,0.45); }
+.ai-compare { margin-top:14px; padding:16px; border-radius:14px; background:rgba(255,255,255,0.04); }
+.compare-title { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+.ai-badge { font-size:12px; padding:3px 10px; border-radius:8px; background:rgba(139,168,140,0.2); color:#8BA88C; font-weight:600; }
+.ai-tip { font-size:12px; color:rgba(255,255,255,0.35); }
+.compare-list { display:flex; flex-direction:column; gap:4px; }
+.compare-row { display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:8px; font-size:13px; }
+.compare-row.best { background:rgba(139,168,140,0.1); }
+.compare-platform { flex:1; font-weight:500; color:rgba(255,255,255,0.6); }
+.compare-price { font-weight:700; color:#fff; }
+.compare-features { font-size:11px; color:rgba(255,255,255,0.35); }
+.compare-best-tag { font-size:11px; padding:2px 8px; border-radius:6px; background:#8BA88C; color:#fff; font-weight:600; }
+.compare-verdict { padding:10px 14px; border-radius:10px; margin-top:10px; font-size:13px; color:rgba(255,255,255,0.5); }
+.hotel-savings { font-size:14px; color:#8BA88C; font-weight:600; margin-top:10px; }
+.hotel-book-btn { width:100%; margin-top:14px; padding:14px; text-align:center; }
+
+/* 关怀信 */
+.care-letter-section { display:none; }
+.care-letter-section.show { display:block; }
+.care-letter { padding:28px; }
+.care-letter-greeting { font-size:28px; font-weight:600; color:#fff; margin-bottom:8px; }
+.care-letter-title { font-size:20px; font-weight:600; color:rgba(255,255,255,0.8); margin-bottom:12px; }
+.care-letter-body { font-size:15px; color:rgba(255,255,255,0.55); line-height:1.8; margin-bottom:16px; }
+.care-letter-action { font-size:14px; color:rgba(255,255,255,0.45); margin-bottom:16px; padding:12px; border-radius:12px; background:rgba(255,255,255,0.04); }
+.care-letter-quote { font-size:14px; color:rgba(255,255,255,0.35); font-style:italic; }
+
+/* 预订比价弹窗 */
+.booking-popup-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000;
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity 0.3s;
+}
+.booking-popup-overlay.show { opacity:1; pointer-events:auto; }
+.booking-popup {
+  width:360px; max-width:90vw; background:rgba(30,30,30,0.95);
+  backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
+  border:1px solid rgba(255,255,255,0.1); border-radius:20px; padding:24px;
+  transform:scale(0.9); transition:transform 0.3s var(--easing);
+}
+.booking-popup-overlay.show .booking-popup { transform:scale(1); }
+.booking-popup-header { text-align:center; margin-bottom:16px; }
+.booking-popup-title { font-size:18px; font-weight:700; color:#FFFFFF; }
+.booking-popup-body { display:flex; flex-direction:column; align-items:center; }
+.booking-spinner {
+  width:32px; height:32px; border:2px solid rgba(255,255,255,0.1); border-top-color:#8BA88C;
+  border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:12px;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+.booking-popup-text { font-size:14px; color:rgba(255,255,255,0.5); margin-bottom:16px; }
+.platform-list { width:100%; display:flex; flex-direction:column; gap:6px; }
+.platform-item {
+  display:flex; align-items:center; gap:8px; padding:10px;
+  background:rgba(255,255,255,0.04); border-radius:10px; font-size:14px;
+}
+.platform-item.checked { background:rgba(139,168,140,0.12); }
+.platform-icon { font-size:18px; }
+.platform-name { flex:1; font-weight:600; color:rgba(255,255,255,0.7); }
+.platform-price { font-weight:700; color:#8BA88C; }
+.platform-wait { color:rgba(255,255,255,0.3); font-size:11px; }
+.booking-popup-footer { margin-top:16px; text-align:center; display:none; }
+.booking-best { font-size:15px; font-weight:700; color:#FFFFFF; display:block; }
+.booking-save { font-size:13px; color:#8BA88C; font-weight:600; margin:6px 0 10px; display:block; }
+.booking-action-btn {
+  width:100%; height:42px; border-radius:20px; border:none;
+  display:flex; align-items:center; justify-content:center;
+  font-size:15px; font-weight:700; color:#fff; cursor:pointer; transition:all 0.25s;
+}
+.booking-action-btn:active { transform:scale(.97); }
+
+/* Toast */
+.toast-bar {
+  position:fixed; bottom:40px; left:50%; transform:translateX(-50%);
+  padding:14px 32px; border-radius:24px;
+  background:rgba(0,0,0,0.8); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  color:#FFFFFF; font-family:var(--font-body); font-size:14px; font-weight:500;
+  z-index:300; box-shadow:0 8px 32px rgba(0,0,0,0.2); white-space:nowrap;
+  opacity:0; pointer-events:none; transition:opacity 0.3s var(--easing), transform 0.3s var(--easing);
+}
+.toast-bar.show { opacity:1; transform:translateX(-50%) translateY(-8px); }
+
+/* 合规 & 底部 */
+.compliance-strip { display:flex; align-items:center; gap:16px; flex-wrap:wrap; padding-top:20px; border-top:1px solid rgba(255,255,255,0.06); margin-top:10px; }
+.comp-item { font-size:13px; color:rgba(255,255,255,0.35); white-space:nowrap; }
+.mini-footer { display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:13px; color:rgba(255,255,255,0.3); padding-bottom:8px; }
+.dot-sep { color:rgba(255,255,255,0.1); }
+
+/* 树洞按钮 — 右下角悬浮 */
+.tree-hole-btn {
+  position:fixed; bottom:32px; right:32px; z-index:200;
+  width:56px; height:56px; border-radius:50%;
+  border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.06);
+  backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  font-size:24px; transition:all 0.35s var(--easing);
+  box-shadow:0 4px 20px rgba(0,0,0,0.12);
+}
+.tree-hole-btn:hover {
+  background:rgba(255,255,255,0.14); border-color:rgba(255,255,255,0.3);
+  transform:scale(1.08); box-shadow:0 8px 32px rgba(0,0,0,0.18);
+}
+.tree-hole-btn.pulse {
+  animation:treeHolePulse 2s ease-in-out infinite;
+}
+@keyframes treeHolePulse {
+  0%,100%{box-shadow:0 4px 20px rgba(0,0,0,0.12)}
+  50%{box-shadow:0 4px 36px rgba(139,168,140,0.4)}
+}
+
+/* 树洞弹窗 */
+.tree-hole-popup {
+  position:fixed; bottom:100px; right:32px; z-index:201;
+  width:320px; padding:24px; border-radius:20px;
+  background:rgba(20,20,36,0.92); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
+  border:1px solid rgba(255,255,255,0.12);
+  box-shadow:0 16px 48px rgba(0,0,0,0.3);
+  opacity:0; pointer-events:none; transform:translateY(12px);
+  transition:all 0.35s var(--easing);
+}
+.tree-hole-popup.show { opacity:1; pointer-events:auto; transform:translateY(0); }
+.tree-hole-popup-title {
+  font-size:16px; font-weight:600; color:#fff; margin-bottom:6px;
+}
+.tree-hole-popup-sub {
+  font-size:13px; color:rgba(255,255,255,0.4); margin-bottom:16px; line-height:1.6;
+}
+.tree-hole-input {
+  width:100%; padding:12px 16px; border-radius:14px; border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.05); color:#fff; font-family:var(--font-body);
+  font-size:14px; outline:none; resize:none; min-height:80px;
+  transition:border-color 0.3s;
+}
+.tree-hole-input::placeholder { color:rgba(255,255,255,0.25); }
+.tree-hole-input:focus { border-color:rgba(139,168,140,0.5); }
+.tree-hole-send {
+  width:100%; margin-top:12px; padding:12px; border-radius:14px; border:none;
+  background:linear-gradient(135deg, #8BA88C, #6B8E6C); color:#fff;
+  font-family:var(--font-body); font-size:15px; font-weight:600; cursor:pointer;
+  transition:all 0.25s var(--easing);
+}
+.tree-hole-send:hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(139,168,140,0.3); }
+.tree-hole-send:active { transform:scale(0.97); }
+
+/* 负面情绪简化模式 — 隐藏筛选器 */
+.simplified-overlay {
+  position:fixed; inset:0; z-index:150;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity 0.8s var(--easing);
+  gap:32px; padding:40px;
+}
+.simplified-overlay.show { opacity:1; pointer-events:auto; }
+.healing-greeting {
+  font-family:var(--font-display); font-size:36px; font-weight:600;
+  color:#fff; text-align:center; line-height:1.5; text-shadow:0 2px 16px rgba(0,0,0,0.2);
+  max-width:600px;
+}
+.healing-sub {
+  font-family:var(--font-body); font-size:18px; font-weight:300;
+  color:rgba(255,255,255,0.5); text-align:center;
+}
+.healing-btn {
+  padding:20px 48px; border-radius:18px; border:none;
+  font-family:var(--font-body); font-size:20px; font-weight:600; color:#fff; cursor:pointer;
+  transition:all 0.35s var(--easing); box-shadow:0 8px 32px rgba(0,0,0,0.2);
+  letter-spacing:1px;
+}
+.healing-btn:hover { transform:translateY(-3px); box-shadow:0 12px 40px rgba(0,0,0,0.25); }
+.healing-btn:active { transform:scale(0.95); }
+.healing-dismiss {
+  background:none; border:1px solid rgba(255,255,255,0.15); border-radius:24px;
+  padding:10px 28px; color:rgba(255,255,255,0.4); font-family:var(--font-body);
+  font-size:14px; cursor:pointer; transition:all 0.3s;
+}
+.healing-dismiss:hover { color:rgba(255,255,255,0.7); border-color:rgba(255,255,255,0.3); }
+
+/* 柔性试探气泡 */
+.emotion-bubble {
+  position:fixed; bottom:120px; right:32px; z-index:199;
+  max-width:300px; padding:20px 24px; border-radius:20px;
+  background:rgba(20,20,36,0.92); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
+  border:1px solid rgba(255,255,255,0.12);
+  box-shadow:0 16px 48px rgba(0,0,0,0.3);
+  opacity:0; pointer-events:none; transform:translateY(8px) scale(0.95);
+  transition:all 0.5s var(--easing);
+}
+.emotion-bubble.show { opacity:1; pointer-events:auto; transform:translateY(0) scale(1); }
+.bubble-title {
+  font-size:16px; font-weight:600; color:#fff; margin-bottom:8px;
+}
+.bubble-sub {
+  font-size:13px; color:rgba(255,255,255,0.5); margin-bottom:16px; line-height:1.6;
+}
+.bubble-actions { display:flex; flex-direction:column; gap:8px; }
+.bubble-option {
+  padding:11px 16px; border-radius:14px; border:none; color:#fff;
+  font-family:var(--font-body); font-size:14px; font-weight:500; cursor:pointer;
+  transition:all 0.3s var(--easing); text-align:left; display:flex; align-items:center; gap:8px;
+}
+.bubble-option:hover { transform:translateX(3px); box-shadow:0 4px 16px rgba(0,0,0,0.25); }
+.bubble-option:active { transform:scale(0.97); }
+.bubble-option.option-soothe { background:rgba(139,168,140,0.25); border:1px solid rgba(139,168,140,0.3); }
+.bubble-option.option-soothe:hover { background:rgba(139,168,140,0.4); }
+.bubble-option.option-distract { background:rgba(255,180,120,0.2); border:1px solid rgba(255,180,120,0.25); }
+.bubble-option.option-distract:hover { background:rgba(255,180,120,0.35); }
+.bubble-dismiss-row { display:flex; justify-content:center; padding-top:2px; }
+.bubble-dismiss {
+  background:none; border:none; color:rgba(255,255,255,0.3); font-family:var(--font-body);
+  font-size:12px; cursor:pointer; padding:6px 12px; transition:all 0.25s;
+}
+.bubble-dismiss:hover { color:rgba(255,255,255,0.55); }
+
+/* 无缝降级 — 云层减速用 CSS 变量 */
+.cloud { transition: opacity 1.5s var(--easing); }
+.particle { transition: opacity 1.5s var(--easing); }
+.balloon { transition: animation-duration 1.5s var(--easing); }
+.brand-name, .brand-slogan { transition: font-weight 1.5s var(--easing), letter-spacing 1.5s var(--easing); }
+
+/* 负面情绪时隐藏的筛选器 */
+.filter-hidden { opacity:0; pointer-events:none; transition:opacity 0.5s var(--easing); }
+
+/* 隐私透明化声明 */
+.privacy-notice {
+  padding:12px 0; text-align:center; font-size:11px; font-weight:300;
+  color:rgba(255,255,255,0.2); letter-spacing:0.5px; line-height:1.8;
+  transition:color 0.8s var(--easing);
+}
+.privacy-notice:hover { color:rgba(255,255,255,0.4); }
+
+/* 安抚态 — 呼吸感微动效 */
+body.soothing .cloud { opacity:0.18; transition:opacity 2s var(--easing); }
+body.soothing .particle { animation-duration:12s !important; transition:animation-duration 2s var(--easing); }
+body.soothing .balloon { animation-duration:32s !important; }
+body.soothing .bg-sky { transition:background 2s var(--easing); }
+body.soothing .brand-name { font-weight:400; letter-spacing:6px; transition:all 2s var(--easing); }
+body.soothing .brand-slogan { font-weight:300; letter-spacing:4px; transition:all 2s var(--easing); }
+
+/* 安抚态 — 呼吸光环 */
+.breathe-glow {
+  position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:0; height:0; border-radius:50%; pointer-events:none; z-index:0;
+  opacity:0; transition:all 2s var(--easing);
+}
+body.soothing .breathe-glow {
+  width:600px; height:600px; opacity:0.06;
+  background:radial-gradient(circle, rgba(139,168,140,0.8) 0%, transparent 70%);
+  animation:breathePulse 8s ease-in-out infinite;
+}
+@keyframes breathePulse {
+  0%,100% { transform:translate(-50%,-50%) scale(1); opacity:0.04; }
+  50%     { transform:translate(-50%,-50%) scale(1.15); opacity:0.08; }
+}
+
+/* ================================================================
+   硬核规划模块 — 交通耗时、Plan B、地图、导出、刷新
+   ================================================================ */
+
+/* 交通耗时标签 */
+.transit-bar {
+  display:flex; align-items:center; gap:6px; padding:6px 12px; margin:4px 0 4px 24px;
+  border-radius:10px; background:rgba(255,255,255,0.04); font-size:12px;
+  color:rgba(255,255,255,0.35); border-left:2px solid rgba(255,255,255,0.08);
+}
+.transit-bar .transit-icon { font-size:14px; }
+.transit-bar .transit-time { font-weight:600; color:rgba(255,255,255,0.5); }
+
+/* 雨天预案标签 */
+.rain-plan-toggle {
+  display:inline-flex; align-items:center; gap:4px; padding:4px 10px; margin-top:6px;
+  border-radius:8px; background:rgba(107,143,163,0.15); border:1px solid rgba(107,143,163,0.2);
+  font-size:11px; color:rgba(107,180,210,0.8); cursor:pointer; transition:all 0.25s;
+}
+.rain-plan-toggle:hover { background:rgba(107,143,163,0.25); }
+.rain-plan-detail {
+  display:none; margin-top:6px; padding:10px; border-radius:10px;
+  background:rgba(107,143,163,0.08); font-size:12px; color:rgba(255,255,255,0.4);
+  line-height:1.6;
+}
+.rain-plan-detail.show { display:block; }
+
+/* 刷新按钮 */
+.refresh-btn {
+  display:inline-flex; align-items:center; gap:6px; padding:8px 16px; margin-left:8px;
+  border-radius:20px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.05);
+  color:rgba(255,255,255,0.5); font-family:var(--font-body); font-size:12px;
+  cursor:pointer; transition:all 0.25s var(--easing); backdrop-filter:blur(8px);
+}
+.refresh-btn:hover { background:rgba(255,255,255,0.12); color:#fff; border-color:rgba(255,255,255,0.25); }
+.refresh-btn:active { transform:scale(0.95); }
+.refresh-btn.refreshing { pointer-events:none; opacity:0.5; }
+
+/* 导出按钮 */
+.export-bar {
+  display:flex; gap:10px; padding:0 0 8px; flex-wrap:wrap;
+}
+.export-btn {
+  padding:10px 20px; border-radius:20px; border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.55);
+  font-family:var(--font-body); font-size:13px; cursor:pointer;
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  transition:all 0.25s var(--easing);
+}
+.export-btn:hover { background:rgba(255,255,255,0.14); color:#fff; border-color:rgba(255,255,255,0.3); }
+.export-btn:active { transform:scale(0.95); }
+
+/* 地图可视化 */
+.map-section { display:none; }
+.map-section.show { display:block; }
+.map-container {
+  width:100%; height:320px; border-radius:20px; position:relative; overflow:hidden;
+  background:rgba(20,25,36,0.5); border:1px solid rgba(255,255,255,0.08);
+}
+.map-svg { width:100%; height:100%; }
+.map-poi-dot { cursor:pointer; transition:all 0.3s var(--easing); }
+.map-poi-dot:hover { filter:brightness(1.3); }
+.map-poi-label {
+  font-size:9px; fill:rgba(255,255,255,0.7); pointer-events:none;
+  text-shadow:0 0 4px rgba(0,0,0,0.5);
+}
+.map-route-line {
+  fill:none; stroke:rgba(255,255,255,0.2); stroke-width:1.5;
+  stroke-dasharray:6 4; animation:routeDash 2s linear infinite;
+}
+@keyframes routeDash { to { stroke-dashoffset: -20; } }
+.map-legend {
+  display:flex; gap:16px; padding:8px 0 0; font-size:11px; color:rgba(255,255,255,0.3);
+}
+.map-legend-item { display:flex; align-items:center; gap:4px; }
+.map-legend-dot { width:8px; height:8px; border-radius:50%; }
+
+/* 预算超标警告 */
+.budget-warning {
+  padding:12px 16px; border-radius:12px; background:rgba(255,107,107,0.12);
+  border:1px solid rgba(255,107,107,0.2); font-size:13px; color:rgba(255,150,150,0.8);
+  margin-top:10px; display:none;
+}
+.budget-warning.show { display:block; }
+
+/* 日头工具栏 */
+.day-toolbar {
+  display:flex; align-items:center; justify-content:flex-end; gap:8px; padding:4px 0 8px;
+}
+
+/* 导出预览弹窗 */
+.export-modal-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:1000;
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity 0.3s;
+}
+.export-modal-overlay.show { opacity:1; pointer-events:auto; }
+.export-modal {
+  width:680px; max-width:90vw; max-height:80vh; overflow-y:auto;
+  background:rgba(24,24,40,0.96); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
+  border:1px solid rgba(255,255,255,0.1); border-radius:20px; padding:28px;
+  transform:scale(0.9); transition:transform 0.3s var(--easing);
+}
+.export-modal-overlay.show .export-modal { transform:scale(1); }
+.export-modal h2 { font-size:20px; color:#fff; margin-bottom:16px; }
+.export-modal pre {
+  background:rgba(0,0,0,0.3); border-radius:12px; padding:16px; font-size:12px;
+  color:rgba(255,255,255,0.7); white-space:pre-wrap; font-family:'Consolas','Monaco',monospace;
+  line-height:1.8; max-height:400px; overflow-y:auto;
+}
+.export-modal-actions { display:flex; gap:10px; margin-top:16px; }
+.export-modal-btn {
+  padding:10px 24px; border-radius:14px; border:none; color:#fff;
+  font-family:var(--font-body); font-size:14px; font-weight:600; cursor:pointer;
+  transition:all 0.25s;
+}
+.export-modal-btn:active { transform:scale(0.95); }
+.export-modal-close {
+  position:absolute; top:16px; right:20px; background:none; border:none;
+  color:rgba(255,255,255,0.4); font-size:20px; cursor:pointer;
+}
+
+/* 深夜模式全局暗色 */
+body.night-mode .cloud { background:rgba(255,255,255,0.08); }
+body.night-mode .bg-particles .particle { background:rgba(255,255,255,0.15); }
+body.night-mode .mountain { opacity:0.3; }
+
+/* 响应式 */
+@media (max-width:1200px) {
+  .left-panel { width:45%; padding:40px 32px 40px 40px; }
+  .right-panel { width:55%; padding:40px 40px 40px 0; }
+}
+@media (max-width:1024px) {
+  .main-layout { flex-direction:column; }
+  .left-panel { width:100%; min-width:0; padding:32px 24px 20px; height:auto; }
+  .left-content { align-items:center; gap:32px; }
+  .brand-section { text-align:center; }
+  .mood-section-title { text-align:center; }
+  .mood-grid { grid-template-columns:repeat(6,1fr); gap:10px; }
+  .mood-btn { padding:16px 8px 14px; border-radius:16px; }
+  .mood-btn-emoji { font-size:24px; }
+  .mood-btn-label { font-size:13px; }
+  .right-panel { width:100%; padding:0 24px 40px; overflow-y:visible; height:auto; }
+  .premium-page { overflow-y:auto; height:auto; }
+  .brand-slogan { font-size:24px; }
+  .budget-number { font-size:56px; }
+  .section-title { font-size:28px; }
+}
+@media (max-width:640px) {
+  .left-panel { padding:24px 16px 16px; }
+  .mood-grid { grid-template-columns:repeat(3,1fr); }
+  .budget-panel { padding:28px 20px; }
+  .budget-number { font-size:48px; }
+  .hot-route-card { flex:0 0 160px; }
+  .section-title { font-size:24px; }
+  .plan-card { padding:20px; }
+  .plan-step-name { font-size:14px; }
+  .brand-name { font-size:28px; }
+  .brand-slogan { font-size:20px; }
+}
+</style>
+</head>
+<body>
+<div class="premium-page">
+
+  <!-- ============================================================ -->
+  <!--  背景层 -->
+  <!-- ============================================================ -->
+  <div class="bg-layer" aria-hidden="true">
+    <div class="bg-sky sky-calm" id="bgSky"></div>
+    <div class="bg-clouds">
+      <div class="cloud cloud-1"></div><div class="cloud cloud-2"></div><div class="cloud cloud-3"></div>
+      <div class="cloud cloud-4"></div><div class="cloud cloud-5"></div>
+    </div>
+    <div class="bg-balloons">
+      <div class="balloon balloon-1"><div class="balloon-envelope"></div><div class="balloon-basket"></div></div>
+      <div class="balloon balloon-2"><div class="balloon-envelope"></div><div class="balloon-basket"></div></div>
+    </div>
+    <div class="bg-airplane"><span class="airplane-icon">✈️</span><div class="airplane-trail"></div></div>
+    <div class="bg-particles" id="bgParticles"></div>
+    <div class="bg-mountains">
+      <div class="mountain mountain-1"></div><div class="mountain mountain-2"></div><div class="mountain mountain-3"></div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!--  主布局：左右分栏 -->
+  <!-- ============================================================ -->
+  <div class="main-layout">
+
+    <!-- ========== 左侧面板 42% ========== -->
+    <aside class="left-panel">
+      <div class="left-content">
+
+        <!-- 品牌区 -->
+        <div class="brand-section">
+          <div class="brand-icon">✦</div>
+          <h1 class="brand-name">MoodTravel</h1>
+          <p class="brand-slogan">让每一次出发<br/>都有温度</p>
+          <p class="brand-sub">情绪驱动旅行 · 随心而行</p>
+        </div>
+
+        <!-- 心情选择器 -->
+        <div class="mood-section">
+          <h3 class="mood-section-title">此刻心情</h3>
+          <div class="mood-grid" id="moodGrid"></div>
+        </div>
+
+        <!-- 同伴选择 -->
+        <div class="companion-section">
+          <h3 class="mood-section-title">同行伙伴</h3>
+          <div class="companion-chips" id="companionChips"></div>
+        </div>
+
+        <!-- 长者模式开关 -->
+        <div class="elderly-toggle-wrap">
+          <span class="elderly-toggle-label">👴 长辈关怀模式</span>
+          <label class="elderly-toggle" id="elderlyToggle">
+            <input type="checkbox" id="elderlyCheckbox">
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+        </div>
+
+        <!-- 快捷入口 -->
+        <div class="left-quick">
+          <button class="quick-link" onclick="scrollToContent()"><span>↓</span> 探索方案</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ========== 右侧面板 58% ========== -->
+    <main class="right-panel" id="rightPanel">
+      <div class="right-content">
+
+        <!-- 场景选择器：休闲旅游 vs 商务/日常出行 -->
+        <section class="scene-section">
+          <div class="scene-toggle" id="sceneToggle">
+            <button class="scene-btn active" data-scene="tourism" onclick="switchScene('tourism')">
+              <span class="scene-icon">🏖️</span>
+              <span class="scene-label">休闲旅游</span>
+              <span class="scene-desc">松弛感 · 打卡地 · 休息时间</span>
+            </button>
+            <button class="scene-btn" data-scene="business" onclick="switchScene('business')">
+              <span class="scene-icon">💼</span>
+              <span class="scene-label">商务/日常出行</span>
+              <span class="scene-desc">效率优先 · 交通便利 · 省时</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- 日常微情绪场景 -->
+        <section class="daily-section">
+          <div class="daily-scenarios-scroll" id="dailyScenariosScroll"></div>
+          <div class="daily-spots-container" id="dailySpotsContainer"></div>
+        </section>
+
+        <!-- 预算控制面板 -->
+        <section class="budget-section" id="budgetSection">
+          <div class="glass-panel budget-panel">
+            <div class="budget-header">
+              <span class="budget-label">旅行预算</span>
+              <span class="budget-hint">拖动滑块或直接输入</span>
+            </div>
+            <div class="budget-display">
+              <span class="budget-currency">¥</span>
+              <span class="budget-number" id="budgetNumber">2,000</span>
+            </div>
+            <div class="budget-slider-wrap">
+              <div class="budget-slider-track">
+                <div class="budget-slider-fill" id="budgetFill" style="width:37.5%;background:#8BA88C"></div>
+              </div>
+              <input type="range" class="budget-slider-input" id="budgetSlider" min="200" max="100000" step="100" value="2000">
+              <div class="budget-range-labels"><span>¥200</span><span id="budgetMaxLabel">¥100,000</span></div>
+            </div>
+            <div class="budget-controls">
+              <div class="budget-presets" id="budgetPresets"></div>
+              <div class="budget-custom-wrap">
+                <span class="budget-custom-prefix">¥</span>
+                <input type="text" class="budget-custom-input" id="budgetCustom" placeholder="自定义金额">
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 热门情绪路线 -->
+        <section class="hot-routes-section">
+          <div class="section-header">
+            <h2 class="section-title">热门情绪路线</h2>
+            <span class="section-hint">← 左右滑动 →</span>
+          </div>
+          <div class="hot-routes-scroll" id="hotRoutesScroll"></div>
+        </section>
+
+        <!-- 推荐方案 -->
+        <section class="plans-section" id="plansSection">
+          <div class="section-header">
+            <h2 class="section-title">推荐方案</h2>
+            <span class="section-count" id="planCount" style="background:rgba(139,168,140,0.1);color:#8BA88C">6 套</span>
+          </div>
+          <div class="plans-waterfall" id="plansWaterfall"></div>
+          <div class="load-more-wrap" id="loadMoreWrap">
+            <button class="load-more-btn glass-panel" id="loadMoreBtn" onclick="loadMore()">加载更多</button>
+          </div>
+        </section>
+
+        <!-- 智能生成行程按钮 -->
+        <button class="generate-btn glass-panel" id="generatePlanBtn" onclick="generatePlan()" style="background:linear-gradient(135deg, #A3C4D6, #6B8FA3)">
+          ✨ 智能生成行程
+        </button>
+
+        <!-- 行程概览仪表盘 -->
+        <div class="stats-row" id="statsRow" style="display:none;display:flex;gap:16px;flex-wrap:wrap;"></div>
+
+        <!-- AI 行程时间轴 -->
+        <section class="itinerary-section" id="itinerarySection">
+          <div class="section-header">
+            <h2 class="section-title">📅 推荐行程</h2>
+            <span class="section-count" id="itineraryCount" style="background:rgba(139,168,140,0.1);color:#8BA88C">0 天</span>
+          </div>
+          <!-- 导出工具栏 -->
+          <div class="export-bar" id="exportBar" style="display:none">
+            <button class="export-btn" onclick="exportMarkdown()">📋 复制 Markdown</button>
+            <button class="export-btn" onclick="exportHTML()">🖨️ 打印版行程单</button>
+          </div>
+          <!-- 预算超标警告 -->
+          <div class="budget-warning" id="budgetWarning"></div>
+          <div id="itineraryDays"></div>
+        </section>
+
+        <!-- 地图可视化 -->
+        <section class="map-section" id="mapSection">
+          <div class="section-header">
+            <h2 class="section-title">🗺️ 动线可视化</h2>
+            <span class="section-hint">景点连线 · 路线合理性一目了然</span>
+          </div>
+          <div class="map-container glass-panel" id="mapContainer">
+            <svg class="map-svg" id="mapSvg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"></svg>
+          </div>
+          <div class="map-legend">
+            <span class="map-legend-item"><span class="map-legend-dot" style="background:#8BA88C"></span>景点</span>
+            <span class="map-legend-item"><span class="map-legend-dot" style="background:#E8A85A"></span>餐饮</span>
+            <span class="map-legend-item"><span class="map-legend-dot" style="background:rgba(255,255,255,0.5)"></span>休息</span>
+            <span class="map-legend-item" style="margin-left:auto">--- 虚线 = 动线</span>
+          </div>
+        </section>
+
+        <!-- 酒店推荐 -->
+        <section class="hotel-section" id="hotelSection">
+          <div class="section-header">
+            <h2 class="section-title">🏨 酒店推荐</h2>
+          </div>
+          <div class="hotel-card glass-panel" id="hotelCard"></div>
+        </section>
+
+        <!-- 出发前行前清单 -->
+        <section class="checklist-section" id="checklistSection">
+          <div class="section-header">
+            <h2 class="section-title">🎒 出发前最后检查</h2>
+          </div>
+          <div class="checklist-card glass-panel" id="checklistCard"></div>
+        </section>
+
+        <!-- 关怀信 -->
+        <section class="care-letter-section" id="careLetterSection">
+          <div class="section-header">
+            <h2 class="section-title">💌 今日关怀</h2>
+          </div>
+          <div class="care-letter glass-panel" id="careLetter"></div>
+        </section>
+
+        <!-- 合规 -->
+        <div class="compliance-strip">
+          <span class="comp-item">🖼️ CSS 动画 · 自主绘制</span>
+          <span class="comp-item">🔤 Google Fonts · SIL OFL 1.1</span>
+        </div>
+        <footer class="mini-footer">
+          <span>MoodTravel 情绪旅行</span><span class="dot-sep">·</span>
+          <span>图片来自 Unsplash（免费商用授权）</span><span class="dot-sep">·</span>
+          <span>字体来自 Google Fonts（SIL OFL 1.1）</span>
+        </footer>
+        <div class="privacy-notice">
+          🛡️ 你的感受，只属于你。我们仅在本地浏览器瞬间感知你的状态以提供陪伴，不记录任何行为轨迹，关闭网页即烟消云散。
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast-bar" id="toast"></div>
+
+  <!-- 预订比价弹窗 -->
+  <div class="booking-popup-overlay" id="bookingPopupOverlay" onclick="closeBookingPopup()">
+    <div class="booking-popup" onclick="event.stopPropagation()">
+      <div class="booking-popup-header"><span class="booking-popup-title">🔍 全网比价中</span></div>
+      <div class="booking-popup-body">
+        <div class="booking-spinner" id="bookingSpinner"></div>
+        <span class="booking-popup-text" id="bookingPopupText">正在为您查询多个平台...</span>
+        <div class="platform-list" id="platformList"></div>
+      </div>
+      <div class="booking-popup-footer" id="bookingPopupFooter"></div>
+    </div>
+  </div>
+
+  <!-- 导出预览弹窗 -->
+  <div class="export-modal-overlay" id="exportModalOverlay" onclick="closeExportModal()">
+    <div class="export-modal" onclick="event.stopPropagation()" style="position:relative">
+      <button class="export-modal-close" onclick="closeExportModal()">✕</button>
+      <h2 id="exportModalTitle">📋 行程预览</h2>
+      <pre id="exportModalContent"></pre>
+      <div class="export-modal-actions">
+        <button class="export-modal-btn" id="exportCopyBtn" style="background:#8BA88C" onclick="copyExportContent()">📋 一键复制</button>
+        <button class="export-modal-btn" style="background:rgba(255,255,255,0.1)" onclick="closeExportModal()">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 树洞按钮 — 一键倾诉 -->
+  <button class="tree-hole-btn" id="treeHoleBtn" title="不想选？随便说句话" onclick="toggleTreeHole()">🎤</button>
+
+  <!-- 树洞弹窗 -->
+  <div class="tree-hole-popup" id="treeHolePopup">
+    <div class="tree-hole-popup-title">🌳 树洞倾听</div>
+    <div class="tree-hole-popup-sub">不想选？随便叹口气，或者说句话，剩下的交给我。</div>
+    <textarea class="tree-hole-input" id="treeHoleInput" placeholder="比如：今天好累...、想一个人静静、跟对象吵架了..."></textarea>
+    <button class="tree-hole-send" onclick="sendToTreeHole()">💬 说出来，我懂你</button>
+  </div>
+
+  <!-- 柔性试探气泡 — 双选项 + 关闭 -->
+  <div class="emotion-bubble" id="emotionBubble">
+    <div class="bubble-title">看起来有点累？</div>
+    <div class="bubble-sub">要不要试试轻松一点的目的地？</div>
+    <div class="bubble-actions">
+      <button class="bubble-option option-soothe" id="bubbleOptionSoothe">想静静，帮我放松一下</button>
+      <button class="bubble-option option-distract" id="bubbleOptionDistract">找点乐子，给我推荐点有趣的</button>
+    </div>
+    <div class="bubble-dismiss-row">
+      <button class="bubble-dismiss" id="bubbleDismiss">不用了，谢谢</button>
+    </div>
+  </div>
+
+  <!-- 呼吸光环 — 安抚态微动效 -->
+  <div class="breathe-glow" id="breatheGlow"></div>
+
+  <!-- 负面情绪简化模式 — 治愈覆盖层 -->
+  <div class="simplified-overlay" id="simplifiedOverlay">
+    <div class="healing-greeting" id="healingGreeting">看起来今天有点累？<br/>先听首轻音乐吧。</div>
+    <div class="healing-sub">不需要做任何选择，点击下面的按钮，我会为你生成一条治愈路线。</div>
+    <button class="healing-btn" id="healingGenBtn" onclick="quickHealingPlan()">✨ 一键生成治愈路线</button>
+    <button class="healing-dismiss" onclick="dismissSimplified()">我想自己慢慢选</button>
+  </div>
+
+</div>
+
+<script>
+'use strict';
+
+// ================================================================
+//  数据层
+//  来源：web-demo.vue + plan.vue + travel.js + travelData.js
+// ================================================================
+
+var MOODS = [
+  { key: 'calm', label: '平静', emoji: '😌', color: '#8BA88C' },
+  { key: 'happy', label: '开心', emoji: '😊', color: '#E8A85A' },
+  { key: 'sad', label: '治愈', emoji: '🌅', color: '#E8945A' },
+  { key: 'anxious', label: '放松', emoji: '🌿', color: '#6B8FA3' },
+  { key: 'excited', label: '探索', emoji: '🔥', color: '#FF6B6B' },
+  { key: 'tired', label: '慵懒', emoji: '😴', color: '#B5A3C4' },
+  { key: 'insomnia', label: '深夜', emoji: '🌙', color: '#6B7BA3' }
+];
+
+var MOOD_THEME_MAP = {
+  tired:   { name:'静谧蓝', primary:'#6B8FA3', primaryLight:'#A3C4D6', bg:'#EDF3F6', bgGradient:'#DCE8EE', accent:'#5B7D8F' },
+  excited: { name:'活力橙', primary:'#E8945A', primaryLight:'#F5C19A', bg:'#FEF8F2', bgGradient:'#FDF0E4', accent:'#D4783A' },
+  happy:   { name:'暖阳绿', primary:'#8BA88C', primaryLight:'#B5CEB6', bg:'#F2F7F0', bgGradient:'#E6F0E4', accent:'#6B8E6C' },
+  calm:    { name:'莫兰迪绿', primary:'#A3B5A6', primaryLight:'#C5D5C8', bg:'#F5F2ED', bgGradient:'#E8EDE5', accent:'#7A9680' },
+  anxious: { name:'薰衣草紫', primary:'#B5A3C4', primaryLight:'#D5C8E0', bg:'#F6F3F8', bgGradient:'#EDE8F2', accent:'#8E7DA8' },
+  sad:     { name:'柔雾粉', primary:'#C4A8A8', primaryLight:'#DDC8C8', bg:'#F8F4F4', bgGradient:'#F0E8E8', accent:'#A88888' },
+  insomnia:{ name:'暗夜蓝', primary:'#6B7BA3', primaryLight:'#8B9BC3', bg:'#0a0a1a', bgGradient:'#141428', accent:'#5B6B93' }
+};
+
+var COMPANION_TYPES = [
+  { key:'solo', label:'独自出行', icon:'🧑' },
+  { key:'couple', label:'情侣出游', icon:'💑' },
+  { key:'kids', label:'带娃出行', icon:'👶' },
+  { key:'elderly', label:'陪伴长辈', icon:'👴' }
+];
+
+var DAILY_SCENARIOS = [
+  { key:'walk', label:'🚶 下班透透气' },
+  { key:'break', label:'☕ 摸鱼5分钟' },
+  { key:'grocery', label:'🛒 帮长辈买菜' },
+  { key:'rain', label:'🌧️ 雨天躲雨处' }
+];
+
+var TRAVEL_SPOTS = [
+  { id:'spot-001', title:'避世书局', tags:['躺平','回血','安静'], energyLevel:10, distance:280, scenario:'relax', description:'这里很安静，适合一个人发呆，把烦恼留在门外。', elderDesc:'安静的书店，适合老人慢慢逛', emoji:'📚' },
+  { id:'spot-002', title:'云端足疗', tags:['放松','回血','按摩'], energyLevel:15, distance:420, scenario:'relax', description:'把疲惫交给专业的双手，让身体像云一样轻盈。', elderDesc:'专业的足疗按摩店', emoji:'🦶' },
+  { id:'spot-006', title:'猫空咖啡', tags:['治愈','萌宠','咖啡'], energyLevel:40, distance:350, scenario:'relax', description:'猫咪的呼噜声是最好的白噪音，一杯拿铁就是一下午。', elderDesc:'安静的猫咪咖啡馆', emoji:'🐱' },
+  { id:'spot-101', title:'社区小公园', tags:['散步','户外','日常'], energyLevel:5, distance:120, scenario:'walk', description:'出门右转就是，有长椅和树荫，晚饭后散步的好去处。', elderDesc:'适合老人散步的公园，距您120米', emoji:'🌳' },
+  { id:'spot-102', title:'转角咖啡', tags:['咖啡','摸鱼','休闲'], energyLevel:8, distance:200, scenario:'break', description:'手冲咖啡很棒，WiFi免费，适合摸鱼五分钟。', elderDesc:'安静的咖啡店，距您200米', emoji:'☕' },
+  { id:'spot-103', title:'幸福菜市场', tags:['买菜','日常','新鲜'], energyLevel:5, distance:200, scenario:'grocery', description:'早上刚进了一批新鲜蔬菜，西红柿和黄瓜都很水灵。', elderDesc:'附近便宜的菜市场，距您200米', emoji:'🥬' },
+  { id:'spot-104', title:'街角便利店', tags:['日常','便利','买菜'], energyLevel:3, distance:80, scenario:'grocery', description:'24小时营业，牛奶面包鸡蛋都有，比菜市场干净。', elderDesc:'小区门口的便利店，距您80米', emoji:'🏪' },
+  { id:'spot-105', title:'避雨长廊', tags:['下雨','躲雨','日常'], energyLevel:2, distance:300, scenario:'rain', description:'沿着河边的长廊一直走，全程有顶棚，下雨也不怕。', elderDesc:'河边有顶棚的长廊，下雨也能散步', emoji:'🌂' },
+  { id:'spot-106', title:'社区活动中心', tags:['室内','躲雨','日常'], energyLevel:5, distance:250, scenario:'rain', description:'有棋牌室和阅览室，下雨天老人们都在这。', elderDesc:'可以下棋看报的社区活动中心', emoji:'🎲' },
+  { id:'spot-107', title:'河滨步道', tags:['散步','户外','日常'], energyLevel:10, distance:400, scenario:'walk', description:'平坦的步道，适合下班后透透气，看河水慢慢流。', elderDesc:'平坦好走的河边步道，距您400米', emoji:'🌊' }
+];
+
+var POIS = [
+  { id:1, name:'悦榕庄SPA水疗', category:'leisure', energyLevel:1, crowdednessLevel:2, weatherSensitivity:'indoor', ticketPrice:680, kidsFriendly:false, elderlyFriendly:true, romanticLevel:5, hasPhotoSpot:false, hasNursingRoom:false, strollerFriendly:false, wheelchairAccessible:true, restSeats:4, nearMedical:false, moodScores:{tired:10,anxious:8,sad:9,calm:8,excited:2,happy:5}, tags:['高端','放松','按摩'], estimatedDuration:120, mapX:15, mapY:55 },
+  { id:2, name:'猫的天空之城·概念书店', category:'leisure', energyLevel:1, crowdednessLevel:2, weatherSensitivity:'indoor', ticketPrice:35, kidsFriendly:true, elderlyFriendly:true, minAge:3, romanticLevel:3, hasPhotoSpot:true, hasNursingRoom:false, strollerFriendly:true, wheelchairAccessible:true, restSeats:4, nearMedical:false, moodScores:{tired:9,anxious:9,sad:10,calm:9,excited:3,happy:6}, tags:['安静','文艺','拍照'], estimatedDuration:90, mapX:35, mapY:42 },
+  { id:4, name:'永福寺·抄经体验', category:'temple', energyLevel:1, crowdednessLevel:2, weatherSensitivity:'indoor', ticketPrice:45, kidsFriendly:true, elderlyFriendly:true, minAge:6, romanticLevel:2, hasPhotoSpot:false, hasNursingRoom:false, strollerFriendly:false, wheelchairAccessible:false, restSeats:4, nearMedical:false, moodScores:{tired:8,anxious:10,sad:9,calm:9,excited:2,happy:5}, tags:['安静','禅意','抄经'], estimatedDuration:120, mapX:13, mapY:28 },
+  { id:5, name:'中国茶叶博物馆', category:'museum', energyLevel:1, crowdednessLevel:2, weatherSensitivity:'indoor', ticketPrice:0, kidsFriendly:true, elderlyFriendly:true, minAge:3, romanticLevel:2, hasPhotoSpot:false, hasNursingRoom:true, strollerFriendly:true, wheelchairAccessible:true, restSeats:4, nearMedical:false, moodScores:{tired:8,anxious:9,sad:8,calm:9,excited:3,happy:6}, tags:['免费','安静','品茶'], estimatedDuration:90, mapX:22, mapY:38 },
+  { id:6, name:'西湖漫步', category:'scenic', energyLevel:2, crowdednessLevel:3, weatherSensitivity:'outdoor', ticketPrice:0, kidsFriendly:true, elderlyFriendly:true, minAge:0, romanticLevel:5, hasPhotoSpot:true, hasNursingRoom:false, strollerFriendly:true, wheelchairAccessible:true, restSeats:3, nearMedical:false, moodScores:{tired:6,anxious:5,sad:8,calm:8,excited:6,happy:8}, tags:['免费','西湖','散步'], estimatedDuration:60, mapX:38, mapY:50 },
+  { id:7, name:'杭州宋城·千古情', category:'theme_park', energyLevel:4, crowdednessLevel:4, weatherSensitivity:'mixed', ticketPrice:320, kidsFriendly:true, elderlyFriendly:true, minAge:3, romanticLevel:3, hasPhotoSpot:true, hasNursingRoom:true, strollerFriendly:true, wheelchairAccessible:true, restSeats:3, nearMedical:false, moodScores:{tired:2,anxious:2,sad:3,calm:5,excited:10,happy:9}, tags:['演出','穿越','亲子'], estimatedDuration:240, mapX:18, mapY:68 },
+  { id:8, name:'苏堤骑行', category:'sport', energyLevel:4, crowdednessLevel:3, weatherSensitivity:'outdoor', ticketPrice:30, kidsFriendly:true, elderlyFriendly:false, minAge:8, romanticLevel:4, hasPhotoSpot:true, hasNursingRoom:false, strollerFriendly:false, wheelchairAccessible:false, restSeats:1, nearMedical:false, moodScores:{tired:2,anxious:4,sad:4,calm:6,excited:9,happy:9}, tags:['骑行','户外','运动'], estimatedDuration:120, mapX:30, mapY:46 },
+  { id:9, name:'河坊街夜市', category:'shopping', energyLevel:3, crowdednessLevel:5, weatherSensitivity:'outdoor', ticketPrice:0, kidsFriendly:true, elderlyFriendly:true, minAge:0, romanticLevel:3, hasPhotoSpot:true, hasNursingRoom:false, strollerFriendly:false, wheelchairAccessible:true, restSeats:2, nearMedical:true, moodScores:{tired:3,anxious:2,sad:4,calm:5,excited:8,happy:9}, tags:['免费','小吃','古街'], estimatedDuration:120, mapX:48, mapY:62 },
+  { id:10, name:'湖滨银泰in77', category:'shopping', energyLevel:3, crowdednessLevel:4, weatherSensitivity:'indoor', ticketPrice:0, kidsFriendly:true, elderlyFriendly:true, minAge:0, romanticLevel:2, hasPhotoSpot:true, hasNursingRoom:true, strollerFriendly:true, wheelchairAccessible:true, restSeats:4, nearMedical:true, moodScores:{tired:4,anxious:3,sad:4,calm:6,excited:8,happy:9}, tags:['购物','美食','免费'], estimatedDuration:150, mapX:52, mapY:52 },
+  { id:11, name:'杭州动物园', category:'theme_park', energyLevel:3, crowdednessLevel:3, weatherSensitivity:'outdoor', ticketPrice:20, kidsFriendly:true, elderlyFriendly:true, minAge:0, romanticLevel:2, hasPhotoSpot:true, hasNursingRoom:true, strollerFriendly:true, wheelchairAccessible:true, restSeats:3, nearMedical:false, moodScores:{tired:4,anxious:5,sad:5,calm:7,excited:8,happy:9}, tags:['亲子','动物','户外'], estimatedDuration:180, mapX:20, mapY:60 },
+  { id:12, name:'浙江省科技馆', category:'museum', energyLevel:2, crowdednessLevel:3, weatherSensitivity:'indoor', ticketPrice:0, kidsFriendly:true, elderlyFriendly:true, minAge:3, romanticLevel:1, hasPhotoSpot:false, hasNursingRoom:true, strollerFriendly:true, wheelchairAccessible:true, restSeats:4, nearMedical:false, moodScores:{tired:5,anxious:5,sad:5,calm:7,excited:8,happy:8}, tags:['免费','亲子','互动'], estimatedDuration:120, mapX:58, mapY:40 },
+  { id:15, name:'郭庄园林下午茶', category:'leisure', energyLevel:1, crowdednessLevel:2, weatherSensitivity:'mixed', ticketPrice:68, kidsFriendly:true, elderlyFriendly:true, minAge:3, romanticLevel:5, hasPhotoSpot:true, hasNursingRoom:false, strollerFriendly:true, wheelchairAccessible:false, restSeats:5, nearMedical:false, moodScores:{tired:8,anxious:9,sad:8,calm:9,excited:5,happy:7}, tags:['园林','下午茶','安静'], estimatedDuration:90, mapX:25, mapY:42 },
+  { id:16, name:'Wagas轻食沙拉', category:'restaurant', energyLevel:1, crowdednessLevel:3, weatherSensitivity:'indoor', ticketPrice:68, isDietFriendly:true, dietaryTags:['lowFat','highProtein'], avgCalories:350, queueTime:5, hasElevator:true, spicinessLevel:0, hasPrivateRoom:false, hasHotTea:false, noiseLevel:2, romanticLevel:2, hasPhotoSpot:false, hasNursingRoom:false, strollerFriendly:true, wheelchairAccessible:true, restSeats:3, nearMedical:false, kidsFriendly:true, elderlyFriendly:true, moodScores:{tired:7,anxious:6,sad:6,calm:7,excited:5,happy:6}, estimatedDuration:60, mapX:55, mapY:48 },
+  { id:17, name:'蒸年轻·蒸汽海鲜', category:'restaurant', energyLevel:1, crowdednessLevel:3, weatherSensitivity:'indoor', ticketPrice:90, isDietFriendly:true, dietaryTags:['lowFat','highProtein','lightFlavor'], avgCalories:400, queueTime:15, hasElevator:true, spicinessLevel:0, hasPrivateRoom:true, hasHotTea:true, noiseLevel:1, romanticLevel:2, hasPhotoSpot:false, hasNursingRoom:false, strollerFriendly:true, wheelchairAccessible:true, restSeats:4, nearMedical:false, kidsFriendly:true, elderlyFriendly:true, moodScores:{tired:6,anxious:6,sad:6,calm:7,excited:6,happy:7}, estimatedDuration:60, mapX:44, mapY:55 },
+  { id:18, name:'楼外楼·杭帮菜', category:'restaurant', energyLevel:1, crowdednessLevel:4, weatherSensitivity:'indoor', ticketPrice:120, isDietFriendly:false, dietaryTags:[], avgCalories:900, queueTime:45, hasElevator:false, spicinessLevel:1, hasPrivateRoom:true, hasHotTea:true, noiseLevel:3, romanticLevel:3, hasPhotoSpot:true, hasNursingRoom:false, strollerFriendly:false, wheelchairAccessible:false, restSeats:3, nearMedical:false, kidsFriendly:true, elderlyFriendly:true, moodScores:{tired:5,anxious:4,sad:5,calm:6,excited:7,happy:8}, estimatedDuration:60, mapX:40, mapY:48 },
+  { id:19, name:'外婆家', category:'restaurant', energyLevel:1, crowdednessLevel:4, weatherSensitivity:'indoor', ticketPrice:65, isDietFriendly:false, dietaryTags:[], avgCalories:750, queueTime:60, hasElevator:true, spicinessLevel:1, hasPrivateRoom:false, hasHotTea:true, noiseLevel:4, romanticLevel:2, hasPhotoSpot:false, hasNursingRoom:false, strollerFriendly:true, wheelchairAccessible:true, restSeats:2, nearMedical:false, kidsFriendly:true, elderlyFriendly:true, moodScores:{tired:4,anxious:3,sad:4,calm:5,excited:6,happy:7}, estimatedDuration:60, mapX:50, mapY:58 },
+  { id:20, name:'浙江美术馆', category:'museum', energyLevel:1, crowdednessLevel:2, weatherSensitivity:'indoor', ticketPrice:0, kidsFriendly:true, elderlyFriendly:true, minAge:3, romanticLevel:3, hasPhotoSpot:true, hasNursingRoom:true, strollerFriendly:true, wheelchairAccessible:true, restSeats:4, nearMedical:false, moodScores:{tired:7,anxious:8,sad:8,calm:8,excited:4,happy:6}, tags:['免费','艺术','安静'], estimatedDuration:90, mapX:44, mapY:62 },
+  { id:21, name:'西西弗书店', category:'leisure', energyLevel:1, crowdednessLevel:2, weatherSensitivity:'indoor', ticketPrice:30, kidsFriendly:true, elderlyFriendly:true, minAge:3, romanticLevel:3, hasPhotoSpot:true, hasNursingRoom:false, strollerFriendly:true, wheelchairAccessible:true, restSeats:4, nearMedical:false, moodScores:{tired:9,anxious:8,sad:9,calm:9,excited:3,happy:6}, tags:['安静','咖啡','阅读'], estimatedDuration:90, mapX:54, mapY:44 },
+  { id:23, name:'灵隐寺', category:'temple', energyLevel:3, crowdednessLevel:5, weatherSensitivity:'outdoor', ticketPrice:75, kidsFriendly:true, elderlyFriendly:true, minAge:3, romanticLevel:3, hasPhotoSpot:true, hasNursingRoom:false, strollerFriendly:false, wheelchairAccessible:false, restSeats:2, nearMedical:false, moodScores:{tired:4,anxious:4,sad:5,calm:6,excited:5,happy:6}, tags:['佛教','古迹','人流量大'], estimatedDuration:120, mapX:10, mapY:22 },
+  { id:24, name:'九溪烟树', category:'scenic', energyLevel:3, crowdednessLevel:2, weatherSensitivity:'outdoor', ticketPrice:0, kidsFriendly:true, elderlyFriendly:false, minAge:5, romanticLevel:4, hasPhotoSpot:true, hasNursingRoom:false, strollerFriendly:false, wheelchairAccessible:false, restSeats:1, nearMedical:false, moodScores:{tired:4,anxious:6,sad:7,calm:8,excited:7,happy:8}, tags:['免费','徒步','溪流'], estimatedDuration:180, mapX:22, mapY:72 },
+  { id:25, name:'知味观·味庄', category:'restaurant', energyLevel:1, crowdednessLevel:2, weatherSensitivity:'indoor', ticketPrice:85, isDietFriendly:true, dietaryTags:['lightFlavor','traditional'], avgCalories:500, queueTime:10, hasElevator:true, spicinessLevel:0, hasPrivateRoom:true, hasHotTea:true, noiseLevel:1, romanticLevel:3, hasPhotoSpot:true, hasNursingRoom:false, strollerFriendly:true, wheelchairAccessible:true, restSeats:4, nearMedical:false, kidsFriendly:true, elderlyFriendly:true, moodScores:{tired:8,anxious:8,sad:8,calm:8,excited:5,happy:7}, estimatedDuration:60, mapX:42, mapY:52 },
+  { id:27, name:'鼎泰丰', category:'restaurant', energyLevel:1, crowdednessLevel:2, weatherSensitivity:'indoor', ticketPrice:110, isDietFriendly:true, dietaryTags:['lightFlavor','steamed'], avgCalories:420, queueTime:20, hasElevator:true, spicinessLevel:0, hasPrivateRoom:true, hasHotTea:true, noiseLevel:1, romanticLevel:3, hasPhotoSpot:false, hasNursingRoom:true, strollerFriendly:true, wheelchairAccessible:true, restSeats:4, nearMedical:false, kidsFriendly:true, elderlyFriendly:true, moodScores:{tired:7,anxious:7,sad:7,calm:8,excited:5,happy:7}, estimatedDuration:60, mapX:56, mapY:50 },
+  { id:28, name:'方回春堂·药膳餐厅', category:'restaurant', energyLevel:1, crowdednessLevel:1, weatherSensitivity:'indoor', ticketPrice:75, isDietFriendly:true, dietaryTags:['medicinal','lightFlavor','warm'], avgCalories:380, queueTime:5, hasElevator:true, spicinessLevel:0, hasPrivateRoom:true, hasHotTea:true, noiseLevel:1, romanticLevel:1, hasPhotoSpot:false, hasNursingRoom:false, strollerFriendly:true, wheelchairAccessible:true, restSeats:5, nearMedical:true, kidsFriendly:true, elderlyFriendly:true, moodScores:{tired:9,anxious:9,sad:9,calm:9,excited:3,happy:6}, estimatedDuration:60, mapX:46, mapY:60 }
+];
+
+var HOTELS = [
+  { id:1, name:'安缦法云精品酒店', priceRangeLow:3800, stars:5, has_spa:true, has_pool:true, has_gym:true, breakfastIncluded:true, kidsFriendly:true, elderlyFriendly:true, nearTransport:false, businessFriendly:false, moodScores:{tired:10,anxious:9,sad:9,calm:10,excited:7,happy:8}, rating:4.9 },
+  { id:2, name:'西溪湿地悦榕庄', priceRangeLow:2200, stars:5, has_spa:true, has_pool:true, has_gym:true, breakfastIncluded:true, kidsFriendly:true, elderlyFriendly:true, nearTransport:false, businessFriendly:false, moodScores:{tired:10,anxious:9,sad:9,calm:9,excited:8,happy:8}, rating:4.8 },
+  { id:3, name:'西湖国宾馆', priceRangeLow:1200, stars:5, has_spa:false, has_pool:true, has_gym:true, breakfastIncluded:true, kidsFriendly:true, elderlyFriendly:true, nearTransport:true, businessFriendly:true, moodScores:{tired:8,anxious:8,sad:8,calm:9,excited:6,happy:7}, rating:4.7 },
+  { id:4, name:'全季酒店（西湖店）', priceRangeLow:350, stars:3, has_spa:false, has_pool:false, has_gym:false, breakfastIncluded:false, kidsFriendly:true, elderlyFriendly:true, nearTransport:true, businessFriendly:true, moodScores:{tired:5,anxious:5,sad:5,calm:6,excited:5,happy:6}, rating:4.3 },
+  { id:5, name:'如家快捷酒店', priceRangeLow:180, stars:2, has_spa:false, has_pool:false, has_gym:false, breakfastIncluded:false, kidsFriendly:false, elderlyFriendly:true, nearTransport:true, businessFriendly:true, moodScores:{tired:3,anxious:3,sad:3,calm:4,excited:3,happy:4}, rating:3.8 },
+  { id:6, name:'杭州西子湖四季酒店', priceRangeLow:2800, stars:5, has_spa:true, has_pool:true, has_gym:true, breakfastIncluded:true, kidsFriendly:true, elderlyFriendly:true, nearTransport:false, businessFriendly:false, moodScores:{tired:9,anxious:9,sad:9,calm:10,excited:8,happy:9}, rating:4.9 }
+];
+
+var WEIGHT_MATRIX = {
+  'tired_solo':     { mood:0.35, budget:0.15, energy:0.30, crowd:0.15, kid:0, elderly:0, couple:0, diet:0.05 },
+  'tired_kids':     { mood:0.30, budget:0.10, energy:0.25, crowd:0.15, kid:0.15, elderly:0, couple:0, diet:0.05 },
+  'tired_elderly':  { mood:0.25, budget:0.15, energy:0.30, crowd:0.15, kid:0, elderly:0.10, couple:0, diet:0.05 },
+  'tired_couple':   { mood:0.30, budget:0.10, energy:0.15, crowd:0.10, kid:0, elderly:0, couple:0.30, diet:0.05 },
+  'excited_solo':   { mood:0.20, budget:0.15, energy:0.10, crowd:0.05, kid:0, elderly:0, couple:0, diet:0 },
+  'excited_couple': { mood:0.25, budget:0.10, energy:0.05, crowd:0.05, kid:0, elderly:0, couple:0.30, diet:0.05 },
+  'sad_kids':       { mood:0.30, budget:0.10, energy:0.15, crowd:0.20, kid:0.20, elderly:0, couple:0, diet:0.05 },
+  'sad_solo':       { mood:0.35, budget:0.15, energy:0.20, crowd:0.20, kid:0, elderly:0, couple:0, diet:0.10 },
+  'sad_couple':     { mood:0.30, budget:0.10, energy:0.15, crowd:0.15, kid:0, elderly:0, couple:0.25, diet:0.05 },
+  'anxious_solo':   { mood:0.30, budget:0.15, energy:0.20, crowd:0.25, kid:0, elderly:0, couple:0, diet:0.10 },
+  'happy_couple':   { mood:0.15, budget:0.10, energy:0.10, crowd:0.05, kid:0, elderly:0, couple:0.35, diet:0.05 },
+  'happy_budget':   { mood:0.15, budget:0.35, energy:0.10, crowd:0.05, kid:0, elderly:0, couple:0, diet:0.05 },
+  'calm_family':    { mood:0.20, budget:0.15, energy:0.15, crowd:0.15, kid:0.20, elderly:0, couple:0, diet:0.15 },
+  'calm_couple':    { mood:0.20, budget:0.10, energy:0.15, crowd:0.10, kid:0, elderly:0, couple:0.30, diet:0.15 },
+  'default':        { mood:0.25, budget:0.20, energy:0.15, crowd:0.15, kid:0.10, elderly:0.05, couple:0, diet:0.10 }
+};
+
+var MOOD_ENERGY_MAP = { tired:1, sad:1, anxious:2, calm:2, happy:3, excited:4, insomnia:1 };
+
+var PLATFORM_LIST = [
+  { name:'携程', icon:'🏨', baseMultiplier:1.0 },
+  { name:'美团', icon:'🍜', baseMultiplier:0.95 },
+  { name:'飞猪', icon:'🐷', baseMultiplier:0.92 },
+  { name:'去哪儿', icon:'✈️', baseMultiplier:0.97 },
+  { name:'同程', icon:'🎫', baseMultiplier:0.93 }
+];
+
+var BUDGET_PRESETS = [
+  { label:'¥3,000', value:3000 },
+  { label:'¥5,000', value:5000 },
+  { label:'¥10,000', value:10000 },
+  { label:'自定义', value:'custom' }
+];
+
+var HOT_ROUTES = [
+  { id:1, title:'森林治愈之旅', emoji:'🌲', days:'2天1夜', budget:'¥800起', bg:'linear-gradient(135deg, #a8d8a8, #6b9b6b)' },
+  { id:2, title:'海边发呆指南', emoji:'🌊', days:'3天2夜', budget:'¥1,500起', bg:'linear-gradient(135deg, #89CFF0, #4A90D9)' },
+  { id:3, title:'城市漫步探店', emoji:'☕', days:'1天', budget:'¥300起', bg:'linear-gradient(135deg, #D4A574, #A67C52)' },
+  { id:4, title:'山间露营观星', emoji:'🏕️', days:'2天1夜', budget:'¥600起', bg:'linear-gradient(135deg, #7B8FB2, #4A5F7A)' },
+  { id:5, title:'古镇文艺之旅', emoji:'🏘️', days:'2天1夜', budget:'¥500起', bg:'linear-gradient(135deg, #C4A8A8, #8B7070)' },
+  { id:6, title:'骑行追风计划', emoji:'🚴', days:'1天', budget:'¥200起', bg:'linear-gradient(135deg, #FFB347, #E8945A)' },
+  { id:7, title:'温泉放松之旅', emoji:'♨️', days:'2天1夜', budget:'¥1,200起', bg:'linear-gradient(135deg, #B5A3C4, #7B6B8A)' }
+];
+
+var PLAN_CARDS = [
+  { id:1, color:'#FF6B6B', moodLabel:'活力出行', showBack:false, planA:[{time:'09:00',name:'西湖苏堤漫步'},{time:'12:00',name:'知味观午餐'},{time:'14:00',name:'青藤茶馆品茗'},{time:'17:00',name:'雷峰塔日落'}], planAStats:{steps:'🚶 8k步',time:'⏱ 8h',budget:'💰 ¥1,200'}, planB:[{time:'08:00',name:'十里琅珰徒步'},{time:'11:30',name:'龙井村农家菜'},{time:'14:00',name:'环湖骑行30km'},{time:'18:00',name:'桂语山房晚餐'}], planBStats:{steps:'🚶 25k步',time:'⏱ 10h',budget:'💰 ¥2,800'} },
+  { id:2, color:'#8BA88C', moodLabel:'治愈放松', showBack:false, planA:[{time:'10:00',name:'浙博之江馆'},{time:'13:00',name:'素食餐厅'},{time:'15:00',name:'梅家坞茶园'},{time:'18:00',name:'湖边散步'}], planAStats:{steps:'🚶 5k步',time:'⏱ 6h',budget:'💰 ¥800'}, planB:[{time:'09:00',name:'西溪湿地摇橹船'},{time:'12:30',name:'湿地农庄午餐'},{time:'15:00',name:'湿地博物馆'},{time:'18:00',name:'河坊街小吃'}], planBStats:{steps:'🚶 12k步',time:'⏱ 9h',budget:'💰 ¥1,500'} },
+  { id:3, color:'#6B8FA3', moodLabel:'静谧时光', showBack:false, planA:[{time:'11:00',name:'猫空书店'},{time:'13:30',name:'转角咖啡馆'},{time:'16:00',name:'社区花园'},{time:'19:00',name:'日式居酒屋'}], planAStats:{steps:'🚶 3k步',time:'⏱ 5h',budget:'💰 ¥500'}, planB:[{time:'10:00',name:'避世书局'},{time:'13:00',name:'法喜寺素斋'},{time:'15:00',name:'云栖竹径'},{time:'18:00',name:'灵隐寺晚钟'}], planBStats:{steps:'🚶 8k步',time:'⏱ 8h',budget:'💰 ¥1,000'} },
+  { id:4, color:'#E8A85A', moodLabel:'探索冒险', showBack:false, planA:[{time:'07:00',name:'宝石山日出'},{time:'10:00',name:'北山街骑行'},{time:'13:00',name:'青芝坞午餐'},{time:'16:00',name:'九溪烟树徒步'}], planAStats:{steps:'🚶 20k步',time:'⏱ 11h',budget:'💰 ¥1,800'}, planB:[{time:'06:30',name:'满觉陇登山'},{time:'11:00',name:'虎跑泉水泡茶'},{time:'14:00',name:'六和塔登高'},{time:'17:00',name:'钱塘江骑行'}], planBStats:{steps:'🚶 28k步',time:'⏱ 12h',budget:'💰 ¥2,000'} },
+  { id:5, color:'#B5A3C4', moodLabel:'文艺漫步', showBack:false, planA:[{time:'10:00',name:'中国美院象山校区'},{time:'13:00',name:'转塘艺术街区'},{time:'15:00',name:'单向空间书店'},{time:'18:00',name:'爵士酒吧'}], planAStats:{steps:'🚶 10k步',time:'⏱ 8h',budget:'💰 ¥1,200'}, planB:[{time:'09:00',name:'南宋御街漫步'},{time:'12:00',name:'杭帮菜博物馆'},{time:'14:30',name:'晓风书屋'},{time:'17:00',name:'西湖音乐喷泉'}], planBStats:{steps:'🚶 15k步',time:'⏱ 9h',budget:'💰 ¥1,600'} },
+  { id:6, color:'#C4A8A8', moodLabel:'温暖陪伴', showBack:false, planA:[{time:'09:30',name:'花港观鱼'},{time:'12:00',name:'楼外楼午餐'},{time:'14:00',name:'三潭印月游船'},{time:'17:00',name:'湖滨银泰晚餐'}], planAStats:{steps:'🚶 6k步',time:'⏱ 7h',budget:'💰 ¥1,500'}, planB:[{time:'10:00',name:'杭州动物园'},{time:'13:00',name:'外婆家午餐'},{time:'15:00',name:'少年宫游乐'},{time:'18:00',name:'武林夜市'}], planBStats:{steps:'🚶 10k步',time:'⏱ 8h',budget:'💰 ¥1,800'} }
+];
+
+var EXTRA_CARDS = [
+  { id:7, color:'#A3B5A6', moodLabel:'自然呼吸', showBack:false, planA:[{time:'08:00',name:'植物园晨练'},{time:'11:00',name:'农家乐午餐'},{time:'14:00',name:'龙井问茶'},{time:'17:00',name:'茅家埠日落'}], planAStats:{steps:'🚶 12k步',time:'⏱ 8h',budget:'💰 ¥1,000'}, planB:[{time:'07:00',name:'玉皇山登顶'},{time:'11:00',name:'八卦田采摘'},{time:'14:00',name:'江洋畈生态公园'},{time:'17:00',name:'白塔公园'}], planBStats:{steps:'🚶 18k步',time:'⏱ 10h',budget:'💰 ¥1,400'} },
+  { id:8, color:'#FFB347', moodLabel:'美食之旅', showBack:false, planA:[{time:'09:00',name:'新丰小吃早餐'},{time:'12:00',name:'奎元馆虾爆鳝面'},{time:'15:00',name:'定胜糕体验'},{time:'18:00',name:'湖滨28餐厅'}], planAStats:{steps:'🚶 4k步',time:'⏱ 6h',budget:'💰 ¥2,000'}, planB:[{time:'08:30',name:'游埠豆浆'},{time:'12:00',name:'德明饭店'},{time:'15:00',name:'Cycle&Cycle'},{time:'18:00',name:'金沙厅'}], planBStats:{steps:'🚶 6k步',time:'⏱ 7h',budget:'💰 ¥3,500'} }
+];
+
+// ================================================================
+//  状态
+// ================================================================
+var activeMood = 'calm';
+var activeMoodColor = '#8BA88C';
+var budget = 2000;
+var displayBudget = 2000;
+var isDragging = false;
+var visibleCards = PLAN_CARDS.slice();
+var hasMore = true;
+var toastTimer = null;
+var bookingTimer = null;
+var companionType = 'solo';
+var hasKids = false;
+var hasElderly = false;
+var isCouple = false;
+var elderlyMode = false;
+var activeScenario = null;
+var isPlanning = false;
+var itinerary = null;
+var hotel = null;
+var stats = null;
+var days = 2;
+var hotelIndex = 0;
+var travelMode = 'tourism'; // 'tourism' | 'business'
+
+// ================================================================
+//  全维度情绪感知系统 — 多维信号交叉验证 + 动态置信度评分
+// ================================================================
+
+// 核心情绪状态机
+var emotionState = {
+  score: 0,             // 置信度 0-100
+  moodType: null,       // 当前判定的情绪类型
+  signals: {},          // 各维度信号贡献 { mouse:0, click:0, time:0, battery:0, ... }
+  lastUpdate: 0,        // 最后更新时间戳
+  decayTimer: null,     // 分数衰减计时器
+  sessionSilent: false  // 本次会话静默：用户关闭气泡后，本次会话不再弹出
+};
+
+// 旧版兼容变量（保留给 selectMood 等使用）
+var autoMoodLocked = false;
+var simplifiedMode = false;
+var autoDetectedMood = null;
+
+// 多维信号采集器
+var mouseHistory = [];
+var clickHistory = [];
+var idleTimer = null;
+var moodCheckTimer = null;
+
+// 内容交互追踪
+var searchHistory = [];        // [{keyword, time}]
+var lastSearchKeyword = '';
+var searchRepeatCount = 0;
+var detailDwellStart = null;   // 详情页停留开始时间
+var detailDwellTriggered = false;
+
+// 树洞输入犹豫追踪
+var treeHoleFocusTime = null;
+var treeHoleCursorBlinkCount = 0;
+var treeHoleHesitationTimer = null;
+
+// 电池状态
+var batteryLevel = 100;
+var batteryLow = false;
+
+// 记忆与学习
+var memoryStore = {
+  rejectCount: 0,
+  lastRejectTime: null,
+  silentUntil: null,       // 静默期截止时间
+  acceptCount: 0,
+  totalProbes: 0
+};
+
+// 阈值配置
+var CONFIDENCE_SOFT_THRESHOLD = 50;   // 后台调整权重的最低分数
+var CONFIDENCE_PROBE_THRESHOLD = 80;  // 触发UI试探的分数
+var CONFIDENCE_SIGNAL_BASE = 20;      // 单一信号基础分
+var CONFIDENCE_DECAY_RATE = 3;        // 每秒衰减分数
+var DETAIL_DWELL_THRESHOLD = 30000;   // 详情页停留 30 秒
+var TREE_HOLE_HESITATE_THRESHOLD = 5000; // 光标闪烁 5 秒
+var SEARCH_REPEAT_THRESHOLD = 3;      // 重复搜索 3 次
+var SILENT_PERIOD_HOURS = 24;         // 静默期 24 小时
+
+// ================================================================
+//  DOM 引用
+// ================================================================
+var bgSky           = document.getElementById('bgSky');
+var budgetNumber    = document.getElementById('budgetNumber');
+var budgetFill      = document.getElementById('budgetFill');
+var budgetSlider    = document.getElementById('budgetSlider');
+var budgetCustom    = document.getElementById('budgetCustom');
+var moodGrid        = document.getElementById('moodGrid');
+var budgetPresets   = document.getElementById('budgetPresets');
+var hotRoutesScroll = document.getElementById('hotRoutesScroll');
+var plansWaterfall  = document.getElementById('plansWaterfall');
+var planCount       = document.getElementById('planCount');
+var loadMoreWrap    = document.getElementById('loadMoreWrap');
+var toast           = document.getElementById('toast');
+var bgParticles     = document.getElementById('bgParticles');
+
+// ================================================================
+//  初始化
+// ================================================================
+function initParticles() {
+  var html = '';
+  for (var n = 1; n <= 20; n++) {
+    var left = (n * 37 + 13) % 100;
+    var delay = (n * 0.7) % 8;
+    var dur = 6 + (n % 5) * 2;
+    var size = 2 + (n % 3);
+    html += '<span class="particle" style="left:' + left + '%;animation-delay:' + delay + 's;animation-duration:' + dur + 's;width:' + size + 'px;height:' + size + 'px"></span>';
+  }
+  bgParticles.innerHTML = html;
+}
+
+function initMoods() {
+  moodGrid.innerHTML = '';
+  MOODS.forEach(function(mood) {
+    var btn = document.createElement('button');
+    btn.className = 'mood-btn' + (activeMood === mood.key ? ' active' : '');
+    if (activeMood === mood.key) {
+      btn.style.background = mood.color + '28';
+      btn.style.borderColor = mood.color + '60';
+      btn.style.color = mood.color;
+      btn.style.boxShadow = '0 0 32px ' + mood.color + '30, inset 0 0 24px ' + mood.color + '10';
+    }
+    btn.setAttribute('aria-label', '选择' + mood.label + '心情');
+    btn.dataset.key = mood.key;
+    btn.innerHTML = '<span class="mood-btn-emoji">' + mood.emoji + '</span><span class="mood-btn-label">' + mood.label + '</span>';
+    btn.addEventListener('click', function() { selectMood(mood); });
+    btn.addEventListener('mouseenter', function() { var e = btn.querySelector('.mood-btn-emoji'); if (e) e.classList.add('wiggle'); });
+    btn.addEventListener('mouseleave', function() { var e = btn.querySelector('.mood-btn-emoji'); if (e) e.classList.remove('wiggle'); });
+    moodGrid.appendChild(btn);
+  });
+}
+
+function initCompanions() {
+  var container = document.getElementById('companionChips');
+  container.innerHTML = '';
+  COMPANION_TYPES.forEach(function(ct) {
+    var chip = document.createElement('button');
+    chip.className = 'companion-chip' + (companionType === ct.key ? ' active' : '');
+    if (companionType === ct.key) {
+      chip.style.background = activeMoodColor + '22';
+      chip.style.borderColor = activeMoodColor + '60';
+      chip.style.color = activeMoodColor;
+    }
+    chip.textContent = ct.icon + ' ' + ct.label;
+    chip.addEventListener('click', function() { selectCompanion(ct.key); });
+    container.appendChild(chip);
+  });
+}
+
+function initPresets() {
+  budgetPresets.innerHTML = '';
+  BUDGET_PRESETS.forEach(function(p) {
+    var btn = document.createElement('button');
+    btn.className = 'preset-chip' + (budget === p.value ? ' active' : '');
+    if (budget === p.value) {
+      btn.style.background = activeMoodColor + '22';
+      btn.style.borderColor = activeMoodColor;
+      btn.style.color = activeMoodColor;
+    }
+    btn.textContent = p.label;
+    btn.addEventListener('click', function() {
+      if (p.value === 'custom') {
+        budgetCustom.focus();
+      } else {
+        setBudget(p.value);
+      }
+    });
+    budgetPresets.appendChild(btn);
+  });
+}
+
+function initDailyScenarios() {
+  var scroll = document.getElementById('dailyScenariosScroll');
+  scroll.innerHTML = '';
+  DAILY_SCENARIOS.forEach(function(sc) {
+    var chip = document.createElement('button');
+    chip.className = 'daily-scenario-chip' + (activeScenario === sc.key ? ' active' : '');
+    if (activeScenario === sc.key) {
+      chip.style.background = activeMoodColor + '22';
+      chip.style.borderColor = activeMoodColor + '60';
+      chip.style.color = activeMoodColor;
+    }
+    chip.textContent = sc.label;
+    chip.addEventListener('click', function() { selectScenario(sc.key); });
+    scroll.appendChild(chip);
+  });
+}
+
+function initHotRoutes() {
+  hotRoutesScroll.innerHTML = '';
+  HOT_ROUTES.forEach(function(route) {
+    var card = document.createElement('div');
+    card.className = 'hot-route-card glass-panel';
+    card.innerHTML = '<div class="hot-route-img" style="background:' + route.bg + '"><span class="hot-route-emoji">' + route.emoji + '</span></div><div class="hot-route-info"><span class="hot-route-title">' + route.title + '</span><span class="hot-route-meta">' + route.days + ' · ' + route.budget + '</span></div>';
+    card.addEventListener('click', function() { showToast('探索「' + route.title + '」'); });
+    hotRoutesScroll.appendChild(card);
+  });
+}
+
+// ================================================================
+//  心情选择
+// ================================================================
+function selectMood(mood) {
+  activeMood = mood.key;
+  activeMoodColor = mood.color;
+  bgSky.className = 'bg-sky sky-' + mood.key;
+  budgetNumber.style.color = mood.color;
+  budgetFill.style.background = mood.color;
+  // 用户手动选择，锁定自动检测
+  autoMoodLocked = true;
+  // 非 insomnia 时移除暗夜模式
+  if (mood.key !== 'insomnia') document.body.classList.remove('night-mode');
+  else document.body.classList.add('night-mode');
+  // 正向心情：退出安抚态
+  if (mood.key === 'happy' || mood.key === 'excited' || mood.key === 'calm') {
+    removeSoothingState();
+  }
+  updateMoodActiveStyle();
+  updatePresetStyles();
+  planCount.style.background = mood.color + '18';
+  planCount.style.color = mood.color;
+  updateGenerateBtn();
+  showToast('已切换至「' + mood.label + '」模式');
+}
+
+function updateMoodActiveStyle() {
+  var btns = moodGrid.querySelectorAll('.mood-btn');
+  btns.forEach(function(btn) {
+    var key = btn.dataset.key;
+    var mood = MOODS.find(function(m) { return m.key === key; });
+    if (key === activeMood) {
+      btn.classList.add('active');
+      btn.style.background = mood.color + '28';
+      btn.style.borderColor = mood.color + '60';
+      btn.style.color = mood.color;
+      btn.style.boxShadow = '0 0 32px ' + mood.color + '30, inset 0 0 24px ' + mood.color + '10';
+    } else {
+      btn.classList.remove('active');
+      btn.style.background = '';
+      btn.style.borderColor = '';
+      btn.style.color = '';
+      btn.style.boxShadow = '';
+    }
+  });
+}
+
+// ================================================================
+//  同伴系统
+// ================================================================
+function selectCompanion(key) {
+  companionType = key;
+  hasKids = (key === 'kids');
+  hasElderly = (key === 'elderly');
+  isCouple = (key === 'couple');
+  updateCompanionStyles();
+  showToast('已切换至「' + COMPANION_TYPES.find(function(c) { return c.key === key; }).label + '」模式');
+}
+
+function updateCompanionStyles() {
+  var chips = document.getElementById('companionChips').querySelectorAll('.companion-chip');
+  chips.forEach(function(chip, i) {
+    var key = COMPANION_TYPES[i].key;
+    if (key === companionType) {
+      chip.classList.add('active');
+      chip.style.background = activeMoodColor + '22';
+      chip.style.borderColor = activeMoodColor + '60';
+      chip.style.color = activeMoodColor;
+    } else {
+      chip.classList.remove('active');
+      chip.style.background = '';
+      chip.style.borderColor = '';
+      chip.style.color = '';
+    }
+  });
+}
+
+// ================================================================
+//  长者模式
+// ================================================================
+function toggleElderlyMode() {
+  elderlyMode = !elderlyMode;
+  document.getElementById('elderlyCheckbox').checked = elderlyMode;
+  showToast(elderlyMode ? '已开启长辈关怀模式' : '已关闭长辈关怀模式');
+}
+
+document.getElementById('elderlyCheckbox').addEventListener('change', function() {
+  elderlyMode = this.checked;
+  showToast(elderlyMode ? '已开启长辈关怀模式' : '已关闭长辈关怀模式');
+});
+
+// ================================================================
+//  日常场景
+// ================================================================
+function selectScenario(key) {
+  if (activeScenario === key) { activeScenario = null; }
+  else { activeScenario = key; }
+  updateScenarioStyles();
+  renderDailySpots();
+}
+
+function updateScenarioStyles() {
+  var chips = document.getElementById('dailyScenariosScroll').querySelectorAll('.daily-scenario-chip');
+  chips.forEach(function(chip, i) {
+    var key = DAILY_SCENARIOS[i].key;
+    if (key === activeScenario) {
+      chip.classList.add('active');
+      chip.style.background = activeMoodColor + '22';
+      chip.style.borderColor = activeMoodColor + '60';
+      chip.style.color = activeMoodColor;
+    } else {
+      chip.classList.remove('active');
+      chip.style.background = '';
+      chip.style.borderColor = '';
+      chip.style.color = '';
+    }
+  });
+}
+
+function renderDailySpots() {
+  var container = document.getElementById('dailySpotsContainer');
+  if (!activeScenario) { container.innerHTML = ''; return; }
+  var spots = TRAVEL_SPOTS.filter(function(s) { return s.scenario === activeScenario; });
+  if (spots.length === 0) {
+    var nearby = TRAVEL_SPOTS.filter(function(s) { return s.distance <= 500; }).slice(0, 3);
+    spots = nearby;
+  }
+  container.innerHTML = spots.map(function(s) {
+    var desc = elderlyMode && s.elderDesc ? s.elderDesc : s.description;
+    return '<div class="daily-spot-card"><span class="daily-spot-emoji">' + (s.emoji || '📍') + '</span><div class="daily-spot-info"><span class="daily-spot-title">' + s.title + '</span><span class="daily-spot-desc">' + desc + '</span></div><span class="daily-spot-dist">' + s.distance + 'm</span></div>';
+  }).join('');
+}
+
+// ================================================================
+//  预算系统
+// ================================================================
+function setBudget(val) {
+  budget = val;
+  displayBudget = val;
+  budgetCustom.value = '';
+  budgetSlider.value = val;
+  updateBudgetFill();
+  updatePresetStyles();
+  budgetNumber.textContent = val.toLocaleString();
+}
+
+function updateBudgetFill() {
+  var sliderMin = Number(budgetSlider.min);
+  var sliderMax = Number(budgetSlider.max);
+  var pct = ((budget - sliderMin) / (sliderMax - sliderMin)) * 100;
+  budgetFill.style.width = pct + '%';
+  budgetFill.style.background = activeMoodColor;
+}
+
+function updatePresetStyles() {
+  var btns = budgetPresets.querySelectorAll('.preset-chip');
+  btns.forEach(function(btn, i) {
+    var val = BUDGET_PRESETS[i].value;
+    if (val === budget) {
+      btn.classList.add('active');
+      btn.style.background = activeMoodColor + '22';
+      btn.style.borderColor = activeMoodColor;
+      btn.style.color = activeMoodColor;
+    } else {
+      btn.classList.remove('active');
+      btn.style.background = '';
+      btn.style.borderColor = '';
+      btn.style.color = '';
+    }
+  });
+}
+
+budgetSlider.addEventListener('input', function(e) {
+  budget = Number(e.target.value);
+  displayBudget = budget;
+  budgetCustom.value = '';
+  budgetNumber.textContent = budget.toLocaleString();
+  updateBudgetFill();
+  updatePresetStyles();
+});
+budgetSlider.addEventListener('mousedown', function() { isDragging = true; budgetFill.classList.add('glowing'); });
+budgetSlider.addEventListener('mouseup', function() { isDragging = false; budgetFill.classList.remove('glowing'); });
+budgetSlider.addEventListener('touchstart', function() { isDragging = true; budgetFill.classList.add('glowing'); });
+budgetSlider.addEventListener('touchend', function() { isDragging = false; budgetFill.classList.remove('glowing'); });
+
+budgetCustom.addEventListener('input', function(e) {
+  var raw = e.target.value.replace(/[^0-9]/g, '');
+  budgetCustom.value = raw;
+  if (raw) {
+    var val = Math.max(200, Number(raw));
+    budget = val; displayBudget = val;
+    budgetSlider.value = Math.min(val, Number(budgetSlider.max));
+    budgetNumber.textContent = val.toLocaleString();
+    updateBudgetFill(); updatePresetStyles();
+  }
+});
+budgetCustom.addEventListener('blur', function() {
+  if (budgetCustom.value) {
+    var val = Math.max(200, Number(budgetCustom.value));
+    budget = val; displayBudget = val;
+    budgetSlider.value = Math.min(val, Number(budgetSlider.max));
+    budgetNumber.textContent = val.toLocaleString();
+    updateBudgetFill(); updatePresetStyles();
+  }
+});
+
+// ================================================================
+//  方案卡片
+// ================================================================
+function renderPlanCards() {
+  plansWaterfall.innerHTML = '';
+  visibleCards.forEach(function(card) {
+    var steps = card.showBack ? card.planB : card.planA;
+    var stats = card.showBack ? card.planBStats : card.planAStats;
+    var html = '<div class="plan-card glass-panel"><div class="plan-card-header">' +
+      '<span class="plan-card-mood" style="background:' + card.color + '22;color:' + card.color + '">' + card.moodLabel + '</span>' +
+      '<button class="plan-card-switch" style="color:' + activeMoodColor + '">' + (card.showBack ? '方案A' : '方案B') + '</button>' +
+      '</div><div class="plan-card-route">';
+    steps.forEach(function(step) {
+      html += '<div class="plan-route-step"><span class="plan-step-time">' + step.time + '</span><span class="plan-step-dot" style="background:' + card.color + '"></span><span class="plan-step-name">' + step.name + '</span></div>';
+    });
+    html += '</div><div class="plan-card-footer"><div class="plan-card-stats"><span>' + stats.steps + '</span><span>' + stats.time + '</span><span>' + stats.budget + '</span></div>' +
+      '<button class="plan-card-book" style="background:' + activeMoodColor + '">预订</button></div></div>';
+    plansWaterfall.innerHTML += html;
+  });
+  planCount.textContent = visibleCards.length + ' 套';
+  setTimeout(function() {
+    var cards = plansWaterfall.querySelectorAll('.plan-card');
+    cards.forEach(function(cardEl, idx) {
+      var card = visibleCards[idx];
+      if (!card) return;
+      var switchBtn = cardEl.querySelector('.plan-card-switch');
+      if (switchBtn) switchBtn.addEventListener('click', function(e) { e.stopPropagation(); toggleCard(card); });
+      var bookBtn = cardEl.querySelector('.plan-card-book');
+      if (bookBtn) bookBtn.addEventListener('click', function(e) { e.stopPropagation(); showBookingPopup(card.moodLabel); });
+    });
+    observeCards();
+  }, 50);
+}
+
+function toggleCard(card) {
+  card.showBack = !card.showBack;
+  showToast(card.moodLabel + ' · ' + (card.showBack ? '方案B' : '方案A'));
+  renderPlanCards();
+}
+
+function loadMore() {
+  if (!hasMore) return;
+  var btn = document.getElementById('loadMoreBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading-dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>';
+  setTimeout(function() {
+    visibleCards = visibleCards.concat(EXTRA_CARDS);
+    hasMore = false;
+    loadMoreWrap.style.display = 'none';
+    renderPlanCards();
+  }, 600);
+}
+
+var cardObserver = null;
+function observeCards() {
+  if (cardObserver) cardObserver.disconnect();
+  cardObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting) { e.target.classList.add('visible'); cardObserver.unobserve(e.target); }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+  document.querySelectorAll('.plan-card').forEach(function(el) { cardObserver.observe(el); });
+}
+
+// ================================================================
+//  预订比价弹窗
+// ================================================================
+function showBookingPopup(label) {
+  var overlay = document.getElementById('bookingPopupOverlay');
+  var text = document.getElementById('bookingPopupText');
+  var spinner = document.getElementById('bookingSpinner');
+  var list = document.getElementById('platformList');
+  var footer = document.getElementById('bookingPopupFooter');
+
+  var basePrice = 300 + Math.floor(Math.random() * 500);
+  overlay.classList.add('show');
+  text.textContent = '正在为您查询 ' + PLATFORM_LIST.length + ' 个平台...';
+  spinner.style.display = 'block';
+  list.innerHTML = '';
+  footer.style.display = 'none';
+
+  var platforms = PLATFORM_LIST.map(function(p) {
+    return { name: p.name, icon: p.icon, price: Math.round(basePrice * (p.baseMultiplier + (Math.random() - 0.5) * 0.15)) };
+  }).sort(function(a, b) { return a.price - b.price; });
+
+  list.innerHTML = platforms.map(function(p) {
+    return '<div class="platform-item"><span class="platform-icon">' + p.icon + '</span><span class="platform-name">' + p.name + '</span><span class="platform-wait">查询中...</span></div>';
+  }).join('');
+
+  var i = 0;
+  var timer = setInterval(function() {
+    var items = list.querySelectorAll('.platform-item');
+    if (i < platforms.length) {
+      var item = items[i];
+      item.classList.add('checked');
+      var wait = item.querySelector('.platform-wait');
+      if (wait) { wait.className = 'platform-price'; wait.textContent = '¥' + platforms[i].price; }
+      i++;
+    }
+    if (i >= platforms.length) {
+      clearInterval(timer);
+      setTimeout(function() {
+        spinner.style.display = 'none';
+        text.textContent = '比价完成！';
+        footer.style.display = 'block';
+        var best = platforms[0];
+        var worst = platforms[platforms.length - 1];
+        footer.innerHTML = '<span class="booking-best">🏆 ' + best.name + ' 最优惠，仅需 ¥' + best.price + '</span>' +
+          '<span class="booking-save">已为您节省 ¥' + (worst.price - best.price) + '</span>' +
+          '<button class="booking-action-btn" style="background:' + activeMoodColor + '" onclick="closeBookingPopup()">前往预订</button>';
+      }, 500);
+    }
+  }, 600);
+}
+
+function closeBookingPopup() {
+  document.getElementById('bookingPopupOverlay').classList.remove('show');
+  if (bookingTimer) { clearInterval(bookingTimer); bookingTimer = null; }
+}
+
+// ================================================================
+//  Toast
+// ================================================================
+function showToast(msg) {
+  if (toastTimer) clearTimeout(toastTimer);
+  toast.textContent = msg;
+  toast.classList.add('show');
+  toastTimer = setTimeout(function() { toast.classList.remove('show'); }, 2500);
+}
+
+// ================================================================
+//  辅助
+// ================================================================
+function scrollToContent() { var el = document.querySelector('.budget-section'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }
+
+function updateGenerateBtn() {
+  var btn = document.getElementById('generatePlanBtn');
+  var theme = MOOD_THEME_MAP[activeMood] || MOOD_THEME_MAP.calm;
+  btn.style.background = 'linear-gradient(135deg, ' + theme.primaryLight + ', ' + theme.primary + ')';
+  btn.style.boxShadow = '0 6px 20px ' + theme.primary + '40';
+}
+
+function getWeightKey() {
+  var k = hasKids ? 'kids' : hasElderly ? 'elderly' : isCouple ? 'couple' : 'solo';
+  return WEIGHT_MATRIX[activeMood + '_' + k] || WEIGHT_MATRIX['default'];
+}
+
+function fmtTime(h) {
+  var hh = Math.floor(h); var mm = Math.round((h - hh) * 60);
+  return String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0');
+}
+
+function genReason(poi) {
+  var s = poi._scores; var reasons = [];
+  if (s.moodScore > 25) reasons.push('当前心情高度匹配');
+  else if (s.moodScore > 15) reasons.push('适合当前心情状态');
+  if (s.budgetScore > 15) reasons.push(poi.ticketPrice === 0 ? '免费景点，零预算压力' : '低价高性价比');
+  if (s.energyScore > 20) reasons.push('体力消耗符合当前状态');
+  if (s.kidScore > 15) reasons.push('亲子游首选');
+  if (s.coupleScore > 20) reasons.push('情侣浪漫之选');
+  if (s.elderlyScore > 15) reasons.push('适合老人出行');
+  return reasons.join('；') || '综合匹配推荐';
+}
+
+function genTags(poi) {
+  var s = poi._scores; var tags = [];
+  if (s.moodScore > 20) tags.push('心情匹配');
+  if (s.budgetScore > 15) tags.push(poi.ticketPrice === 0 ? '免费景点' : '高性价比');
+  if (isCouple && poi.romanticLevel >= 4) tags.push('浪漫约会');
+  if (isCouple && poi.hasPhotoSpot) tags.push('拍照打卡');
+  if (hasKids && poi.hasNursingRoom) tags.push('母婴室');
+  if (hasKids && poi.strollerFriendly) tags.push('推车友好');
+  if (hasElderly && poi.wheelchairAccessible) tags.push('无障碍');
+  if (hasElderly && poi.restSeats >= 4) tags.push('休息充足');
+  if (hasElderly && poi.nearMedical) tags.push('近医疗点');
+  if (hasElderly && poi.hasPrivateRoom) tags.push('有包间');
+  return tags;
+}
+
+function genHotelReason(h) {
+  var reasons = [];
+  if (h.moodScores[activeMood] >= 8) reasons.push('当前心情高度匹配');
+  if (h.priceRangeLow <= budget * 0.3) reasons.push('预算友好');
+  if (h.rating >= 4.5) reasons.push('高评分推荐');
+  if (isCouple) reasons.push('私密性好，适合情侣入住');
+  if (hasKids && h.kidsFriendly) reasons.push('亲子友好，儿童设施齐全');
+  if (hasElderly && h.elderlyFriendly) reasons.push('老人友好，无障碍设施完善');
+  return reasons.join('；') || '综合推荐';
+}
+
+// ================================================================
+//  场景切换
+// ================================================================
+function switchScene(mode) {
+  travelMode = mode;
+  var btns = document.querySelectorAll('.scene-btn');
+  btns.forEach(function(btn) {
+    if (btn.dataset.scene === mode) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+  if (mode === 'tourism') {
+    showToast('已切换至「休闲旅游」模式 — 松弛感优先');
+  } else {
+    showToast('已切换至「商务/日常出行」模式 — 效率优先');
+  }
+}
+
+// ================================================================
+//  4层漏斗引擎（增强版：双场景 + 交通耗时 + 反特种兵 + Plan B + 预算硬上限）
+// ================================================================
+function doGenerate() {
+  var weights = getWeightKey();
+  var dailyBudget = budget / days;
+  var energyIdeal = MOOD_ENERGY_MAP[activeMood] || 2;
+
+  // LAYER 1: 硬过滤
+  var candidates = POIS.filter(function(poi) {
+    if (poi.ticketPrice > dailyBudget * 0.5) return false;
+    if (hasKids && !poi.kidsFriendly) return false;
+    if (hasKids && poi.minAge && poi.minAge > 5) return false;
+    if (hasElderly && !poi.elderlyFriendly && poi.energyLevel >= 4) return false;
+    if (hasElderly && poi.category === 'restaurant') {
+      if (poi.queueTime > 60) return false;
+      if (poi.hasElevator === false) return false;
+      if (poi.spicinessLevel >= 3) return false;
+    }
+    if (hasKids && poi.energyLevel >= 3 && !poi.hasNursingRoom && !poi.strollerFriendly) return false;
+    if (hasElderly && poi.energyLevel >= 3 && !poi.wheelchairAccessible && poi.restSeats < 3) return false;
+    return true;
+  });
+
+  // LAYER 2: 多维评分
+  var scored = candidates.map(function(poi) {
+    var moodScore = (poi.moodScores[activeMood] || 5) * weights.mood * 10;
+    var budgetRatio = dailyBudget > 0 ? Math.min(poi.ticketPrice / dailyBudget, 1) : 0;
+    var budgetScore = (1 - budgetRatio) * weights.budget * 100;
+    var energyDiff = Math.abs(poi.energyLevel - energyIdeal);
+    var energyScore = (1 - energyDiff / 4) * weights.energy * 100;
+    var crowdScore = (5 - poi.crowdednessLevel) / 4 * weights.crowd * 100;
+    var kidScore = hasKids ? (poi.kidsFriendly ? weights.kid * 100 : 0) : 0;
+    var elderlyScore = hasElderly ? (poi.elderlyFriendly ? weights.elderly * 100 : 0) : 0;
+    var coupleScore = isCouple ? (poi.romanticLevel / 5 * weights.couple * 100) : 0;
+
+    var elderlyRestaurantBonus = 0;
+    if (hasElderly && poi.category === 'restaurant') {
+      if (poi.hasPrivateRoom) elderlyRestaurantBonus += 20;
+      if (poi.hasHotTea) elderlyRestaurantBonus += 15;
+      if (poi.noiseLevel <= 2) elderlyRestaurantBonus += 15;
+    }
+    var coupleBonus = 0;
+    if (isCouple) {
+      if (poi.hasPhotoSpot) coupleBonus += 15;
+      if (poi.category === 'restaurant' && poi.romanticLevel >= 4) coupleBonus += 20;
+      if (poi.category === 'leisure' && poi.romanticLevel >= 4) coupleBonus += 15;
+    }
+    var kidsBonus = 0;
+    if (hasKids) { if (poi.hasNursingRoom) kidsBonus += 20; if (poi.strollerFriendly) kidsBonus += 15; }
+    var elderlyBonus = 0;
+    if (hasElderly) { if (poi.wheelchairAccessible) elderlyBonus += 15; if (poi.restSeats >= 4) elderlyBonus += 15; if (poi.nearMedical) elderlyBonus += 20; }
+
+    var total = moodScore + budgetScore + energyScore + crowdScore + kidScore + elderlyScore + coupleScore + elderlyRestaurantBonus + coupleBonus + kidsBonus + elderlyBonus;
+    return Object.assign({}, poi, { _scores: { moodScore:moodScore, budgetScore:budgetScore, energyScore:energyScore, crowdScore:crowdScore, kidScore:kidScore, elderlyScore:elderlyScore, coupleScore:coupleScore }, _total: total });
+  });
+  scored.sort(function(a, b) { return b._total - a._total; });
+
+  // LAYER 3: 行程编排（增强版：双场景 + 反特种兵 + 交通耗时 + Plan B + 预算上限）
+  var isLowEnergy = activeMood === 'tired' || activeMood === 'sad' || activeMood === 'anxious' || activeMood === 'insomnia';
+  var isBusiness = travelMode === 'business';
+  var maxPerDay = isBusiness ? (isLowEnergy ? 2 : 3) : (isLowEnergy ? 3 : 4);
+  var used = new Set();
+  var itinerary = [];
+  var allPoiItems = [];
+
+  // 辅助：查找雨天备选（室内、不同类别）
+  function findRainPlan(poi, excludeIds) {
+    for (var ri = 0; ri < scored.length; ri++) {
+      var alt = scored[ri];
+      if (alt.id === poi.id) continue;
+      if (alt.weatherSensitivity !== 'indoor') continue;
+      if (alt.category === poi.category) continue;
+      if (excludeIds && excludeIds.has(alt.id)) continue;
+      return { name: alt.name, estimatedCost: alt.ticketPrice || 0, category: alt.category };
+    }
+    // fallback: any indoor
+    for (var ri2 = 0; ri2 < scored.length; ri2++) {
+      var alt2 = scored[ri2];
+      if (alt2.id === poi.id) continue;
+      if (alt2.weatherSensitivity !== 'indoor') continue;
+      if (excludeIds && excludeIds.has(alt2.id)) continue;
+      return { name: alt2.name, estimatedCost: alt2.ticketPrice || 0, category: alt2.category };
+    }
+    return null;
+  }
+
+  for (var d = 0; d < days; d++) {
+    var items = [];
+    var dayPois = [];
+    for (var pi = 0; pi < scored.length; pi++) {
+      if (dayPois.length >= maxPerDay) break;
+      var poi = scored[pi];
+      if (!used.has(poi.id)) { used.add(poi.id); dayPois.push(poi); }
+    }
+    var cats = {};
+    dayPois.forEach(function(p) { cats[p.category] = true; });
+    if (Object.keys(cats).length < 2 && dayPois.length >= 3) {
+      for (var ci = 0; ci < scored.length; ci++) {
+        var altPoi = scored[ci];
+        if (!used.has(altPoi.id) && !cats[altPoi.category]) {
+          used.delete(dayPois[dayPois.length - 1].id);
+          dayPois[dayPois.length - 1] = altPoi;
+          used.add(altPoi.id);
+          break;
+        }
+      }
+    }
+
+    var hour = 9;
+    var midIdx = Math.floor(dayPois.length / 2);
+
+    for (var idx = 0; idx < dayPois.length; idx++) {
+      var dayPoi = dayPois[idx];
+
+      // 午餐插入（在中间位置）
+      if (idx === midIdx) {
+        var lunchPoi = scored.find(function(p) { return p.category === 'restaurant' && !used.has(p.id); });
+        if (lunchPoi) {
+          used.add(lunchPoi.id);
+          items.push({ type:'restaurant', time:fmtTime(hour), name:lunchPoi.name, estimatedCost:lunchPoi.ticketPrice || 80, estimatedDuration:lunchPoi.estimatedDuration || 60, reason:'午餐时间，推荐附近高评分餐厅', reasonTags:['位置便利','高评分'], poiId:lunchPoi.id });
+          hour += 1;
+        }
+      }
+
+      // 休息时间插入（仅旅游模式 + 疲惫/悲伤心情）
+      if (!isBusiness && (activeMood === 'tired' || activeMood === 'sad') && idx === midIdx) {
+        items.push({ type:'rest', time:fmtTime(hour), name:'☕ 休息时间', estimatedCost:30, estimatedDuration:30, reason:'疲惫模式：自动插入半小时休息，避免体力透支', reasonTags:['心情匹配','体力保护'] });
+        hour += 0.5;
+      }
+
+      // POI 条目
+      var dur = dayPoi.estimatedDuration ? dayPoi.estimatedDuration / 60 : (isLowEnergy ? 2 : 1.5);
+      // 商务模式：缩短游玩时间
+      if (isBusiness) dur = Math.min(dur, 1.5);
+      var poiItem = {
+        type: 'poi',
+        time: fmtTime(hour),
+        name: dayPoi.name,
+        estimatedCost: dayPoi.ticketPrice || 0,
+        estimatedDuration: dayPoi.estimatedDuration || 90,
+        tags: dayPoi.tags || [],
+        reason: genReason(dayPoi),
+        reasonTags: genTags(dayPoi),
+        poiId: dayPoi.id,
+        mapX: dayPoi.mapX,
+        mapY: dayPoi.mapY,
+        weatherSensitivity: dayPoi.weatherSensitivity
+      };
+
+      // Plan B: 雨天备选（户外或混合类POI）
+      if (dayPoi.weatherSensitivity === 'outdoor' || dayPoi.weatherSensitivity === 'mixed') {
+        var rainPlan = findRainPlan(dayPoi, used);
+        if (rainPlan) {
+          poiItem.rain_plan = rainPlan;
+        }
+      }
+
+      items.push(poiItem);
+      allPoiItems.push(poiItem);
+      hour += dur;
+    }
+
+    // 计算交通耗时（相邻POI之间的欧几里得距离）
+    for (var ii = 1; ii < items.length; ii++) {
+      var prev = items[ii - 1];
+      var curr = items[ii];
+      if (prev.mapX !== undefined && prev.mapY !== undefined && curr.mapX !== undefined && curr.mapY !== undefined) {
+        var dx = prev.mapX - curr.mapX;
+        var dy = prev.mapY - curr.mapY;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        var distKm = dist * 0.5;
+        var transitMin = Math.round(distKm / 40 * 60);
+        if (transitMin < 5) transitMin = 5;
+        curr.transitTime = transitMin;
+      }
+    }
+
+    itinerary.push({ day: d + 1, items: items });
+  }
+
+  // 预算硬上限检查
+  var runningTotal = 0;
+  itinerary.forEach(function(d) { d.items.forEach(function(it) { runningTotal += it.estimatedCost || 0; }); });
+  var budgetExceeded = false;
+  var budgetOverage = 0;
+
+  if (runningTotal > budget) {
+    budgetExceeded = true;
+    budgetOverage = runningTotal - budget;
+    // 找到最贵的POI并替换为更便宜的备选
+    var mostExpensiveItem = null;
+    var mostExpensiveDayIdx = -1;
+    var mostExpensiveItemIdx = -1;
+    for (var di = 0; di < itinerary.length; di++) {
+      for (var ii2 = 0; ii2 < itinerary[di].items.length; ii2++) {
+        var it = itinerary[di].items[ii2];
+        if (it.type === 'poi' && (mostExpensiveItem === null || it.estimatedCost > mostExpensiveItem.estimatedCost)) {
+          mostExpensiveItem = it;
+          mostExpensiveDayIdx = di;
+          mostExpensiveItemIdx = ii2;
+        }
+      }
+    }
+    if (mostExpensiveItem && mostExpensiveDayIdx >= 0) {
+      for (var si = scored.length - 1; si >= 0; si--) {
+        var cheapAlt = scored[si];
+        if (cheapAlt.id === mostExpensiveItem.poiId) continue;
+        if (used.has(cheapAlt.id)) continue;
+        if (cheapAlt.ticketPrice >= mostExpensiveItem.estimatedCost) continue;
+        used.add(cheapAlt.id);
+        var newItem = {
+          type: 'poi',
+          time: mostExpensiveItem.time,
+          name: cheapAlt.name,
+          estimatedCost: cheapAlt.ticketPrice || 0,
+          estimatedDuration: cheapAlt.estimatedDuration || 90,
+          tags: cheapAlt.tags || [],
+          reason: genReason(cheapAlt),
+          reasonTags: genTags(cheapAlt),
+          poiId: cheapAlt.id,
+          mapX: cheapAlt.mapX,
+          mapY: cheapAlt.mapY,
+          weatherSensitivity: cheapAlt.weatherSensitivity,
+          transitTime: mostExpensiveItem.transitTime
+        };
+        if (cheapAlt.weatherSensitivity === 'outdoor' || cheapAlt.weatherSensitivity === 'mixed') {
+          var rp = findRainPlan(cheapAlt, used);
+          if (rp) newItem.rain_plan = rp;
+        }
+        itinerary[mostExpensiveDayIdx].items[mostExpensiveItemIdx] = newItem;
+        // 重新计算总额
+        runningTotal = 0;
+        itinerary.forEach(function(d) { d.items.forEach(function(it) { runningTotal += it.estimatedCost || 0; }); });
+        budgetOverage = Math.max(0, runningTotal - budget);
+        budgetExceeded = runningTotal > budget;
+        break;
+      }
+    }
+  }
+
+  // LAYER 4: 酒店推荐（含预算上限 + 商务模式偏好）
+  var hotelCandidates = HOTELS.map(function(h) {
+    var score = 0;
+    var ratio = dailyBudget > 0 ? h.priceRangeLow / dailyBudget : 0;
+    if (ratio <= 0.3) score += 30; else if (ratio <= 0.5) score += 25; else if (ratio <= 0.8) score += 20; else if (ratio <= 1.2) score += 15; else score += 5;
+    score += (h.moodScores[activeMood] || 5) * 3;
+    if (hasKids && h.kidsFriendly) score += 20;
+    if (hasElderly && h.elderlyFriendly) score += 20;
+    if (isCouple && h.has_spa) score += 25;
+    score += h.rating * 5;
+    // 商务模式：偏好交通便利（评分相近的酒店中，优先选择距离市中心近的）
+    if (isBusiness) {
+      if (h.nearTransport) score += 30;
+      if (h.has_gym) score += 10;   // 商务人士偏好健身房
+      if (h.businessFriendly) score += 25;
+    }
+    return Object.assign({}, h, { _score: score });
+  }).sort(function(a, b) { return b._score - a._score; });
+
+  // 预算上限：过滤超出预算太多的酒店
+  var affordableHotels = hotelCandidates.filter(function(h) {
+    return h.priceRangeLow * days <= budget * 0.8;
+  });
+  if (affordableHotels.length === 0) {
+    affordableHotels = hotelCandidates.slice(0, 2);
+  }
+
+  var best = affordableHotels[0];
+  var totalCost = runningTotal + (best ? best.priceRangeLow : 0) * days;
+
+  var hotelData = null;
+  if (best) {
+    var platforms = [
+      { name:'携程', icon:'🏨', price:Math.round(best.priceRangeLow * 1.0), features:'含早', isBest:false },
+      { name:'美团', icon:'🍜', price:Math.round(best.priceRangeLow * 0.95), features:'含早且可取消', isBest:true },
+      { name:'飞猪', icon:'🐷', price:Math.round(best.priceRangeLow * 0.92), features:'免费升级房型', isBest:false },
+      { name:'去哪儿', icon:'✈️', price:Math.round(best.priceRangeLow * 0.97), features:'含双早', isBest:false }
+    ];
+    var bestPlat = platforms.find(function(p) { return p.isBest; });
+    hotelData = {
+      name: best.name, rating: best.rating, price: best.priceRangeLow,
+      bestPrice: bestPlat.price, bestPlatform: bestPlat.name, bestReason: bestPlat.features,
+      savedAmount: Math.max.apply(null, platforms.map(function(p) { return p.price; })) - bestPlat.price,
+      platforms: platforms, reason: genHotelReason(best)
+    };
+  }
+
+  return {
+    itinerary: itinerary,
+    hotel: hotelData,
+    stats: { totalCost: totalCost, totalSaved: hotelData ? hotelData.savedAmount : 0, totalPois: used.size, filterTotal: POIS.length, filterPassed: candidates.length, budgetExceeded: budgetExceeded, budgetOverage: budgetOverage }
+  };
+}
+
+// ================================================================
+//  生成行程
+// ================================================================
+function generatePlan() {
+  if (isPlanning) return;
+  isPlanning = true;
+  var btn = document.getElementById('generatePlanBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ AI 正在规划中...';
+
+  setTimeout(function() {
+    var result = doGenerate();
+    itinerary = result.itinerary;
+    hotel = result.hotel;
+    stats = result.stats;
+    renderItinerary();
+    renderHotel();
+    renderMap();
+    renderChecklist();
+    renderCareLetter();
+    renderStats();
+    document.getElementById('exportBar').style.display = 'flex';
+    // 预算超标警告
+    var warnEl = document.getElementById('budgetWarning');
+    if (stats.budgetExceeded) {
+      warnEl.textContent = '⚠️ 预算超标 ¥' + stats.budgetOverage + '，已自动替换最贵景点为更经济的选择';
+      warnEl.classList.add('show');
+    } else {
+      warnEl.classList.remove('show');
+    }
+    isPlanning = false;
+    btn.disabled = false;
+    btn.textContent = '✨ 智能生成行程';
+    showToast('AI 行程规划完成！共 ' + stats.totalPois + ' 个精选景点');
+    document.getElementById('itinerarySection').scrollIntoView({ behavior: 'smooth' });
+    // 触发行前提醒（模拟2小时后出发）
+    scheduleReminder();
+  }, 1500);
+}
+
+function renderItinerary() {
+  var section = document.getElementById('itinerarySection');
+  var daysEl = document.getElementById('itineraryDays');
+  var countEl = document.getElementById('itineraryCount');
+  section.classList.add('show');
+  countEl.textContent = itinerary.length + ' 天';
+
+  var theme = MOOD_THEME_MAP[activeMood] || MOOD_THEME_MAP.calm;
+  daysEl.innerHTML = '';
+  itinerary.forEach(function(day, dayIndex) {
+    var html = '<div class="day-header" style="background:' + theme.primaryLight + '25;color:' + theme.primary + '"><span>Day ' + day.day + '</span><span>' + day.items.length + ' 个节点</span></div>';
+    html += '<div class="day-toolbar"><button class="refresh-btn" onclick="regenerateDay(' + dayIndex + ')">🔄 刷新这天</button></div>';
+    html += '<div class="timeline">';
+
+    day.items.forEach(function(item, itemIndex) {
+      // 交通耗时条（非第一个条目）
+      if (itemIndex > 0 && item.transitTime) {
+        html += '<div class="transit-bar"><span class="transit-icon">🚗</span><span class="transit-time">约' + item.transitTime + '分钟车程</span></div>';
+      }
+
+      var dotColor = item.type === 'rest' ? '#A3B5A6' : item.type === 'restaurant' ? '#E8A85A' : activeMoodColor;
+      var catLabel = item.type === 'rest' ? '休息' : item.type === 'restaurant' ? '餐饮' : '景点';
+      html += '<div class="timeline-item"><div class="timeline-dot" style="background:' + dotColor + '"></div><div class="timeline-card"><div class="time-row"><span class="time">' + item.time + '</span><span class="category">' + catLabel + '</span>';
+      if (item.estimatedDuration) {
+        html += '<span class="category" style="margin-left:4px;opacity:0.5">⏱ ' + item.estimatedDuration + '分钟</span>';
+      }
+      html += '</div><span class="poi-name">' + item.name + '</span>';
+      if (item.reason) html += '<div class="reason-bar">💡 ' + item.reason + '</div>';
+      if (item.reasonTags && item.reasonTags.length) {
+        html += '<div class="tags">' + item.reasonTags.map(function(t) { return '<span class="tag">' + t + '</span>'; }).join('') + '</div>';
+      }
+      if (item.type !== 'rest') {
+        html += '<div class="booking-row"><div class="price-tag" style="color:' + activeMoodColor + '">¥' + (item.estimatedCost || 0) + '</div><button class="book-btn" style="background:' + activeMoodColor + '" onclick="showBookingPopup(\'' + item.name + '\')">预订</button></div>';
+        if (item.estimatedCost > 0) html += '<div class="compare-inline"><span>🔍</span><span>AI比价：美团 ¥' + Math.round(item.estimatedCost * 0.93) + ' 起</span><span class="compare-inline-save">省¥' + Math.round(item.estimatedCost * 0.12) + '</span></div>';
+      }
+      // 雨天备选
+      if (item.rain_plan) {
+        html += '<div class="rain-plan-toggle" onclick="toggleRainPlan(' + dayIndex + ',' + itemIndex + ')">🌧️ 雨天备选</div>';
+        html += '<div class="rain-plan-detail" id="rainDetail_' + dayIndex + '_' + itemIndex + '">🏠 <strong>' + item.rain_plan.name + '</strong>（' + item.rain_plan.category + '）· ¥' + (item.rain_plan.estimatedCost || 0) + '</div>';
+      }
+      html += '</div></div>';
+    });
+    html += '</div>';
+    daysEl.innerHTML += html;
+  });
+}
+
+function renderHotel() {
+  if (!hotel) return;
+  var section = document.getElementById('hotelSection');
+  var card = document.getElementById('hotelCard');
+  section.classList.add('show');
+  var html = '<div class="hotel-header"><div class="hotel-info"><span class="hotel-name">' + hotel.name + '</span><span class="hotel-rating">⭐ ' + hotel.rating + '分</span></div><div class="hotel-price" style="color:' + activeMoodColor + '">¥' + hotel.bestPrice + '</div></div>';
+  html += '<span class="hotel-reason">💡 ' + hotel.reason + '</span>';
+  if (hotel.platforms) {
+    html += '<div class="ai-compare"><div class="compare-title"><span class="ai-badge">AI 比价</span><span class="ai-tip">已为您对比 ' + hotel.platforms.length + ' 个平台</span></div><div class="compare-list">';
+    hotel.platforms.forEach(function(p) {
+      html += '<div class="compare-row' + (p.isBest ? ' best' : '') + '"><span class="compare-platform">' + p.icon + ' ' + p.name + '</span><span class="compare-price">¥' + p.price + '</span><span class="compare-features">' + (p.features || '') + '</span>' + (p.isBest ? '<span class="compare-best-tag">最优</span>' : '') + '</div>';
+    });
+    html += '</div><div class="compare-verdict" style="background:' + MOOD_THEME_MAP[activeMood].primary + '12"><span>AI建议：' + hotel.bestPlatform + '（' + hotel.bestReason + '）</span></div></div>';
+  }
+  if (hotel.savedAmount > 0) html += '<div class="hotel-savings">💰 比价节省 ¥' + hotel.savedAmount + '</div>';
+  html += '<div style="display:flex;gap:10px;margin-top:12px"><button class="book-btn hotel-book-btn" style="background:' + activeMoodColor + '" onclick="showBookingPopup(\'' + hotel.name + '\')">预订酒店</button><button class="refresh-btn" onclick="regenerateHotel()" style="margin-left:0">🔄 换一家</button></div>';
+  card.innerHTML = html;
+}
+
+function renderCareLetter() {
+  var section = document.getElementById('careLetterSection');
+  var letter = document.getElementById('careLetter');
+  section.classList.add('show');
+  var hour = new Date().getHours();
+  var greeting = hour < 6 ? '深夜好' : hour < 9 ? '早安' : hour < 12 ? '上午好' : hour < 14 ? '中午好' : hour < 18 ? '下午好' : '晚上好';
+  var care = {
+    tired:   { title:'今天允许自己慢下来', body:'疲惫不是软弱，是身体在提醒你需要休息。泡一杯温热的茶，找一个舒服的角落，不需要做任何事——只是呼吸，只是存在。', action:'点一支香薰蜡烛，听一首没有歌词的轻音乐。' },
+    excited: { title:'让这份能量流动起来', body:'兴奋是生命力的绽放。今天适合去做一件你一直想做但没做的事，哪怕只是走出门散个步，或者给一个老朋友打个电话。', action:'把这份能量写下来，或者画下来——创造力需要出口。' },
+    happy:   { title:'珍惜此刻的光亮', body:'开心的时候，世界都是暖色调的。不需要寻找意义，此刻本身就是意义。如果可以，记得把这份温暖传递给身边的人。', action:'拍一张记录此刻的照片，放进你的情绪日记里。' },
+    calm:    { title:'平静是最高级的能量', body:'不疾不徐，不忧不惧。平静不是无聊，而是内心足够丰盈。今天的一切都刚刚好——阳光、空气、和你自己。', action:'尝试五分钟的正念呼吸：吸气四秒，屏息四秒，呼气六秒。' },
+    anxious: { title:'焦虑是你在乎的证明', body:'手心出汗、心跳加速——这些都是你认真生活的证据。深呼吸，把手放在心口，对自己说：我已经做得很好了。', action:'写下三件今天让你感到安全的小事，哪怕只是喝到了一杯温度刚好的水。' },
+    sad:     { title:'悲伤值得被温柔对待', body:'低落的时候不需要急着振作。眼泪是心灵的雨水，落完了，天空自然会放晴。今天你是被允许脆弱的。', action:'裹一条柔软的毯子，看一部温暖的电影，或者什么也不做——只是允许自己难过。' },
+    insomnia:{ title:'夜深了，世界很安静', body:'失眠的夜晚，思绪像潮水一样涌来。不需要强迫自己入睡——有时候，安静的醒着，也是和自己对话的珍贵时光。', action:'把手机屏幕调到最暗，闭上眼睛，听一段白噪音。睡不着也没关系，明天会是新的一天。' }
+  };
+  var c = care[activeMood] || care.calm;
+  var quotes = ['「你不需要成为更好的自己，你只需要更温柔地对待此刻的自己。」','「生活不是马拉松，而是散步——停下来看看花，也是一种前进。」','「今天你已经很棒了，哪怕只是起床、呼吸、存在。」','「情绪像天气，没有好坏之分。雨天的意义，是让晴天的阳光更珍贵。」','「真正的勇敢，不是从不疲惫，而是疲惫时依然选择温柔对待自己。」'];
+  var quote = quotes[Math.floor(Math.random() * quotes.length)];
+  letter.innerHTML = '<div class="care-letter-greeting">' + greeting + '</div><div class="care-letter-title">' + c.title + '</div><div class="care-letter-body">' + c.body + '</div><div class="care-letter-action">✨ ' + c.action + '</div><div class="care-letter-quote">' + quote + '</div>';
+}
+
+function renderStats() {
+  if (!stats) return;
+  var row = document.getElementById('statsRow');
+  row.style.display = 'flex';
+  var theme = MOOD_THEME_MAP[activeMood] || MOOD_THEME_MAP.calm;
+  row.innerHTML = '<div class="glass-panel" style="flex:1;min-width:140px;padding:16px;text-align:center"><span style="font-size:24px;font-weight:700;color:' + activeMoodColor + '">' + stats.filterPassed + '/' + stats.filterTotal + '</span><br><span style="font-size:12px;color:rgba(255,255,255,0.4)">通过过滤</span></div>' +
+    '<div class="glass-panel" style="flex:1;min-width:140px;padding:16px;text-align:center"><span style="font-size:24px;font-weight:700;color:' + activeMoodColor + '">' + stats.totalPois + '</span><br><span style="font-size:12px;color:rgba(255,255,255,0.4)">精选景点</span></div>' +
+    '<div class="glass-panel" style="flex:1;min-width:140px;padding:16px;text-align:center"><span style="font-size:24px;font-weight:700;color:' + activeMoodColor + '">¥' + (stats.totalSaved || 0) + '</span><br><span style="font-size:12px;color:rgba(255,255,255,0.4)">比价节省</span></div>' +
+    '<div class="glass-panel" style="flex:1;min-width:140px;padding:16px;text-align:center"><span style="font-size:24px;font-weight:700;color:' + activeMoodColor + '">¥' + (stats.totalCost || 0) + '</span><br><span style="font-size:12px;color:rgba(255,255,255,0.4)">总预算</span></div>';
+}
+
+// ================================================================
+//  行前清单渲染
+// ================================================================
+function renderChecklist() {
+  var section = document.getElementById('checklistSection');
+  var card = document.getElementById('checklistCard');
+  section.classList.add('show');
+
+  var isBusiness = travelMode === 'business';
+
+  // 通用物品
+  var commonItems = [
+    { cat:'必备证件', items:['身份证/护照', '手机 + 充电器', '钱包/银行卡', '钥匙'] },
+    { cat:'电子设备', items:['充电宝', '数据线', '耳机'] }
+  ];
+
+  // 旅游模式专属
+  var tourismItems = [
+    { cat:'户外防护', items:['防晒霜', '墨镜', '遮阳帽', '舒适的鞋子'] },
+    { cat:'拍照打卡', items:['相机/手机支架', '自拍杆', '充电宝（多带一个）'] },
+    { cat:'随身好物', items:['水杯', '小零食', '纸巾/湿巾', '便携雨伞'] },
+    { cat:'药品', items:['创可贴', '晕车药', '防蚊液'] }
+  ];
+
+  // 商务模式专属
+  var businessItems = [
+    { cat:'工作必备', items:['笔记本电脑 + 充电器', '会议资料/文件', '名片', '笔 + 笔记本'] },
+    { cat:'出行效率', items:['充电宝', '便携水杯', '口香糖/薄荷糖', '便携雨伞'] },
+    { cat:'衣物', items:['正装/商务装', '备用衬衫', '商务鞋'] },
+    { cat:'药品', items:['创可贴', '感冒药', '胃药'] }
+  ];
+
+  var allItems = commonItems.concat(isBusiness ? businessItems : tourismItems);
+
+  var html = '<div class="checklist-title">' + (isBusiness ? '💼' : '🎒') + ' ' + (isBusiness ? '商务出行必备清单' : '旅行出发前检查清单') + '</div>';
+  html += '<div class="checklist-sub">' + (isBusiness ? '出发前2小时检查，确保万无一失' : '出发前2小时逐项检查，安心出发') + '</div>';
+  html += '<div class="checklist-items">';
+
+  var itemIndex = 0;
+  allItems.forEach(function(cat) {
+    html += '<div class="checklist-category">' + cat.cat + '</div>';
+    cat.items.forEach(function(item) {
+      html += '<div class="checklist-item" onclick="toggleChecklistItem(this)" data-idx="' + itemIndex + '"><div class="checklist-cb">✓</div><div class="checklist-text">' + item + '</div></div>';
+      itemIndex++;
+    });
+  });
+  html += '</div>';
+  html += '<div class="checklist-progress" id="checklistProgress">已检查 0/' + itemIndex + ' 项</div>';
+  card.innerHTML = html;
+}
+
+function toggleChecklistItem(el) {
+  el.classList.toggle('checked');
+  updateChecklistProgress();
+}
+
+function updateChecklistProgress() {
+  var items = document.querySelectorAll('.checklist-item');
+  var checked = document.querySelectorAll('.checklist-item.checked');
+  var prog = document.getElementById('checklistProgress');
+  if (prog) {
+    prog.textContent = '已检查 ' + checked.length + '/' + items.length + ' 项';
+  }
+}
+
+// ================================================================
+//  行前提醒（Notification API）
+// ================================================================
+var reminderTimer = null;
+
+function scheduleReminder() {
+  if (reminderTimer) clearTimeout(reminderTimer);
+  var isBusiness = travelMode === 'business';
+
+  // 模拟2小时后出发（实际开发中，这里用真实出发时间）
+  // 演示时用10秒模拟，让用户能看到效果
+  reminderTimer = setTimeout(function() {
+    sendReminder(isBusiness);
+  }, 10000); // 10秒后触发演示
+}
+
+function sendReminder(isBusiness) {
+  if (!('Notification' in window)) return;
+
+  if (Notification.permission === 'granted') {
+    showNotification(isBusiness);
+  } else if (Notification.permission !== 'denied') {
+    Notification.requestPermission().then(function(permission) {
+      if (permission === 'granted') {
+        showNotification(isBusiness);
+      }
+    });
+  }
+}
+
+function showNotification(isBusiness) {
+  var title = isBusiness ? '💼 出发提醒 — 商务出行' : '🏖️ 出发提醒 — 休闲旅游';
+  var options = {
+    body: isBusiness
+      ? '记得检查身份证和充电宝，路上注意安全，别迟到哦！'
+      : '别忘了带防晒霜和墨镜，准备开启好心情！',
+    icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">' + (isBusiness ? '💼' : '🏖️') + '</text></svg>',
+    tag: 'moodtravel-reminder',
+    requireInteraction: true
+  };
+  try {
+    new Notification(title, options);
+  } catch (e) {
+    // fallback: show toast
+    showToast('📢 ' + title + '：' + options.body);
+  }
+}
+
+// ================================================================
+//  刷新某天行程
+// ================================================================
+function regenerateDay(dayIndex) {
+  if (!itinerary || dayIndex < 0 || dayIndex >= itinerary.length) return;
+  showToast('第' + (dayIndex + 1) + '天正在刷新...');
+
+  var weights = getWeightKey();
+  var dailyBudget = budget / days;
+  var energyIdeal = MOOD_ENERGY_MAP[activeMood] || 2;
+  var isLowEnergy = activeMood === 'tired' || activeMood === 'sad' || activeMood === 'anxious' || activeMood === 'insomnia';
+  var isBusiness = travelMode === 'business';
+  var maxPerDay = isBusiness ? (isLowEnergy ? 2 : 3) : (isLowEnergy ? 3 : 4);
+
+  // 收集当前已使用的POI ID
+  var used = new Set();
+  itinerary.forEach(function(day, di) {
+    if (di === dayIndex) return;
+    day.items.forEach(function(it) {
+      if (it.poiId) used.add(it.poiId);
+    });
+  });
+
+  // 重新评分
+  var candidates = POIS.filter(function(poi) {
+    if (used.has(poi.id)) return false;
+    if (poi.ticketPrice > dailyBudget * 0.5) return false;
+    if (hasKids && !poi.kidsFriendly) return false;
+    if (hasKids && poi.minAge && poi.minAge > 5) return false;
+    if (hasElderly && !poi.elderlyFriendly && poi.energyLevel >= 4) return false;
+    if (hasElderly && poi.category === 'restaurant') {
+      if (poi.queueTime > 60) return false;
+      if (poi.hasElevator === false) return false;
+      if (poi.spicinessLevel >= 3) return false;
+    }
+    if (hasKids && poi.energyLevel >= 3 && !poi.hasNursingRoom && !poi.strollerFriendly) return false;
+    if (hasElderly && poi.energyLevel >= 3 && !poi.wheelchairAccessible && poi.restSeats < 3) return false;
+    return true;
+  });
+
+  var scored = candidates.map(function(poi) {
+    var moodScore = (poi.moodScores[activeMood] || 5) * weights.mood * 10;
+    var budgetRatio = dailyBudget > 0 ? Math.min(poi.ticketPrice / dailyBudget, 1) : 0;
+    var budgetScore = (1 - budgetRatio) * weights.budget * 100;
+    var energyDiff = Math.abs(poi.energyLevel - energyIdeal);
+    var energyScore = (1 - energyDiff / 4) * weights.energy * 100;
+    var crowdScore = (5 - poi.crowdednessLevel) / 4 * weights.crowd * 100;
+    var kidScore = hasKids ? (poi.kidsFriendly ? weights.kid * 100 : 0) : 0;
+    var elderlyScore = hasElderly ? (poi.elderlyFriendly ? weights.elderly * 100 : 0) : 0;
+    var coupleScore = isCouple ? (poi.romanticLevel / 5 * weights.couple * 100) : 0;
+    var elderlyRestaurantBonus = 0;
+    if (hasElderly && poi.category === 'restaurant') {
+      if (poi.hasPrivateRoom) elderlyRestaurantBonus += 20;
+      if (poi.hasHotTea) elderlyRestaurantBonus += 15;
+      if (poi.noiseLevel <= 2) elderlyRestaurantBonus += 15;
+    }
+    var coupleBonus = 0;
+    if (isCouple) {
+      if (poi.hasPhotoSpot) coupleBonus += 15;
+      if (poi.category === 'restaurant' && poi.romanticLevel >= 4) coupleBonus += 20;
+      if (poi.category === 'leisure' && poi.romanticLevel >= 4) coupleBonus += 15;
+    }
+    var kidsBonus = 0;
+    if (hasKids) { if (poi.hasNursingRoom) kidsBonus += 20; if (poi.strollerFriendly) kidsBonus += 15; }
+    var elderlyBonus = 0;
+    if (hasElderly) { if (poi.wheelchairAccessible) elderlyBonus += 15; if (poi.restSeats >= 4) elderlyBonus += 15; if (poi.nearMedical) elderlyBonus += 20; }
+    var total = moodScore + budgetScore + energyScore + crowdScore + kidScore + elderlyScore + coupleScore + elderlyRestaurantBonus + coupleBonus + kidsBonus + elderlyBonus;
+    return Object.assign({}, poi, { _scores: { moodScore:moodScore, budgetScore:budgetScore, energyScore:energyScore, crowdScore:crowdScore, kidScore:kidScore, elderlyScore:elderlyScore, coupleScore:coupleScore }, _total: total });
+  });
+  scored.sort(function(a, b) { return b._total - a._total; });
+
+  function findRainPlanRegen(poi, excludeIds) {
+    for (var ri = 0; ri < scored.length; ri++) {
+      var alt = scored[ri];
+      if (alt.id === poi.id) continue;
+      if (alt.weatherSensitivity !== 'indoor') continue;
+      if (alt.category === poi.category) continue;
+      if (excludeIds && excludeIds.has(alt.id)) continue;
+      return { name: alt.name, estimatedCost: alt.ticketPrice || 0, category: alt.category };
+    }
+    for (var ri2 = 0; ri2 < scored.length; ri2++) {
+      var alt2 = scored[ri2];
+      if (alt2.id === poi.id) continue;
+      if (alt2.weatherSensitivity !== 'indoor') continue;
+      if (excludeIds && excludeIds.has(alt2.id)) continue;
+      return { name: alt2.name, estimatedCost: alt2.ticketPrice || 0, category: alt2.category };
+    }
+    return null;
+  }
+
+  var dayPois = [];
+  var dayUsed = new Set();
+  for (var pi = 0; pi < scored.length; pi++) {
+    if (dayPois.length >= maxPerDay) break;
+    var poi = scored[pi];
+    if (!dayUsed.has(poi.id)) { dayUsed.add(poi.id); dayPois.push(poi); }
+  }
+
+  var items = [];
+  var hour = 9;
+  var midIdx = Math.floor(dayPois.length / 2);
+
+  for (var idx = 0; idx < dayPois.length; idx++) {
+    var dayPoi = dayPois[idx];
+    if (idx === midIdx) {
+      var lunchPoi = scored.find(function(p) { return p.category === 'restaurant' && !dayUsed.has(p.id); });
+      if (lunchPoi) {
+        dayUsed.add(lunchPoi.id);
+        items.push({ type:'restaurant', time:fmtTime(hour), name:lunchPoi.name, estimatedCost:lunchPoi.ticketPrice || 80, estimatedDuration:lunchPoi.estimatedDuration || 60, reason:'午餐时间，推荐附近高评分餐厅', reasonTags:['位置便利','高评分'], poiId:lunchPoi.id });
+        hour += 1;
+      }
+    }
+    if (!isBusiness && (activeMood === 'tired' || activeMood === 'sad') && idx === midIdx) {
+      items.push({ type:'rest', time:fmtTime(hour), name:'☕ 休息时间', estimatedCost:30, estimatedDuration:30, reason:'疲惫模式：自动插入半小时休息，避免体力透支', reasonTags:['心情匹配','体力保护'] });
+      hour += 0.5;
+    }
+    var dur = dayPoi.estimatedDuration ? dayPoi.estimatedDuration / 60 : (isLowEnergy ? 2 : 1.5);
+    if (isBusiness) dur = Math.min(dur, 1.5);
+    var poiItem = {
+      type: 'poi', time: fmtTime(hour), name: dayPoi.name, estimatedCost: dayPoi.ticketPrice || 0,
+      estimatedDuration: dayPoi.estimatedDuration || 90, tags: dayPoi.tags || [],
+      reason: genReason(dayPoi), reasonTags: genTags(dayPoi), poiId: dayPoi.id,
+      mapX: dayPoi.mapX, mapY: dayPoi.mapY, weatherSensitivity: dayPoi.weatherSensitivity
+    };
+    if (dayPoi.weatherSensitivity === 'outdoor' || dayPoi.weatherSensitivity === 'mixed') {
+      var rp = findRainPlanRegen(dayPoi, dayUsed);
+      if (rp) poiItem.rain_plan = rp;
+    }
+    items.push(poiItem);
+    hour += dur;
+  }
+
+  for (var ii = 1; ii < items.length; ii++) {
+    var prev = items[ii - 1];
+    var curr = items[ii];
+    if (prev.mapX !== undefined && prev.mapY !== undefined && curr.mapX !== undefined && curr.mapY !== undefined) {
+      var dx = prev.mapX - curr.mapX;
+      var dy = prev.mapY - curr.mapY;
+      var dist = Math.sqrt(dx * dx + dy * dy);
+      var distKm = dist * 0.5;
+      var transitMin = Math.round(distKm / 40 * 60);
+      if (transitMin < 5) transitMin = 5;
+      curr.transitTime = transitMin;
+    }
+  }
+
+  itinerary[dayIndex] = { day: dayIndex + 1, items: items };
+  renderItinerary();
+  renderMap();
+  showToast('第' + (dayIndex + 1) + '天已刷新');
+}
+
+// ================================================================
+//  刷新酒店推荐
+// ================================================================
+function regenerateHotel() {
+  if (!HOTELS || HOTELS.length === 0) return;
+  showToast('正在为您更换酒店...');
+
+  hotelIndex = (hotelIndex + 1) % HOTELS.length;
+  var dailyBudget = budget / days;
+
+  var hotelCandidates = HOTELS.map(function(h) {
+    var score = 0;
+    var ratio = dailyBudget > 0 ? h.priceRangeLow / dailyBudget : 0;
+    if (ratio <= 0.3) score += 30; else if (ratio <= 0.5) score += 25; else if (ratio <= 0.8) score += 20; else if (ratio <= 1.2) score += 15; else score += 5;
+    score += (h.moodScores[activeMood] || 5) * 3;
+    if (hasKids && h.kidsFriendly) score += 20;
+    if (hasElderly && h.elderlyFriendly) score += 20;
+    if (isCouple && h.has_spa) score += 25;
+    score += h.rating * 5;
+    if (travelMode === 'business') {
+      if (h.nearTransport) score += 30;
+      if (h.has_gym) score += 10;
+      if (h.businessFriendly) score += 25;
+    }
+    return Object.assign({}, h, { _score: score });
+  }).sort(function(a, b) { return b._score - a._score; });
+
+  // 循环选择下一个酒店
+  var idx = hotelIndex % hotelCandidates.length;
+  var best = hotelCandidates[idx];
+
+  var platforms = [
+    { name:'携程', icon:'🏨', price:Math.round(best.priceRangeLow * 1.0), features:'含早', isBest:false },
+    { name:'美团', icon:'🍜', price:Math.round(best.priceRangeLow * 0.95), features:'含早且可取消', isBest:true },
+    { name:'飞猪', icon:'🐷', price:Math.round(best.priceRangeLow * 0.92), features:'免费升级房型', isBest:false },
+    { name:'去哪儿', icon:'✈️', price:Math.round(best.priceRangeLow * 0.97), features:'含双早', isBest:false }
+  ];
+  var bestPlat = platforms.find(function(p) { return p.isBest; });
+  hotel = {
+    name: best.name, rating: best.rating, price: best.priceRangeLow,
+    bestPrice: bestPlat.price, bestPlatform: bestPlat.name, bestReason: bestPlat.features,
+    savedAmount: Math.max.apply(null, platforms.map(function(p) { return p.price; })) - bestPlat.price,
+    platforms: platforms, reason: genHotelReason(best)
+  };
+
+  renderHotel();
+  showToast('酒店已更换');
+}
+
+// ================================================================
+//  地图可视化
+// ================================================================
+function renderMap() {
+  if (!itinerary || itinerary.length === 0) return;
+  var svg = document.getElementById('mapSvg');
+  var section = document.getElementById('mapSection');
+  section.classList.add('show');
+
+  var allPoints = [];
+  itinerary.forEach(function(day, di) {
+    day.items.forEach(function(item, ii) {
+      if (item.mapX !== undefined && item.mapY !== undefined) {
+        allPoints.push({
+          x: item.mapX, y: item.mapY,
+          name: item.name,
+          type: item.type,
+          dayIndex: di,
+          itemIndex: ii
+        });
+      }
+    });
+  });
+
+  if (allPoints.length === 0) {
+    svg.innerHTML = '';
+    return;
+  }
+
+  var html = '';
+
+  // 画路线（虚线连接）
+  for (var i = 1; i < allPoints.length; i++) {
+    var prev = allPoints[i - 1];
+    var curr = allPoints[i];
+    html += '<line class="map-route-line" x1="' + prev.x + '" y1="' + prev.y + '" x2="' + curr.x + '" y2="' + curr.y + '" />';
+  }
+
+  // 画点
+  for (var j = 0; j < allPoints.length; j++) {
+    var pt = allPoints[j];
+    var color = pt.type === 'rest' ? 'rgba(163,181,166,0.8)' : pt.type === 'restaurant' ? '#E8A85A' : '#8BA88C';
+    var r = pt.type === 'rest' ? 2.5 : 4;
+    html += '<circle class="map-poi-dot" cx="' + pt.x + '" cy="' + pt.y + '" r="' + r + '" fill="' + color + '" stroke="rgba(255,255,255,0.3)" stroke-width="1" />';
+    // 标签（截断4字符）
+    var label = pt.name.length > 4 ? pt.name.substring(0, 4) + '…' : pt.name;
+    html += '<text class="map-poi-label" x="' + pt.x + '" y="' + (pt.y + r + 10) + '" text-anchor="middle">' + label + '</text>';
+    // 第一天标记
+    if (pt.itemIndex === 0 && pt.dayIndex === 0) {
+      html += '<circle cx="' + pt.x + '" cy="' + pt.y + '" r="7" fill="none" stroke="' + activeMoodColor + '" stroke-width="2" stroke-dasharray="3 2" />';
+    }
+    // 每天第一个POI加天数标记
+    if (pt.itemIndex === 0 && pt.type === 'poi') {
+      html += '<text x="' + (pt.x - 6) + '" y="' + (pt.y - 6) + '" font-size="8" fill="' + activeMoodColor + '" font-weight="bold">D' + (pt.dayIndex + 1) + '</text>';
+    }
+  }
+
+  svg.innerHTML = html;
+}
+
+// ================================================================
+//  雨天备选切换
+// ================================================================
+function toggleRainPlan(dayIndex, itemIndex) {
+  var el = document.getElementById('rainDetail_' + dayIndex + '_' + itemIndex);
+  if (el) {
+    if (el.classList.contains('show')) {
+      el.classList.remove('show');
+    } else {
+      el.classList.add('show');
+    }
+  }
+}
+
+// ================================================================
+//  导出功能
+// ================================================================
+var exportContentText = '';
+
+function exportMarkdown() {
+  if (!itinerary || itinerary.length === 0) return;
+  var md = '# 🗺️ MoodTravel 行程规划\n\n';
+  md += '> 心情：' + activeMood + ' | 预算：¥' + budget + ' | 天数：' + days + '天\n\n';
+
+  itinerary.forEach(function(day) {
+    md += '## Day ' + day.day + '\n\n';
+    day.items.forEach(function(item, idx) {
+      if (idx > 0 && item.transitTime) {
+        md += '> 🚗 约' + item.transitTime + '分钟车程\n\n';
+      }
+      var icon = item.type === 'rest' ? '☕' : item.type === 'restaurant' ? '🍽️' : '📍';
+      md += '### ' + icon + ' ' + item.time + ' — ' + item.name + '\n';
+      md += '- 费用：¥' + (item.estimatedCost || 0) + '\n';
+      if (item.estimatedDuration) md += '- 预计游玩：' + item.estimatedDuration + '分钟\n';
+      if (item.reason) md += '- 推荐理由：' + item.reason + '\n';
+      if (item.reasonTags && item.reasonTags.length) md += '- 标签：' + item.reasonTags.join('、') + '\n';
+      if (item.rain_plan) md += '- 🌧️ 雨天备选：' + item.rain_plan.name + '（¥' + (item.rain_plan.estimatedCost || 0) + '）\n';
+      md += '\n';
+    });
+  });
+
+  if (hotel) {
+    md += '## 🏨 推荐酒店\n\n';
+    md += '- **' + hotel.name + '** ⭐' + hotel.rating + '分\n';
+    md += '- 最优价格：' + hotel.bestPlatform + ' ¥' + hotel.bestPrice + '（' + hotel.bestReason + '）\n';
+    md += '- 推荐理由：' + hotel.reason + '\n';
+  }
+
+  if (stats) {
+    md += '\n---\n';
+    md += '总预算：¥' + stats.totalCost + ' | 精选景点：' + stats.totalPois + ' | 比价节省：¥' + (stats.totalSaved || 0) + '\n';
+  }
+
+  exportContentText = md;
+  document.getElementById('exportModalTitle').textContent = '📋 Markdown 行程预览';
+  document.getElementById('exportModalContent').textContent = md;
+  document.getElementById('exportModalOverlay').classList.add('show');
+}
+
+function exportHTML() {
+  if (!itinerary || itinerary.length === 0) return;
+  var theme = MOOD_THEME_MAP[activeMood] || MOOD_THEME_MAP.calm;
+  var html = '<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><title>MoodTravel 行程单</title>';
+  html += '<style>body{font-family:"PingFang SC","Hiragino Sans GB",sans-serif;max-width:800px;margin:0 auto;padding:40px 20px;color:#333;line-height:1.8}';
+  html += 'h1{color:' + activeMoodColor + ';border-bottom:2px solid ' + activeMoodColor + ';padding-bottom:10px;}';
+  html += 'h2{color:' + theme.primary + ';margin-top:30px;}';
+  html += '.item{border-left:3px solid ' + activeMoodColor + ';padding:8px 16px;margin:8px 0;background:#f9f9f9;border-radius:0 8px 8px 0;}';
+  html += '.time{color:#888;font-size:14px;} .cost{color:' + activeMoodColor + ';font-weight:bold;}';
+  html += '.transit{color:#aaa;font-size:13px;margin:4px 0 4px 20px;}';
+  html += '.rain{background:#e8f4fd;padding:4px 10px;border-radius:6px;font-size:13px;margin-top:4px;}';
+  html += '.hotel{background:#f0f8f0;padding:16px;border-radius:12px;margin-top:30px;}';
+  html += '@media print{body{padding:20px}}';
+  html += '</style></head><body>';
+  html += '<h1>🗺️ MoodTravel 行程规划</h1>';
+  html += '<p>心情：' + activeMood + ' | 预算：¥' + budget + ' | 天数：' + days + '天</p>';
+
+  itinerary.forEach(function(day) {
+    html += '<h2>Day ' + day.day + '</h2>';
+    day.items.forEach(function(item, idx) {
+      if (idx > 0 && item.transitTime) {
+        html += '<div class="transit">🚗 约' + item.transitTime + '分钟车程</div>';
+      }
+      var icon = item.type === 'rest' ? '☕' : item.type === 'restaurant' ? '🍽️' : '📍';
+      html += '<div class="item"><strong>' + icon + ' ' + item.name + '</strong> <span class="time">' + item.time + '</span><br>';
+      html += '费用：<span class="cost">¥' + (item.estimatedCost || 0) + '</span>';
+      if (item.estimatedDuration) html += ' · 预计' + item.estimatedDuration + '分钟';
+      if (item.reason) html += '<br>💡 ' + item.reason;
+      if (item.rain_plan) html += '<div class="rain">🌧️ 雨天备选：' + item.rain_plan.name + '（¥' + (item.rain_plan.estimatedCost || 0) + '）</div>';
+      html += '</div>';
+    });
+  });
+
+  if (hotel) {
+    html += '<div class="hotel"><h2>🏨 推荐酒店</h2>';
+    html += '<strong>' + hotel.name + '</strong> ⭐' + hotel.rating + '分<br>';
+    html += '最优价格：' + hotel.bestPlatform + ' ¥' + hotel.bestPrice + '（' + hotel.bestReason + '）<br>';
+    html += '💡 ' + hotel.reason + '</div>';
+  }
+
+  if (stats) {
+    html += '<p style="margin-top:30px;padding:16px;background:#f5f5f5;border-radius:8px;">';
+    html += '总预算：¥' + stats.totalCost + ' | 精选景点：' + stats.totalPois + ' | 比价节省：¥' + (stats.totalSaved || 0);
+    html += '</p>';
+  }
+
+  html += '</body></html>';
+  exportContentText = html;
+  document.getElementById('exportModalTitle').textContent = '🖨️ HTML 行程单预览';
+  document.getElementById('exportModalContent').textContent = html;
+  document.getElementById('exportModalOverlay').classList.add('show');
+}
+
+function closeExportModal() {
+  document.getElementById('exportModalOverlay').classList.remove('show');
+}
+
+function copyExportContent() {
+  if (!exportContentText) return;
+  // 使用 Clipboard API 或 fallback
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(exportContentText).then(function() {
+      showToast('已复制到剪贴板！');
+    }).catch(function() {
+      fallbackCopy(exportContentText);
+    });
+  } else {
+    fallbackCopy(exportContentText);
+  }
+}
+
+function fallbackCopy(text) {
+  var textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  document.body.appendChild(textarea);
+  textarea.select();
+  try {
+    document.execCommand('copy');
+    showToast('已复制到剪贴板！');
+  } catch (e) {
+    showToast('复制失败，请手动复制');
+  }
+  document.body.removeChild(textarea);
+}
+
+// ================================================================
+//  全维度情绪感知系统 — 多维信号采集 + 置信度评分 + 记忆学习
+// ================================================================
+
+// 信号权重配置（各维度对每种情绪的贡献权重）
+var SIGNAL_WEIGHTS = {
+  time_night:     { insomnia: 1.0, tired: 0.5, calm: 0.2 },
+  time_morning:   { tired: 0.6, calm: 0.3 },
+  day_monday:     { anxious: 0.7, tired: 0.5 },
+  day_friday:     { excited: 0.6, happy: 0.5 },
+  day_weekend:    { happy: 0.5, calm: 0.4 },
+  battery_low:    { anxious: 0.8, tired: 0.5 },
+  click_fast:     { anxious: 0.9, excited: 0.5 },
+  mouse_slow:     { tired: 0.8, sad: 0.4, calm: 0.3 },
+  idle_long:      { tired: 0.7, sad: 0.5 },
+  search_repeat:  { anxious: 0.8, tired: 0.4 },
+  dwell_long:     { anxious: 0.5, calm: 0.3, sad: 0.3 },
+  treehole_hesitate: { anxious: 0.7, sad: 0.6, tired: 0.4 }
+};
+
+// 判断是否在静默期（会话级 + localStorage 持久级）
+function inSilentPeriod() {
+  // 本次会话静默：用户关闭过气泡，不再打扰
+  if (emotionState.sessionSilent) return true;
+  // localStorage 持久静默：连续拒绝 2 次后 24 小时
+  if (!memoryStore.silentUntil) return false;
+  return Date.now() < memoryStore.silentUntil;
+}
+
+// 加载localStorage记忆
+function loadMemory() {
+  try {
+    var saved = JSON.parse(localStorage.getItem('moodtravel_emotion_memory') || 'null');
+    if (saved) {
+      memoryStore.rejectCount = saved.rejectCount || 0;
+      memoryStore.lastRejectTime = saved.lastRejectTime || null;
+      memoryStore.silentUntil = saved.silentUntil || null;
+      memoryStore.acceptCount = saved.acceptCount || 0;
+      memoryStore.totalProbes = saved.totalProbes || 0;
+    }
+  } catch (e) { /* ignore */ }
+}
+
+// 保存localStorage记忆
+function saveMemory() {
+  try {
+    localStorage.setItem('moodtravel_emotion_memory', JSON.stringify(memoryStore));
+  } catch (e) { /* ignore */ }
+}
+
+// 用户拒绝试探 → 记录并检查是否进入静默期
+function recordRejection() {
+  memoryStore.rejectCount++;
+  memoryStore.lastRejectTime = Date.now();
+  memoryStore.totalProbes++;
+  if (memoryStore.rejectCount > 2) {
+    memoryStore.silentUntil = Date.now() + SILENT_PERIOD_HOURS * 3600 * 1000;
+    console.log('Emotion: 进入静默期，24小时内不再主动试探');
+  }
+  saveMemory();
+}
+
+// 用户接受试探
+function recordAcceptance() {
+  memoryStore.acceptCount++;
+  memoryStore.totalProbes++;
+  // 接受后重置拒绝计数
+  if (memoryStore.rejectCount > 0) {
+    memoryStore.rejectCount = Math.max(0, memoryStore.rejectCount - 1);
+  }
+  saveMemory();
+}
+
+// ================================================================
+//  多维信号采集器
+// ================================================================
+
+// 1. 环境上下文 — 时间维度
+function getTimeContextSignals() {
+  var now = new Date();
+  var hour = now.getHours();
+  var day = now.getDay(); // 0=周日, 1=周一, ..., 6=周六
+  var signals = [];
+
+  if (hour >= 23 || hour < 6) signals.push('time_night');
+  if (hour >= 5 && hour < 9) signals.push('time_morning');
+  if (day === 1) signals.push('day_monday');
+  if (day === 5) signals.push('day_friday');
+  if (day === 0 || day === 6) signals.push('day_weekend');
+
+  return signals;
+}
+
+// 2. 电池状态
+function initBatteryTracking() {
+  if ('getBattery' in navigator) {
+    navigator.getBattery().then(function(b) {
+      batteryLevel = Math.round(b.level * 100);
+      batteryLow = batteryLevel < 20;
+      b.addEventListener('levelchange', function() {
+        batteryLevel = Math.round(b.level * 100);
+        batteryLow = batteryLevel < 20;
+        if (batteryLow) addSignal('battery', 'battery_low');
+      });
+    }).catch(function() { /* 不支持电池API */ });
+  }
+}
+
+// 3. 鼠标移动追踪
+document.addEventListener('mousemove', function(e) {
+  var now = Date.now();
+  mouseHistory.push({ x: e.clientX, y: e.clientY, time: now });
+  while (mouseHistory.length > 0 && now - mouseHistory[0].time > 5000) mouseHistory.shift();
+  resetIdleTimer();
+});
+
+// 4. 点击追踪
+document.addEventListener('click', function(e) {
+  var now = Date.now();
+  clickHistory.push({ time: now });
+  while (clickHistory.length > 0 && now - clickHistory[0].time > 3000) clickHistory.shift();
+  resetIdleTimer();
+  if (clickHistory.length >= 3) addSignal('behavior', 'click_fast');
+});
+
+// 5. 空闲检测
+function resetIdleTimer() {
+  if (idleTimer) clearTimeout(idleTimer);
+  idleTimer = setTimeout(function() {
+    if (!autoMoodLocked) addSignal('behavior', 'idle_long');
+  }, 15000);
+}
+
+// 6. 搜索重复追踪（hook到现有的搜索相关函数）
+function trackSearch(keyword) {
+  if (!keyword) return;
+  searchHistory.push({ keyword: keyword, time: Date.now() });
+  // 只保留最近 10 条
+  if (searchHistory.length > 10) searchHistory.shift();
+
+  if (keyword === lastSearchKeyword) {
+    searchRepeatCount++;
+  } else {
+    searchRepeatCount = 0;
+    lastSearchKeyword = keyword;
+  }
+
+  if (searchRepeatCount >= SEARCH_REPEAT_THRESHOLD - 1) {
+    addSignal('content', 'search_repeat');
+  }
+}
+
+// 7. 详情页停留追踪
+function startDetailDwell(itemId) {
+  detailDwellStart = Date.now();
+  detailDwellTriggered = false;
+}
+function endDetailDwell() {
+  if (detailDwellStart && !detailDwellTriggered) {
+    var dwell = Date.now() - detailDwellStart;
+    if (dwell >= DETAIL_DWELL_THRESHOLD) {
+      detailDwellTriggered = true;
+      addSignal('content', 'dwell_long');
+    }
+  }
+  detailDwellStart = null;
+}
+
+// 8. 树洞输入犹豫追踪
+function trackTreeHoleFocus() {
+  treeHoleFocusTime = Date.now();
+  treeHoleCursorBlinkCount = 0;
+  if (treeHoleHesitationTimer) clearInterval(treeHoleHesitationTimer);
+  treeHoleHesitationTimer = setInterval(function() {
+    var input = document.getElementById('treeHoleInput');
+    if (input && document.activeElement === input) {
+      treeHoleCursorBlinkCount++;
+      var elapsed = Date.now() - treeHoleFocusTime;
+      if (elapsed >= TREE_HOLE_HESITATE_THRESHOLD && input.value.trim() === '') {
+        addSignal('input', 'treehole_hesitate');
+        clearInterval(treeHoleHesitationTimer);
+      }
+    }
+  }, 1000);
+}
+function trackTreeHoleBlur() {
+  if (treeHoleHesitationTimer) clearInterval(treeHoleHesitationTimer);
+  treeHoleFocusTime = null;
+  treeHoleCursorBlinkCount = 0;
+}
+
+// ================================================================
+//  动态置信度评分引擎
+// ================================================================
+
+// 添加信号 → 更新情绪状态
+function addSignal(category, signalKey) {
+  if (autoMoodLocked || simplifiedMode || inSilentPeriod()) return;
+
+  var now = Date.now();
+  // 防止同一信号短时间内重复触发
+  if (emotionState.signals[signalKey] && (now - emotionState.signals[signalKey] < 10000)) return;
+
+  emotionState.signals[signalKey] = now;
+  emotionState.lastUpdate = now;
+
+  // 计算综合置信度
+  recalculateConfidence();
+}
+
+// 综合计算置信度
+function recalculateConfidence() {
+  var now = Date.now();
+  var activeSignals = [];
+  var totalScore = 0;
+
+  // 收集所有活跃信号（10秒内）
+  Object.keys(emotionState.signals).forEach(function(key) {
+    if (now - emotionState.signals[key] < 10000) {
+      activeSignals.push(key);
+    }
+  });
+
+  // 获取环境上下文信号
+  var timeSignals = getTimeContextSignals();
+  var allSignals = activeSignals.concat(timeSignals);
+
+  // 如果电池低，加入信号
+  if (batteryLow) allSignals.push('battery_low');
+
+  // 去重
+  var uniqueSignals = [];
+  allSignals.forEach(function(s) { if (uniqueSignals.indexOf(s) === -1) uniqueSignals.push(s); });
+
+  // 每个信号 +20 基础分，组合信号有加成
+  totalScore = Math.min(uniqueSignals.length * CONFIDENCE_SIGNAL_BASE, 100);
+
+  // 交叉验证加成：如果有 3+ 种不同类别信号，额外加分
+  var categories = {};
+  uniqueSignals.forEach(function(s) {
+    var cat = s.split('_')[0];
+    categories[cat] = true;
+  });
+  var catCount = Object.keys(categories).length;
+  if (catCount >= 3) totalScore = Math.min(totalScore + 15, 100);
+  if (catCount >= 4) totalScore = Math.min(totalScore + 10, 100);
+
+  emotionState.score = totalScore;
+
+  // 推断情绪类型
+  emotionState.moodType = inferMoodType(uniqueSignals);
+
+  // 根据分数执行不同策略
+  if (totalScore >= CONFIDENCE_PROBE_THRESHOLD) {
+    triggerSoftProbe(emotionState.moodType);
+  } else if (totalScore >= CONFIDENCE_SOFT_THRESHOLD) {
+    applySoftAdjustment(emotionState.moodType);
+  }
+
+  // 启动分数衰减
+  startScoreDecay();
+}
+
+// 推断情绪类型
+function inferMoodType(signals) {
+  var moodScores = { anxious: 0, tired: 0, sad: 0, insomnia: 0, excited: 0, happy: 0, calm: 0 };
+
+  signals.forEach(function(sig) {
+    var weights = SIGNAL_WEIGHTS[sig];
+    if (weights) {
+      Object.keys(weights).forEach(function(mood) {
+        moodScores[mood] = (moodScores[mood] || 0) + weights[mood];
+      });
+    }
+  });
+
+  // 额外规则：深夜 + 任何负面信号 → insomnia 加成
+  if (signals.indexOf('time_night') !== -1) {
+    moodScores.insomnia += 2.0;
+  }
+
+  // 找到最高分
+  var bestMood = 'calm';
+  var bestScore = 0;
+  Object.keys(moodScores).forEach(function(m) {
+    if (moodScores[m] > bestScore) { bestScore = moodScores[m]; bestMood = m; }
+  });
+
+  return bestMood;
+}
+
+// 分数衰减（随时间自然下降）
+function startScoreDecay() {
+  if (emotionState.decayTimer) clearInterval(emotionState.decayTimer);
+  emotionState.decayTimer = setInterval(function() {
+    var now = Date.now();
+    var elapsed = (now - emotionState.lastUpdate) / 1000;
+    if (elapsed > 10) {
+      // 10秒没有新信号，开始衰减
+      emotionState.score = Math.max(0, emotionState.score - CONFIDENCE_DECAY_RATE);
+      if (emotionState.score < CONFIDENCE_SOFT_THRESHOLD) {
+        // 分数过低，恢复默认
+        applySoftAdjustment('calm');
+      }
+      if (emotionState.score <= 0) {
+        clearInterval(emotionState.decayTimer);
+        emotionState.moodType = null;
+      }
+    }
+  }, 2000);
+}
+
+// ================================================================
+//  策略执行层
+// ================================================================
+
+// 后台调整（50-79分）：默默调整推荐权重，不改变UI
+function applySoftAdjustment(moodType) {
+  // 调整推荐算法权重（通过修改全局变量，让后续生成时自动使用）
+  if (moodType === 'tired' || moodType === 'sad' || moodType === 'insomnia') {
+    window._emotionAdjust = { energy: 'low', mood: 'healing', content: 'gentle' };
+    // 润物细无声：背景微动效自动降速，营造呼吸感
+    applySoothingState();
+  } else if (moodType === 'anxious') {
+    window._emotionAdjust = { energy: 'low', mood: 'calming', content: 'soothing' };
+    applySoothingState();
+  } else if (moodType === 'excited' || moodType === 'happy') {
+    window._emotionAdjust = { energy: 'high', mood: 'vibrant', content: 'adventurous' };
+    removeSoothingState();
+  } else {
+    window._emotionAdjust = null;
+    removeSoothingState();
+  }
+
+  // 无缝降级：背景微动效和字体排版自动柔和化（轻量级）
+  applySeamlessDegradation(moodType);
+}
+
+// 柔性试探（80+分）：弹出气泡提示
+function triggerSoftProbe(moodType) {
+  if (inSilentPeriod()) return;
+
+  var mood = MOODS.find(function(m) { return m.key === moodType; });
+  if (!mood) return;
+
+  // 显示柔性试探气泡
+  showEmotionBubble(moodType, mood);
+}
+
+// ================================================================
+//  安抚态 — 润物细无声的视觉降速
+//  不强制暗黑模式，只是让背景微动效变慢，营造呼吸感与安全感
+// ================================================================
+
+var soothingActive = false;
+
+function applySoothingState() {
+  if (soothingActive) return;
+  soothingActive = true;
+  document.body.classList.add('soothing');
+}
+
+function removeSoothingState() {
+  if (!soothingActive) return;
+  soothingActive = false;
+  document.body.classList.remove('soothing');
+}
+
+// ================================================================
+//  UI 无缝降级 — 润物细无声（后台调整用，比 soothing 更轻量）
+// ================================================================
+
+var degradationActive = false;
+
+function applySeamlessDegradation(moodType) {
+  var body = document.body;
+  var sky = document.getElementById('bgSky');
+  var clouds = document.querySelectorAll('.cloud');
+  var particles = document.querySelectorAll('.particle');
+  var balloons = document.querySelectorAll('.balloon');
+
+  var isNegative = (moodType === 'tired' || moodType === 'sad' || moodType === 'anxious' || moodType === 'insomnia');
+
+  if (isNegative) {
+    if (!degradationActive) degradationActive = true;
+
+    // 背景微动效减速
+    body.style.setProperty('--cloud-speed', '0.3');
+    body.style.setProperty('--particle-count', '5');
+    body.style.setProperty('--balloon-speed', '0.5');
+
+    // 云层透明度降低
+    clouds.forEach(function(c) { c.style.opacity = '0.15'; });
+    // 粒子减少
+    particles.forEach(function(p, i) { if (i > 5) p.style.opacity = '0'; });
+    // 热气球减速
+    balloons.forEach(function(b) { b.style.animationDuration = '30s'; });
+
+    // 字体柔和化
+    document.querySelector('.brand-name').style.fontWeight = '400';
+    document.querySelector('.brand-name').style.letterSpacing = '6px';
+    document.querySelector('.brand-slogan').style.fontWeight = '300';
+    document.querySelector('.brand-slogan').style.letterSpacing = '4px';
+  } else {
+    // 恢复默认
+    if (degradationActive) {
+      degradationActive = false;
+      body.style.removeProperty('--cloud-speed');
+      body.style.removeProperty('--particle-count');
+      body.style.removeProperty('--balloon-speed');
+
+      clouds.forEach(function(c) { c.style.opacity = ''; });
+      particles.forEach(function(p) { p.style.opacity = ''; });
+      balloons.forEach(function(b) { b.style.animationDuration = ''; });
+
+      var brandName = document.querySelector('.brand-name');
+      var brandSlogan = document.querySelector('.brand-slogan');
+      if (brandName) { brandName.style.fontWeight = ''; brandName.style.letterSpacing = ''; }
+      if (brandSlogan) { brandSlogan.style.fontWeight = ''; brandSlogan.style.letterSpacing = ''; }
+    }
+  }
+}
+
+// ================================================================
+//  柔性试探气泡 UI
+// ================================================================
+
+var PROBE_MESSAGES = {
+  tired:    { title: '看起来有点累？', sub: '想静静放松，还是找点乐子提提神？', optionA: '想静静，帮我放松', optionB: '找点乐子，提提神', color: '#B5A3C4' },
+  sad:      { title: '心情好像不太美丽...', sub: '想一个人静静，还是需要一点新鲜感？', optionA: '让我静静待会儿', optionB: '带我去点有趣的地方', color: '#C4A8A8' },
+  anxious:  { title: '感觉你有点紧绷', sub: '想深呼吸放松，还是做点什么转移注意力？', optionA: '帮我放松，缓一缓', optionB: '找点乐子，分分心', color: '#6B8FA3' },
+  insomnia: { title: '夜深了，还没睡？', sub: '想安静地待一会儿，还是找点温和的消遣？', optionA: '陪我安静坐坐', optionB: '来点温柔的内容', color: '#6B7BA3' }
+};
+
+function showEmotionBubble(moodType, mood) {
+  var bubble = document.getElementById('emotionBubble');
+  if (!bubble) return;
+  if (emotionState.sessionSilent) return;
+
+  var msg = PROBE_MESSAGES[moodType] || PROBE_MESSAGES.tired;
+  bubble.querySelector('.bubble-title').textContent = msg.title;
+  bubble.querySelector('.bubble-sub').textContent = msg.sub;
+
+  var btnSoothe = document.getElementById('bubbleOptionSoothe');
+  var btnDistract = document.getElementById('bubbleOptionDistract');
+  var btnDismiss = document.getElementById('bubbleDismiss');
+
+  btnSoothe.textContent = '🧘 ' + msg.optionA;
+  btnDistract.textContent = '✨ ' + msg.optionB;
+
+  // 安抚选项（柔和的绿色调）
+  btnSoothe.onclick = function() { acceptProbeSoothe(moodType, mood); };
+  // 转移注意力选项（温暖的橙色调）
+  btnDistract.onclick = function() { acceptProbeDistract(moodType, mood); };
+  // 关闭按钮
+  btnDismiss.onclick = function() { dismissProbe(); };
+
+  bubble.classList.add('show');
+  autoDetectedMood = moodType;
+}
+
+// 选项 A：安抚 — 降速、柔化、温暖陪伴
+function acceptProbeSoothe(moodType, mood) {
+  recordAcceptance();
+  document.getElementById('emotionBubble').classList.remove('show');
+  if (mood) selectMood(mood);
+  // 进入安抚态：不强制暗黑模式，而是让背景缓慢柔化
+  applySoothingState();
+  showToast('好的，我会放慢节奏，陪你安静一会儿~');
+}
+
+// 选项 B：转移注意力 — 推荐有趣内容、周边
+function acceptProbeDistract(moodType, mood) {
+  recordAcceptance();
+  document.getElementById('emotionBubble').classList.remove('show');
+  if (mood) selectMood(mood);
+  // 退出安抚态，恢复正常
+  removeSoothingState();
+  showToast('好嘞！帮你找点新鲜好玩的~');
+  // 自动触发生成一条轻松有趣的路线
+  budget = Math.min(budget, 800);
+  displayBudget = budget;
+  budgetSlider.value = budget;
+  budgetNumber.textContent = budget;
+  budgetCustom.value = '';
+  updateBudgetFill();
+  updatePresetStyles();
+  setTimeout(function() { generatePlan(); }, 600);
+}
+
+function dismissProbe() {
+  recordRejection();
+  document.getElementById('emotionBubble').classList.remove('show');
+  autoDetectedMood = null;
+  emotionState.sessionSilent = true; // 本次会话不再弹出任何试探
+  applySeamlessDegradation('calm'); // 恢复默认
+
+  // 如果进入 24 小时静默期，给用户一个轻柔提示
+  if (inSilentPeriod() && memoryStore.silentUntil) {
+    showToast('好的，接下来一段时间不会打扰你~');
+  }
+}
+
+// 定期检测（每 8 秒）
+moodCheckTimer = setInterval(function() {
+  if (!autoMoodLocked && !simplifiedMode && !inSilentPeriod()) {
+    recalculateConfidence();
+  }
+}, 8000);
+
+// ================================================================
+//  树洞系统
+// ================================================================
+function toggleTreeHole() {
+  var popup = document.getElementById('treeHolePopup');
+  var btn = document.getElementById('treeHoleBtn');
+  if (popup.classList.contains('show')) {
+    popup.classList.remove('show');
+    btn.classList.remove('pulse');
+    trackTreeHoleBlur();
+  } else {
+    popup.classList.add('show');
+    btn.classList.add('pulse');
+    document.getElementById('treeHoleInput').focus();
+    trackTreeHoleFocus();
+  }
+}
+
+// 关键词情感映射
+var MOOD_KEYWORDS = {
+  tired: ['累', '疲惫', '困', '没力气', '躺平', '不想动', '好累', '好困', '睡眠不足', '休息', '想睡'],
+  anxious: ['焦虑', '烦', '紧张', '压力', '不安', '烦躁', '好烦', '心慌', '着急', '担心', '怕'],
+  sad: ['难过', '哭', '低落', '孤独', '伤心', '失望', '委屈', '分手', '吵架', '崩溃', '想哭', '难受', '不开心'],
+  calm: ['安静', '平静', '放松', '舒服', '宁静', '悠闲', '自在'],
+  excited: ['兴奋', '期待', '开心', '激动', '太好了', '棒', '冲冲冲'],
+  happy: ['高兴', '快乐', '幸福', '满足', '美好', '阳光', '喜欢']
+};
+
+function sendToTreeHole() {
+  var input = document.getElementById('treeHoleInput');
+  var text = input.value.trim();
+  if (!text) { showToast('随便说点什么吧，我在这里听着~'); return; }
+
+  trackTreeHoleBlur(); // 停止犹豫追踪
+
+  // 关键词匹配
+  var matchedMood = null;
+  var maxHits = 0;
+  Object.keys(MOOD_KEYWORDS).forEach(function(moodKey) {
+    var hits = 0;
+    MOOD_KEYWORDS[moodKey].forEach(function(kw) {
+      if (text.indexOf(kw) !== -1) hits++;
+    });
+    if (hits > maxHits) { maxHits = hits; matchedMood = moodKey; }
+  });
+
+  // 关闭树洞弹窗
+  document.getElementById('treeHolePopup').classList.remove('show');
+  document.getElementById('treeHoleBtn').classList.remove('pulse');
+  input.value = '';
+
+  autoMoodLocked = true; // 用户主动表达，锁定自动检测
+
+  if (matchedMood && maxHits > 0) {
+    var mood = MOODS.find(function(m) { return m.key === matchedMood; });
+    if (mood) {
+      selectMood(mood);
+      showToast('我感受到了你的「' + mood.label + '」，让我来帮你~');
+      // 如果是负面情绪，进入简化模式
+      if (matchedMood === 'anxious' || matchedMood === 'tired' || matchedMood === 'sad') {
+        enterSimplifiedMode(matchedMood);
+      }
+      return;
+    }
+  }
+
+  // 没有匹配到关键词，给一个温暖的默认回应
+  showToast('谢谢你愿意说出来。不管怎样，我都在这里陪着你。');
+  // 默认按低落处理
+  var sadMood = MOODS.find(function(m) { return m.key === 'sad'; });
+  if (sadMood) selectMood(sadMood);
+  enterSimplifiedMode('sad');
+}
+
+// 点击页面其他地方关闭树洞
+document.addEventListener('click', function(e) {
+  var popup = document.getElementById('treeHolePopup');
+  var btn = document.getElementById('treeHoleBtn');
+  if (popup.classList.contains('show') && !popup.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+    popup.classList.remove('show');
+    btn.classList.remove('pulse');
+  }
+});
+
+// Enter 发送树洞消息
+document.getElementById('treeHoleInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendToTreeHole();
+  }
+});
+
+// 树洞输入框失去焦点 → 停止犹豫追踪
+document.getElementById('treeHoleInput').addEventListener('blur', function() {
+  trackTreeHoleBlur();
+});
+
+// ================================================================
+//  负面情绪简化模式
+// ================================================================
+var HEALING_GREETINGS = {
+  anxious: '看起来今天有点焦虑？<br/>先深呼吸，把节奏放慢一点。',
+  tired: '看起来今天有点累？<br/>先听首轻音乐吧。',
+  sad: '心情不太好吗？<br/>没关系，我陪你坐一会儿。',
+  insomnia: '夜深了，还没睡吗？<br/>把屏幕调暗，让我陪你安静一会儿。'
+};
+
+function enterSimplifiedMode(moodKey) {
+  if (simplifiedMode) return;
+  simplifiedMode = true;
+
+  // 切换心情
+  var mood = MOODS.find(function(m) { return m.key === moodKey; });
+  if (mood) selectMood(mood);
+
+  // 显示治愈覆盖层
+  var overlay = document.getElementById('simplifiedOverlay');
+  var greeting = document.getElementById('healingGreeting');
+  var genBtn = document.getElementById('healingGenBtn');
+  greeting.innerHTML = HEALING_GREETINGS[moodKey] || HEALING_GREETINGS.tired;
+  var theme = MOOD_THEME_MAP[moodKey] || MOOD_THEME_MAP.tired;
+  genBtn.style.background = 'linear-gradient(135deg, ' + theme.primaryLight + ', ' + theme.primary + ')';
+  overlay.classList.add('show');
+
+  // 隐藏所有筛选器
+  hideFilters();
+}
+
+function hideFilters() {
+  var filters = [
+    document.getElementById('budgetSection'),
+    document.getElementById('companionChips').parentElement,
+    document.getElementById('elderlyToggle').parentElement,
+    document.querySelector('.daily-section'),
+    document.querySelector('.hot-routes-section'),
+    document.querySelector('.plans-section'),
+    document.getElementById('generatePlanBtn'),
+    document.querySelector('.left-quick')
+  ];
+  filters.forEach(function(el) {
+    if (el) el.classList.add('filter-hidden');
+  });
+  // 隐藏心情选择器标签
+  var moodSection = document.querySelector('.mood-section');
+  if (moodSection) moodSection.classList.add('filter-hidden');
+}
+
+function showFilters() {
+  document.querySelectorAll('.filter-hidden').forEach(function(el) {
+    el.classList.remove('filter-hidden');
+  });
+}
+
+function dismissSimplified() {
+  simplifiedMode = false;
+  autoMoodLocked = false;
+  autoDetectedMood = null;
+  document.getElementById('simplifiedOverlay').classList.remove('show');
+  removeSoothingState();
+  showFilters();
+  showToast('好的，慢慢来，不着急~');
+}
+
+function quickHealingPlan() {
+  document.getElementById('simplifiedOverlay').classList.remove('show');
+  simplifiedMode = false;
+  showFilters();
+  // 自动设置低预算、低能量、治愈型行程
+  budget = 500;
+  displayBudget = 500;
+  budgetSlider.value = 500;
+  budgetNumber.textContent = '500';
+  budgetCustom.value = '';
+  updateBudgetFill();
+  updatePresetStyles();
+  showToast('正在为你生成治愈路线...');
+  // 触发生成
+  setTimeout(function() { generatePlan(); }, 500);
+}
+
+// ================================================================
+//  深夜默认检测
+// ================================================================
+function checkNightMode() {
+  var hour = new Date().getHours();
+  if (hour >= 23 || hour < 6) {
+    // 深夜模式：默认 insomnia 心情
+    var mood = MOODS.find(function(m) { return m.key === 'insomnia'; });
+    if (mood) {
+      activeMood = 'insomnia';
+      activeMoodColor = mood.color;
+      bgSky.className = 'bg-sky sky-insomnia';
+      budgetNumber.style.color = mood.color;
+      budgetFill.style.background = mood.color;
+      document.body.classList.add('night-mode');
+      updateMoodActiveStyle();
+      updatePresetStyles();
+      planCount.style.background = mood.color + '18';
+      planCount.style.color = mood.color;
+      updateGenerateBtn();
+      showToast('🌙 深夜了，已为你开启护眼暗夜模式');
+    }
+  }
+}
+
+// ================================================================
+//  启动
+// ================================================================
+(function() {
+  loadMemory();
+  initBatteryTracking();
+  checkNightMode();
+  resetIdleTimer();
+  initParticles();
+  initMoods();
+  initCompanions();
+  initPresets();
+  initDailyScenarios();
+  initHotRoutes();
+  renderPlanCards();
+})();
+</script>
+</body>
+</html>

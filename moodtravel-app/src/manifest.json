@@ -1,0 +1,41 @@
+{
+  "name": "MoodTravel",
+  "appid": "__UNI__MoodTravel",
+  "description": "情绪旅行 - 懂你的AI旅行规划助手",
+  "versionName": "1.0.0",
+  "versionCode": "100",
+  "transformPx": false,
+  "app-plus": {
+    "usingComponents": true,
+    "nvueStyleCompiler": "uni-app",
+    "distribute": {
+      "android": {
+        "permissions": [
+          "<uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\"/>"
+        ]
+      },
+      "ios": {},
+      "sdkConfigs": {}
+    }
+  },
+  "mp-weixin": {
+    "appid": "",
+    "setting": {
+      "urlCheck": false,
+      "minified": true,
+      "es6": true
+    },
+    "usingComponents": true,
+    "permission": {
+      "scope.userLocation": {
+        "desc": "用于推荐附近的旅行景点"
+      }
+    }
+  },
+  "h5": {
+    "title": "MoodTravel - 情绪旅行",
+    "router": {
+      "mode": "hash"
+    }
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "pages": [
+    {
+      "path": "pages/login/login",
+      "style": {
+        "navigationBarTitleText": "MoodTravel",
+        "navigationStyle": "custom",
+        "navigationBarBackgroundColor": "#A3B5A6",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "MoodTravel",
+        "navigationStyle": "custom",
+        "navigationBarBackgroundColor": "#A3B5A6",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/plan/plan",
+      "style": {
+        "navigationBarTitleText": "行程规划",
+        "navigationBarBackgroundColor": "#A3B5A6",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/mine/mine",
+      "style": {
+        "navigationBarTitleText": "我的",
+        "navigationBarBackgroundColor": "#A3B5A6",
+        "navigationBarTextStyle": "white"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "MoodTravel",
+    "navigationBarBackgroundColor": "#A3B5A6",
+    "backgroundColor": "#F5F2ED",
+    "backgroundColorTop": "#A3B5A6",
+    "backgroundColorBottom": "#F5F2ED"
+  },
+  "tabBar": {
+    "color": "#9B9790",
+    "selectedColor": "#A3B5A6",
+    "backgroundColor": "#FFFCF8",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "static/icons/home.png",
+        "selectedIconPath": "static/icons/home-active.png"
+      },
+      {
+        "pagePath": "pages/plan/plan",
+        "text": "行程",
+        "iconPath": "static/icons/plan.png",
+        "selectedIconPath": "static/icons/plan-active.png"
+      },
+      {
+        "pagePath": "pages/mine/mine",
+        "text": "我的",
+        "iconPath": "static/icons/mine.png",
+        "selectedIconPath": "static/icons/mine-active.png"
+      }
+    ]
+  },
+  "easycom": {
+    "autoscan": true,
+    "custom": {
+      "^u-(.*)": "@/components/u-$1/u-$1.vue"
+    }
+  }
+}

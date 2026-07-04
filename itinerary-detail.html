@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>行程详情 - 旅心流</title>
+<style>
+:root {
+  --sage: #A3B5A6;
+  --sage-light: #C5D5C8;
+  --mint: #B8CCC0;
+  --sand: #DDD0C0;
+  --sand-light: #EBE2D6;
+  --warm-gray: #9B9790;
+  --text: #4A4640;
+  --text-light: #7A7670;
+  --bg: #F5F2ED;
+  --card: #FFFCF8;
+  --rose: #C4A8A8;
+  --blue-gray: #A8B5C4;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --safe-bottom: env(safe-area-inset-bottom, 20px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: #EDE8E0;
+  display: flex; justify-content: center; align-items: center;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 手机外壳 */
+.phone-frame {
+  width: 390px; height: 844px;
+  background: var(--bg);
+  border-radius: 40px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,.15), 0 0 0 3px #1a1a1a, 0 0 0 6px #2d2d2d;
+}
+@media(max-width:420px){
+  .phone-frame{width:100vw;height:100vh;border-radius:0;box-shadow:none}
+}
+
+/* 状态栏 */
+.status-bar {
+  height: 44px; padding: 14px 24px 0;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 12px; font-weight: 600; color: var(--text);
+  background: transparent;
+  position: relative; z-index: 10;
+}
+.status-bar .time { letter-spacing: 0.5px }
+.status-icons { display: flex; gap: 6px; align-items: center }
+.status-icons .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text) }
+
+/* 导航栏 */
+.nav-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 16px;
+}
+.nav-back {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,255,255,.8); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  border: none; cursor: pointer; font-size: 18px; color: var(--text);
+  transition: all .2s;
+}
+.nav-back:active { transform: scale(.92); background: rgba(255,255,255,.95) }
+.nav-title { font-size: 17px; font-weight: 700; color: var(--text) }
+.nav-actions { display: flex; gap: 8px }
+.nav-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,255,255,.8); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  border: none; cursor: pointer; font-size: 16px; color: var(--text);
+  transition: all .2s;
+}
+.nav-btn:active { transform: scale(.92) }
+
+/* 滚动区域 */
+.scroll-area {
+  height: calc(100% - 96px);
+  overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  padding-bottom: 100px;
+}
+.scroll-area::-webkit-scrollbar { display: none }
+
+/* ============ 地图区域 ============ */
+.map-section {
+  position: relative;
+  margin: 0 16px 16px;
+  height: 200px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: linear-gradient(135deg, #D5E0D8 0%, #C8D8CC 30%, #D8D0C4 70%, #D0C8C0 100%);
+  box-shadow: 0 4px 16px rgba(0,0,0,.06);
+}
+.map-canvas {
+  width: 100%; height: 100%;
+  position: relative;
+}
+/* 地图道路 */
+.map-road {
+  position: absolute;
+  background: rgba(255,255,255,.5);
+  border-radius: 2px;
+}
+.map-road.h { height: 3px; }
+.map-road.v { width: 3px; }
+.map-road.r1 { top: 30%; left: 0; width: 100%; }
+.map-road.r2 { top: 60%; left: 0; width: 100%; }
+.map-road.r3 { top: 0; left: 25%; height: 100%; width: 3px; }
+.map-road.r4 { top: 0; left: 60%; height: 100%; width: 3px; }
+.map-road.r5 { top: 0; left: 80%; height: 100%; width: 3px; }
+
+/* 地图标记点 */
+.map-marker {
+  position: absolute;
+  display: flex; flex-direction: column; align-items: center;
+  transform: translate(-50%,-100%);
+  cursor: pointer;
+  transition: transform .3s;
+  z-index: 2;
+}
+.map-marker:active { transform: translate(-50%,-100%) scale(1.15) }
+.map-marker .pin {
+  width: 28px; height: 28px; border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: 0 3px 8px rgba(0,0,0,.15);
+  position: relative;
+}
+.map-marker .pin::after {
+  content: ''; position: absolute; inset: 4px;
+  border-radius: 50%; background: #fff;
+  transform: rotate(45deg);
+}
+.map-marker .pin-emoji {
+  position: absolute; top: 4px; left: 4px;
+  width: 20px; height: 20px; display: flex;
+  align-items: center; justify-content: center;
+  font-size: 11px; z-index: 3; border-radius: 50%;
+  background: #fff; transform: rotate(45deg);
+}
+.map-marker .label {
+  margin-top: 6px; font-size: 10px; font-weight: 600;
+  color: var(--text); background: rgba(255,255,255,.85);
+  padding: 2px 8px; border-radius: 8px;
+  white-space: nowrap; backdrop-filter: blur(4px);
+}
+.marker-1 { left: 20%; top: 55% }
+.marker-1 .pin { background: var(--sage) }
+.marker-2 { left: 48%; top: 38% }
+.marker-2 .pin { background: var(--rose) }
+.marker-3 { left: 72%; top: 55% }
+.marker-3 .pin { background: var(--blue-gray) }
+.marker-4 { left: 35%; top: 22% }
+.marker-4 .pin { background: var(--sand) }
+.marker-5 { left: 85%; top: 40% }
+.marker-5 .pin { background: var(--mint) }
+
+/* 地图路径线 */
+.map-path {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 1;
+}
+.map-path svg { width: 100%; height: 100% }
+
+/* 地图叠加层 */
+.map-overlay {
+  position: absolute; bottom: 12px; left: 12px; right: 12px;
+  display: flex; gap: 8px;
+}
+.map-badge {
+  flex: 1; padding: 8px 10px; border-radius: var(--radius-sm);
+  background: rgba(255,255,255,.85); backdrop-filter: blur(8px);
+  font-size: 11px; font-weight: 600; color: var(--text);
+  display: flex; align-items: center; gap: 4px;
+}
+.map-badge .dot { width: 8px; height: 8px; border-radius: 50%; }
+.map-badge .dot.sage { background: var(--sage) }
+.map-badge .dot.rose { background: var(--rose) }
+.map-badge .dot.blue { background: var(--blue-gray) }
+
+/* 天气标签 */
+.weather-tag {
+  position: absolute; top: 12px; right: 12px;
+  padding: 6px 12px; border-radius: 20px;
+  background: rgba(255,255,255,.85); backdrop-filter: blur(8px);
+  font-size: 12px; font-weight: 600; color: var(--text);
+  display: flex; align-items: center; gap: 4px;
+}
+
+/* ============ 摘要卡片 ============ */
+.summary-card {
+  margin: 0 16px 16px; padding: 16px;
+  background: var(--card); border-radius: var(--radius);
+  box-shadow: 0 2px 12px rgba(0,0,0,.03);
+  display: flex; gap: 12px; align-items: center;
+}
+.summary-avatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--sage-light), var(--sage));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; flex-shrink: 0;
+}
+.summary-info { flex: 1; min-width: 0 }
+.summary-title { font-size: 15px; font-weight: 700; color: var(--text) }
+.summary-sub { font-size: 12px; color: var(--text-light); margin-top: 2px }
+.summary-tags { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap }
+.summary-tag {
+  padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: 600;
+}
+.summary-tag.sage { background: #E8F0EA; color: #6B8A76 }
+.summary-tag.rose { background: #F5ECEE; color: #8A6B75 }
+.summary-tag.blue { background: #ECF0F5; color: #6B7A8A }
+
+/* ============ 时间轴 ============ */
+.timeline-section {
+  margin: 0 16px 16px;
+}
+.timeline-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.timeline-day {
+  font-size: 16px; font-weight: 700; color: var(--text);
+  display: flex; align-items: center; gap: 6px;
+}
+.timeline-day::after {
+  content: ''; width: 4px; height: 4px; border-radius: 50%;
+  background: var(--sage); margin-left: 4px;
+}
+.timeline-date { font-size: 12px; color: var(--text-light) }
+
+/* 时间轴节点 */
+.timeline {
+  position: relative;
+  padding-left: 32px;
+}
+.timeline::before {
+  content: '';
+  position: absolute; left: 11px; top: 8px; bottom: 8px;
+  width: 2px;
+  background: linear-gradient(to bottom,
+    var(--sage) 0%, var(--sage) 30%,
+    var(--rose) 30%, var(--rose) 60%,
+    var(--blue-gray) 60%, var(--blue-gray) 100%);
+  border-radius: 1px;
+}
+.timeline-item {
+  position: relative;
+  margin-bottom: 14px;
+  animation: slideIn .4s ease-out both;
+}
+.timeline-item:nth-child(1) { animation-delay: 0s }
+.timeline-item:nth-child(2) { animation-delay: .08s }
+.timeline-item:nth-child(3) { animation-delay: .16s }
+.timeline-item:nth-child(4) { animation-delay: .24s }
+.timeline-item:nth-child(5) { animation-delay: .32s }
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-12px) }
+  to { opacity: 1; transform: translateX(0) }
+}
+
+/* 时间点 */
+.timeline-dot {
+  position: absolute; left: -21px; top: 14px;
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: #fff; z-index: 2;
+  box-shadow: 0 2px 8px rgba(0,0,0,.1);
+}
+.timeline-dot.sage { background: var(--sage) }
+.timeline-dot.rose { background: var(--rose) }
+.timeline-dot.blue { background: var(--blue-gray) }
+.timeline-dot.sand { background: var(--sand) }
+.timeline-dot.mint { background: var(--mint) }
+
+/* 时间卡片 */
+.timeline-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.02);
+  transition: all .2s;
+}
+.timeline-card:active { transform: scale(.98); background: #FFF9F2 }
+.timeline-card .time-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 6px;
+}
+.timeline-card .time {
+  font-size: 12px; font-weight: 700; color: var(--sage);
+  letter-spacing: 0.5px;
+}
+.timeline-card .duration {
+  font-size: 10px; color: var(--text-light);
+  background: #F5F2ED; padding: 2px 8px; border-radius: 8px;
+}
+.timeline-card .poi-name {
+  font-size: 16px; font-weight: 700; color: var(--text);
+  margin-bottom: 4px;
+}
+.timeline-card .poi-desc {
+  font-size: 12px; color: var(--text-light);
+  line-height: 1.5; margin-bottom: 8px;
+}
+.timeline-card .reason-bar {
+  font-size: 11px; color: var(--text-light);
+  background: #F8F6F2; padding: 8px 10px;
+  border-radius: var(--radius-sm); line-height: 1.5;
+  display: flex; align-items: flex-start; gap: 6px;
+}
+.timeline-card .reason-bar .icon { flex-shrink: 0; margin-top: 1px }
+.timeline-card .tags-row {
+  display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px;
+}
+.timeline-card .tag {
+  padding: 2px 8px; border-radius: 8px; font-size: 10px; font-weight: 600;
+}
+
+/* 切换天按钮 */
+.day-switcher {
+  display: flex; gap: 6px; margin: 0 16px 16px;
+  background: rgba(0,0,0,.03); border-radius: 12px; padding: 3px;
+}
+.day-btn {
+  flex: 1; padding: 8px; border-radius: 10px; border: none;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: all .25s; background: transparent; color: var(--text-light);
+}
+.day-btn.active {
+  background: #fff; color: var(--text);
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+}
+
+/* ============ 天气预报条 ============ */
+.weather-strip {
+  margin: 0 16px 16px; padding: 12px 16px;
+  background: var(--card); border-radius: var(--radius);
+  box-shadow: 0 2px 12px rgba(0,0,0,.03);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.weather-strip .left { display: flex; align-items: center; gap: 10px }
+.weather-strip .w-icon { font-size: 28px }
+.weather-strip .w-info .w-temp { font-size: 15px; font-weight: 700; color: var(--text) }
+.weather-strip .w-info .w-desc { font-size: 11px; color: var(--text-light) }
+.weather-strip .w-items { display: flex; gap: 16px }
+.weather-strip .w-item { text-align: center }
+.weather-strip .w-item .val { font-size: 13px; font-weight: 700; color: var(--text) }
+.weather-strip .w-item .lbl { font-size: 10px; color: var(--text-light) }
+
+/* ============ 悬浮按钮 ============ */
+.fab {
+  position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+  z-index: 20;
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 24px; border-radius: 28px;
+  background: linear-gradient(135deg, var(--sage), #8FA896);
+  color: #fff; font-size: 15px; font-weight: 700;
+  border: none; cursor: pointer;
+  box-shadow: 0 8px 28px rgba(163,181,166,.4);
+  transition: all .3s;
+  white-space: nowrap;
+}
+.fab:hover { transform: translateX(-50%) translateY(-2px); box-shadow: 0 12px 36px rgba(163,181,166,.5) }
+.fab:active { transform: translateX(-50%) scale(.95) }
+.fab .fab-icon { font-size: 20px; transition: transform .3s }
+.fab:active .fab-icon { transform: rotate(180deg) }
+
+/* 心情调整弹窗 */
+.mood-sheet {
+  position: absolute; inset: 0; z-index: 30;
+  display: none; align-items: flex-end;
+}
+.mood-sheet.show { display: flex }
+.mood-sheet .backdrop {
+  position: absolute; inset: 0; background: rgba(0,0,0,.35);
+  backdrop-filter: blur(4px);
+}
+.mood-sheet .sheet {
+  position: relative; width: 100%;
+  background: var(--bg); border-radius: 24px 24px 0 0;
+  padding: 20px 20px calc(20px + var(--safe-bottom));
+  animation: slideUp .3s ease-out;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%) }
+  to { transform: translateY(0) }
+}
+.sheet-handle {
+  width: 36px; height: 4px; background: #D0CCC4;
+  border-radius: 2px; margin: 0 auto 16px;
+}
+.sheet-title {
+  font-size: 17px; font-weight: 700; color: var(--text);
+  text-align: center; margin-bottom: 6px;
+}
+.sheet-sub {
+  font-size: 12px; color: var(--text-light);
+  text-align: center; margin-bottom: 16px;
+}
+.mood-options {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;
+  margin-bottom: 16px;
+}
+.mood-option {
+  padding: 14px 8px; border-radius: var(--radius);
+  background: #fff; border: 2px solid transparent;
+  cursor: pointer; transition: all .2s;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.mood-option:active { transform: scale(.95) }
+.mood-option.selected { border-color: var(--sage); background: #F0F5F1 }
+.mood-option .moji { font-size: 32px }
+.mood-option .mlabel { font-size: 13px; font-weight: 600; color: var(--text) }
+.sheet-btn {
+  width: 100%; padding: 14px; border-radius: var(--radius);
+  background: linear-gradient(135deg, var(--sage), #8FA896);
+  color: #fff; font-size: 15px; font-weight: 700;
+  border: none; cursor: pointer; transition: all .2s;
+}
+.sheet-btn:active { transform: scale(.97) }
+
+/* Toast */
+.toast {
+  position: absolute; top: 80px; left: 50%; transform: translateX(-50%) translateY(-20px);
+  z-index: 40; background: #4A4640; color: #fff; padding: 10px 20px;
+  border-radius: 20px; font-size: 13px; font-weight: 600;
+  opacity: 0; transition: all .3s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0) }
+
+/* 响应式 */
+@media(min-width:421px) and (max-width:768px){
+  .phone-frame{width:390px;height:844px;border-radius:40px}
+}
+</style>
+</head>
+<body>
+
+<div class="phone-frame" id="app">
+
+  <!-- 状态栏 -->
+  <div class="status-bar">
+    <span class="time">9:41</span>
+    <div class="status-icons">
+      <span>●●●●○</span><span>WiFi</span><span class="dot"></span>
+    </div>
+  </div>
+
+  <!-- 导航栏 -->
+  <div class="nav-bar">
+    <button class="nav-back" onclick="history.back()">←</button>
+    <span class="nav-title">行程详情</span>
+    <div class="nav-actions">
+      <button class="nav-btn" id="btnShare">📤</button>
+      <button class="nav-btn" id="btnRefresh">🔄</button>
+    </div>
+  </div>
+
+  <!-- 滚动区域 -->
+  <div class="scroll-area" id="scrollArea">
+
+    <!-- 地图 -->
+    <div class="map-section">
+      <div class="map-canvas" id="mapCanvas">
+        <div class="map-road h r1"></div>
+        <div class="map-road h r2"></div>
+        <div class="map-road v r3"></div>
+        <div class="map-road v r4"></div>
+        <div class="map-road v r5"></div>
+
+        <!-- 路径线 -->
+        <div class="map-path">
+          <svg viewBox="0 0 358 200">
+            <path d="M70,110 Q90,75 170,76 Q220,77 220,110 Q220,130 260,110 Q300,90 305,80"
+              fill="none" stroke="var(--sage)" stroke-width="2.5" stroke-dasharray="6,4"
+              stroke-linecap="round" opacity="0.7"/>
+          </svg>
+        </div>
+
+        <!-- 标记点 -->
+        <div class="map-marker marker-1">
+          <div class="pin"><div class="pin-emoji">🌿</div></div>
+          <div class="label">茶园</div>
+        </div>
+        <div class="map-marker marker-2">
+          <div class="pin"><div class="pin-emoji">🏛</div></div>
+          <div class="label">博物馆</div>
+        </div>
+        <div class="map-marker marker-3">
+          <div class="pin"><div class="pin-emoji">☕</div></div>
+          <div class="label">咖啡馆</div>
+        </div>
+        <div class="map-marker marker-4">
+          <div class="pin"><div class="pin-emoji">🏯</div></div>
+          <div class="label">灵隐寺</div>
+        </div>
+        <div class="map-marker marker-5">
+          <div class="pin"><div class="pin-emoji">🌊</div></div>
+          <div class="label">西湖</div>
+        </div>
+
+        <div class="weather-tag">⛅ 26° 晴</div>
+        <div class="map-overlay">
+          <div class="map-badge"><span class="dot sage"></span> 当前路线</div>
+          <div class="map-badge"><span class="dot rose"></span> 3个景点</div>
+          <div class="map-badge"><span class="dot blue"></span> 步行约2.1km</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 摘要卡片 -->
+    <div class="summary-card">
+      <div class="summary-avatar">😌</div>
+      <div class="summary-info">
+        <div class="summary-title">杭州 · 治愈慢行</div>
+        <div class="summary-sub">2025年7月15日 · 2天1夜 · 预算 ¥800</div>
+        <div class="summary-tags">
+          <span class="summary-tag sage">慢节奏</span>
+          <span class="summary-tag rose">心情匹配 96%</span>
+          <span class="summary-tag blue">低体力消耗</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 天气预报 -->
+    <div class="weather-strip">
+      <div class="left">
+        <span class="w-icon">⛅</span>
+        <div class="w-info">
+          <div class="w-temp">26° / 晴转多云</div>
+          <div class="w-desc">体感舒适，适合出行</div>
+        </div>
+      </div>
+      <div class="w-items">
+        <div class="w-item"><div class="val">优</div><div class="lbl">空气质量</div></div>
+        <div class="w-item"><div class="val">28°</div><div class="lbl">最高温</div></div>
+        <div class="w-item"><div class="val">60%</div><div class="lbl">湿度</div></div>
+      </div>
+    </div>
+
+    <!-- 天数切换 -->
+    <div class="day-switcher">
+      <button class="day-btn active" data-day="1" onclick="switchDay(1)">📅 Day 1</button>
+      <button class="day-btn" data-day="2" onclick="switchDay(2)">📅 Day 2</button>
+    </div>
+
+    <!-- 时间轴 Day 1 -->
+    <div class="timeline-section" id="day1">
+      <div class="timeline-header">
+        <span class="timeline-day">Day 1 · 慢行西湖</span>
+        <span class="timeline-date">7月15日 周一</span>
+      </div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot sage">1</div>
+          <div class="timeline-card">
+            <div class="time-row">
+              <span class="time">09:00</span>
+              <span class="duration">约1.5h</span>
+            </div>
+            <div class="poi-name">🌿 龙井茶园漫步</div>
+            <div class="poi-desc">清晨的茶园人少安静，沿着茶山步道缓缓而行，空气中弥漫着茶香。</div>
+            <div class="reason-bar">
+              <span class="icon">💡</span>
+              <span>清晨光线柔和适合拍照，体力消耗低，适合当前心情状态</span>
+            </div>
+            <div class="tags-row">
+              <span class="tag" style="background:#E8F0EA;color:#6B8A76">慢节奏</span>
+              <span class="tag" style="background:#F5ECEE;color:#8A6B75">心情匹配</span>
+              <span class="tag" style="background:#ECF0F5;color:#6B7A8A">免费景点</span>
+            </div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot rose">2</div>
+          <div class="timeline-card">
+            <div class="time-row">
+              <span class="time">11:00</span>
+              <span class="duration">约1h</span>
+            </div>
+            <div class="poi-name">🏛 中国茶叶博物馆</div>
+            <div class="poi-desc">室内空调舒适，了解千年茶文化，还有免费品茶体验。</div>
+            <div class="reason-bar">
+              <span class="icon">💡</span>
+              <span>室内空调舒适，安静不拥挤，免费品茶放松身心</span>
+            </div>
+            <div class="tags-row">
+              <span class="tag" style="background:#F0EDF5;color:#7A6B8A">文化之旅</span>
+              <span class="tag" style="background:#ECF0F5;color:#6B7A8A">室内舒适</span>
+              <span class="tag" style="background:#E8F0EA;color:#6B8A76">免费</span>
+            </div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot blue">3</div>
+          <div class="timeline-card">
+            <div class="time-row">
+              <span class="time">12:30</span>
+              <span class="duration">约1h</span>
+            </div>
+            <div class="poi-name">🥗 轻食沙拉碗</div>
+            <div class="poi-desc">鸡胸肉藜麦沙拉+牛油果+小番茄，配柠檬油醋汁，约380大卡。</div>
+            <div class="reason-bar">
+              <span class="icon">💡</span>
+              <span>根据减肥需求自动筛选，低卡高蛋白，营养均衡</span>
+            </div>
+            <div class="tags-row">
+              <span class="tag" style="background:#E8F0EA;color:#6B8A76">低卡健康</span>
+              <span class="tag" style="background:#ECF0F5;color:#6B7A8A">高蛋白</span>
+              <span class="tag" style="background:#F5ECEE;color:#8A6B75">减肥友好</span>
+            </div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot sand">4</div>
+          <div class="timeline-card">
+            <div class="time-row">
+              <span class="time">14:00</span>
+              <span class="duration">约2h</span>
+            </div>
+            <div class="poi-name">☕ 湖畔咖啡馆发呆</div>
+            <div class="poi-desc">在西湖边的咖啡馆，点一杯拿铁，看着湖景发呆，享受慢时光。</div>
+            <div class="reason-bar">
+              <span class="icon">💡</span>
+              <span>疲惫时需要的不是更多景点，而是好好休息充电</span>
+            </div>
+            <div class="tags-row">
+              <span class="tag" style="background:#FDF3E6;color:#8A755B">放空自己</span>
+              <span class="tag" style="background:#E8F0EA;color:#6B8A76">慢节奏</span>
+            </div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot mint">5</div>
+          <div class="timeline-card">
+            <div class="time-row">
+              <span class="time">17:00</span>
+              <span class="duration">约1h</span>
+            </div>
+            <div class="poi-name">🌅 西湖夕阳漫步</div>
+            <div class="poi-desc">柳浪闻莺公园，看夕阳西下，看情侣散步，看老人打太极。</div>
+            <div class="reason-bar">
+              <span class="icon">💡</span>
+              <span>免费景点，零预算压力，日落时分最治愈</span>
+            </div>
+            <div class="tags-row">
+              <span class="tag" style="background:#E8F0EA;color:#6B8A76">免费</span>
+              <span class="tag" style="background:#F0EDF5;color:#7A6B8A">治愈</span>
+              <span class="tag" style="background:#F5ECEE;color:#8A6B75">自然</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 时间轴 Day 2 -->
+    <div class="timeline-section" id="day2" style="display:none">
+      <div class="timeline-header">
+        <span class="timeline-day">Day 2 · 禅意清晨</span>
+        <span class="timeline-date">7月16日 周二</span>
+      </div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot sage">1</div>
+          <div class="timeline-card">
+            <div class="time-row">
+              <span class="time">10:00</span>
+              <span class="duration">约1.5h</span>
+            </div>
+            <div class="poi-name">🌿 睡到自然醒 + 酒店早餐</div>
+            <div class="poi-desc">不赶时间，睡到自然醒，在酒店慢慢享用早餐，补充能量。</div>
+            <div class="reason-bar">
+              <span class="icon">💡</span>
+              <span>疲惫状态下，充足的睡眠比任何景点都重要，晚起一小时精力恢复50%</span>
+            </div>
+            <div class="tags-row">
+              <span class="tag" style="background:#E8F0EA;color:#6B8A76">慢节奏</span>
+              <span class="tag" style="background:#FDF3E6;color:#8A755B">充电回血</span>
+            </div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot rose">2</div>
+          <div class="timeline-card">
+            <div class="time-row">
+              <span class="time">11:30</span>
+              <span class="duration">约1.5h</span>
+            </div>
+            <div class="poi-name">🏯 永福寺抄经体验</div>
+            <div class="poi-desc">比灵隐寺更清净，抄经品茶，在禅意中平复心情，人少安静。</div>
+            <div class="reason-bar">
+              <span class="icon">💡</span>
+              <span>比灵隐寺人少80%，抄经体验有助放松，环境清幽舒缓焦虑</span>
+            </div>
+            <div class="tags-row">
+              <span class="tag" style="background:#F0EDF5;color:#7A6B8A">心灵治愈</span>
+              <span class="tag" style="background:#ECF0F5;color:#6B7A8A">避开人潮</span>
+            </div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot blue">3</div>
+          <div class="timeline-card">
+            <div class="time-row">
+              <span class="time">14:00</span>
+              <span class="duration">约1h</span>
+            </div>
+            <div class="poi-name">📚 西西弗书店</div>
+            <div class="poi-desc">找一本喜欢的书，坐在靠窗的位置，看人来人往，安静阅读。</div>
+            <div class="reason-bar">
+              <span class="icon">💡</span>
+              <span>书店是情绪的避风港，一本好书+一杯热茶，比任何景点都治愈</span>
+            </div>
+            <div class="tags-row">
+              <span class="tag" style="background:#F0EDF5;color:#7A6B8A">安静阅读</span>
+              <span class="tag" style="background:#E8F0EA;color:#6B8A76">室内</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 悬浮按钮 -->
+  <button class="fab" id="fabMood" onclick="openMoodSheet()">
+    <span class="fab-icon">🎭</span> 调整心情
+  </button>
+
+  <!-- 心情调整弹窗 -->
+  <div class="mood-sheet" id="moodSheet">
+    <div class="backdrop" onclick="closeMoodSheet()"></div>
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">调整当前心情</div>
+      <div class="sheet-sub">AI 会根据新心情重新规划行程</div>
+      <div class="mood-options" id="moodOptions">
+        <div class="mood-option" data-mood="happy" onclick="selectMood(this)">
+          <span class="moji">😄</span><span class="mlabel">开心</span>
+        </div>
+        <div class="mood-option selected" data-mood="calm" onclick="selectMood(this)">
+          <span class="moji">😌</span><span class="mlabel">平静</span>
+        </div>
+        <div class="mood-option" data-mood="tired" onclick="selectMood(this)">
+          <span class="moji">😴</span><span class="mlabel">疲惫</span>
+        </div>
+        <div class="mood-option" data-mood="anxious" onclick="selectMood(this)">
+          <span class="moji">😰</span><span class="mlabel">焦虑</span>
+        </div>
+        <div class="mood-option" data-mood="sad" onclick="selectMood(this)">
+          <span class="moji">😢</span><span class="mlabel">低落</span>
+        </div>
+        <div class="mood-option" data-mood="excited" onclick="selectMood(this)">
+          <span class="moji">🤩</span><span class="mlabel">兴奋</span>
+        </div>
+      </div>
+      <button class="sheet-btn" onclick="applyMood()">✨ 重新规划行程</button>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+</div>
+
+<script>
+// ============ 天数切换 ============
+function switchDay(day) {
+  document.querySelectorAll('.day-btn').forEach(function(b){
+    b.classList.toggle('active', b.getAttribute('data-day') == day);
+  });
+  document.getElementById('day1').style.display = day === 1 ? 'block' : 'none';
+  document.getElementById('day2').style.display = day === 2 ? 'block' : 'none';
+}
+
+// ============ 心情弹窗 ============
+var currentMood = 'calm';
+
+function openMoodSheet() {
+  document.getElementById('moodSheet').classList.add('show');
+  // 高亮当前选中
+  document.querySelectorAll('.mood-option').forEach(function(o){
+    o.classList.toggle('selected', o.getAttribute('data-mood') === currentMood);
+  });
+}
+
+function closeMoodSheet() {
+  document.getElementById('moodSheet').classList.remove('show');
+}
+
+function selectMood(el) {
+  document.querySelectorAll('.mood-option').forEach(function(o){ o.classList.remove('selected'); });
+  el.classList.add('selected');
+  currentMood = el.getAttribute('data-mood');
+}
+
+function applyMood() {
+  closeMoodSheet();
+
+  // 显示加载动画
+  var fab = document.getElementById('fabMood');
+  var origText = fab.innerHTML;
+  fab.innerHTML = '<span class="fab-icon" style="animation:spin .8s linear infinite">⏳</span> AI 重新规划中...';
+  fab.style.pointerEvents = 'none';
+
+  setTimeout(function(){
+    fab.innerHTML = origText;
+    fab.style.pointerEvents = 'auto';
+
+    // 更新摘要卡片的心情
+    var moodEmoji = {happy:'😄',calm:'😌',tired:'😴',anxious:'😰',sad:'😢',excited:'🤩'};
+    var moodLabel = {happy:'开心',calm:'平静',tired:'疲惫',anxious:'焦虑',sad:'低落',excited:'兴奋'};
+    document.querySelector('.summary-avatar').textContent = moodEmoji[currentMood];
+
+    // 更新心情匹配度
+    var matchMap = {happy:94,calm:96,tired:98,anxious:99,sad:99,excited:92};
+    var match = matchMap[currentMood];
+    var tagEl = document.querySelector('.summary-tag.rose');
+    tagEl.textContent = '心情匹配 ' + match + '%';
+
+    // 更新标题
+    var titleMap = {happy:'杭州 · 活力探索',calm:'杭州 · 治愈慢行',tired:'杭州 · 轻松休闲',anxious:'杭州 · 安静疗愈',sad:'杭州 · 放空发呆',excited:'杭州 · 精彩不停'};
+    document.querySelector('.summary-title').textContent = titleMap[currentMood];
+
+    showToast('✅ 行程已根据「' + moodLabel[currentMood] + '」心情重新规划');
+  }, 1800);
+}
+
+// ============ Toast ============
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2500);
+}
+
+// ============ 分享按钮 ============
+document.getElementById('btnShare').addEventListener('click', function(){
+  showToast('📋 行程链接已复制到剪贴板');
+});
+
+// ============ 刷新按钮 ============
+document.getElementById('btnRefresh').addEventListener('click', function(){
+  var btn = this;
+  btn.style.transform = 'rotate(180deg)';
+  btn.style.transition = 'transform .6s';
+  showToast('🔄 行程已刷新');
+  setTimeout(function(){ btn.style.transform = 'rotate(0)'; }, 600);
+});
+
+// ============ 地图标记点击 ============
+document.querySelectorAll('.map-marker').forEach(function(m){
+  m.addEventListener('click', function(){
+    var label = this.querySelector('.label').textContent;
+    showToast('📍 已选中：' + label);
+  });
+});
+</script>
+
+</body>
+</html>

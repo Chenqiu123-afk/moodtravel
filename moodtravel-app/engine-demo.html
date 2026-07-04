@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MoodTravel 多维规划引擎 · 可视化 Demo</title>
+<style>
+:root{
+  --bg:#F5F2ED; --card:#FFFFFF; --text:#3A3A3A; --text-light:#8A8A8A;
+  --sage:#A3B5A6; --sage-dark:#7A9680; --warm:#D4A574; --warm-light:#F5EDE3;
+  --rose:#C4A8A8; --blue:#8BA5B5; --blue-light:#E0EBF0;
+  --green:#7A9680; --green-light:#E4F0E6;
+  --orange:#D4A574; --orange-light:#FDF3E6;
+  --purple:#B5A3C4; --purple-light:#F0EDF5;
+  --red:#C48888; --red-light:#F5ECEE;
+  --radius:14px; --shadow:0 2px 12px rgba(0,0,0,0.06);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+.container{max-width:960px;margin:0 auto;padding:20px}
+
+/* Header */
+.header{text-align:center;padding:30px 0 20px}
+.header h1{font-size:2em;color:var(--sage-dark);margin-bottom:4px}
+.header p{color:var(--text-light);font-size:.95em}
+
+/* Control Panel */
+.panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px;margin-bottom:20px}
+.panel h2{font-size:1.1em;color:var(--sage-dark);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+.row:last-child{margin-bottom:0}
+
+/* Mood Selector */
+.mood-btn{flex:1;min-width:70px;padding:12px 8px;border:2px solid #E8E4DC;border-radius:var(--radius);background:white;cursor:pointer;text-align:center;transition:all .2s;font-size:.85em}
+.mood-btn:hover{border-color:var(--sage);transform:translateY(-1px)}
+.mood-btn.active{border-color:var(--sage);background:var(--green-light);box-shadow:0 0 0 3px rgba(163,181,166,0.25)}
+.mood-btn .emoji{font-size:2em;display:block;margin-bottom:4px}
+.mood-btn .label{color:var(--text);font-weight:500}
+.mood-btn .tip{color:var(--text-light);font-size:.75em}
+
+/* Toggles */
+.toggle{display:flex;align-items:center;gap:8px;padding:10px 14px;border:2px solid #E8E4DC;border-radius:var(--radius);cursor:pointer;transition:all .2s;background:white;font-size:.9em}
+.toggle:hover{border-color:var(--sage)}
+.toggle.on{border-color:var(--sage);background:var(--green-light)}
+.toggle .icon{font-size:1.3em}
+
+/* Slider */
+.slider-group{flex:1;min-width:200px}
+.slider-group label{display:block;font-size:.85em;color:var(--text-light);margin-bottom:4px}
+.slider-group input{width:100%;accent-color:var(--sage)}
+.slider-value{font-weight:700;color:var(--sage-dark)}
+
+/* Primary Button */
+.btn-primary{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:linear-gradient(135deg,var(--sage),var(--sage-dark));color:white;border:none;border-radius:var(--radius);font-size:1em;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(163,181,166,0.4)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+/* Results */
+.results{margin-top:20px}
+.result-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden}
+
+/* Stats Bar */
+.stats-bar{display:flex;flex-wrap:wrap;gap:12px;padding:16px 20px;background:linear-gradient(135deg,var(--sage),var(--sage-dark));color:white}
+.stat-item{flex:1;min-width:80px;text-align:center}
+.stat-value{font-size:1.5em;font-weight:700}
+.stat-label{font-size:.75em;opacity:.85}
+
+/* Day Header */
+.day-header{padding:14px 20px;background:var(--green-light);font-weight:600;color:var(--sage-dark);font-size:1.05em;display:flex;justify-content:space-between;align-items:center}
+
+/* Timeline */
+.timeline{padding:0 20px 20px}
+.timeline-item{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid #F0EDE8;align-items:flex-start}
+.timeline-item:last-child{border-bottom:none}
+.timeline-time{min-width:52px;font-size:.85em;font-weight:600;color:var(--sage-dark);padding-top:2px}
+.timeline-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1em;flex-shrink:0}
+.timeline-content{flex:1}
+.timeline-name{font-weight:600;font-size:.95em;margin-bottom:2px}
+.timeline-desc{color:var(--text-light);font-size:.82em;margin-bottom:6px}
+.timeline-reason{font-size:.8em;color:var(--sage-dark);background:var(--green-light);padding:4px 10px;border-radius:20px;display:inline-block;margin-bottom:4px}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.tag{font-size:.72em;padding:2px 8px;border-radius:10px;background:#F0EDE8;color:var(--text-light)}
+.tag.mood{background:var(--purple-light);color:var(--purple)}
+.tag.budget{background:var(--orange-light);color:var(--orange)}
+.tag.diet{background:var(--red-light);color:var(--red)}
+.tag.savings{background:var(--green-light);color:var(--green)}
+
+/* Hotel Card */
+.hotel-card{padding:16px 20px;background:var(--orange-light);margin:0 20px 16px;border-radius:var(--radius)}
+.hotel-card h4{color:var(--orange);margin-bottom:4px}
+.hotel-card .savings{font-size:.85em;color:var(--green);font-weight:600}
+
+/* Weight Matrix */
+.matrix{overflow-x:auto;margin:20px 0}
+.matrix table{width:100%;border-collapse:collapse;font-size:.85em}
+.matrix th{background:var(--sage);color:white;padding:8px 10px;text-align:left;font-weight:500}
+.matrix td{padding:8px 10px;border-bottom:1px solid #E8E4DC}
+.matrix tr:hover td{background:var(--green-light)}
+
+/* Score Breakdown */
+.score-bar{height:6px;border-radius:3px;background:#E8E4DC;margin:4px 0;overflow:hidden}
+.score-fill{height:100%;border-radius:3px;transition:width .5s}
+.score-fill.mood{background:var(--purple)}
+.score-fill.budget{background:var(--orange)}
+.score-fill.energy{background:var(--sage)}
+.score-fill.crowd{background:var(--blue)}
+.score-fill.kid{background:var(--red)}
+.score-fill.diet{background:var(--green)}
+.score-fill.elderly{background:var(--warm)}
+
+/* Loading */
+.loading-overlay{position:fixed;inset:0;background:rgba(245,242,237,0.9);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px)}
+.spinner{width:44px;height:44px;border:3px solid #E8E4DC;border-top-color:var(--sage);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{margin-top:16px;color:var(--sage-dark);font-weight:500}
+
+/* Responsive */
+@media(max-width:600px){
+  .header h1{font-size:1.5em}
+  .mood-btn{min-width:60px;padding:8px 4px}
+  .mood-btn .emoji{font-size:1.5em}
+  .stats-bar{gap:8px}
+  .stat-value{font-size:1.2em}
+}
+
+/* Filter stats */
+.filter-stats{display:flex;gap:16px;padding:12px 20px;font-size:.82em;color:var(--text-light);border-bottom:1px solid #F0EDE8}
+.filter-stats span{display:flex;align-items:center;gap:4px}
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loading" style="display:none">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">AI 正在分析</div>
+</div>
+
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <h1>🧠 MoodTravel 多维规划引擎</h1>
+    <p>4层漏斗算法 · 实时权重矩阵 · 酒店比价 · 天气联动 · 可视化评分</p>
+  </div>
+
+  <!-- Control Panel -->
+  <div class="panel">
+    <h2>🎭 第 1 步：选择当前心情</h2>
+    <div class="row" id="moodSelector">
+      <!-- JS 动态生成 -->
+    </div>
+
+    <h2 style="margin-top:20px">⚙️ 第 2 步：设置现实约束</h2>
+    <div class="row" id="toggles">
+      <div class="toggle" data-key="hasKids" onclick="toggleSwitch(this)">
+        <span class="icon">👶</span> 带小孩
+      </div>
+      <div class="toggle" data-key="isDieting" onclick="toggleSwitch(this)">
+        <span class="icon">🥗</span> 正在减肥
+      </div>
+      <div class="toggle" data-key="budgetSensitive" onclick="toggleSwitch(this)">
+        <span class="icon">💰</span> 预算敏感
+      </div>
+      <div class="toggle" data-key="hasElderly" onclick="toggleSwitch(this)">
+        <span class="icon">👴</span> 带老人
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:16px">
+      <div class="slider-group">
+        <label>💰 总预算：<span class="slider-value" id="budgetValue">¥2000</span></label>
+        <input type="range" min="500" max="8000" step="100" value="2000" id="budgetSlider" oninput="updateBudget()">
+      </div>
+      <div class="slider-group">
+        <label>📅 行程天数：<span class="slider-value" id="daysValue">2 天</span></label>
+        <input type="range" min="1" max="5" step="1" value="2" id="daysSlider" oninput="updateDays()">
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:8px">
+      <div class="slider-group">
+        <label>🌧️ 是否下雨：<span class="slider-value" id="rainValue">晴天</span></label>
+        <input type="range" min="0" max="1" step="1" value="0" id="rainSlider" oninput="updateRain()">
+      </div>
+    </div>
+
+    <div style="margin-top:20px;text-align:center">
+      <button class="btn-primary" onclick="runEngine()" id="runBtn">
+        🚀 智能生成行程
+      </button>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div id="results"></div>
+</div>
+
+<script>
+// ============================================================
+// MOOD DATA
+// ============================================================
+const MOODS = [
+  { key:'tired', emoji:'😴', label:'疲惫', tip:'需要放松', index:3 },
+  { key:'excited', emoji:'🤩', label:'兴奋', tip:'充满能量', index:9 },
+  { key:'happy', emoji:'😄', label:'开心', tip:'心情愉悦', index:8 },
+  { key:'calm', emoji:'😌', label:'平静', tip:'不紧不慢', index:6 },
+  { key:'anxious', emoji:'😰', label:'焦虑', tip:'需要舒缓', index:3 },
+  { key:'sad', emoji:'😢', label:'低落', tip:'需要治愈', index:2 }
+];
+
+let selectedMood = MOODS[0];
+let switches = { hasKids:false, isDieting:false, budgetSensitive:false, hasElderly:false };
+let budget = 2000;
+let days = 2;
+let isRain = false;
+
+// ============================================================
+// INIT
+// ============================================================
+function init(){
+  // Mood buttons
+  const container = document.getElementById('moodSelector');
+  MOODS.forEach((m,i) => {
+    const btn = document.createElement('div');
+    btn.className = 'mood-btn' + (i===0?' active':'');
+    btn.innerHTML = `<span class="emoji">${m.emoji}</span><span class="label">${m.label}</span><span class="tip">${m.tip}</span>`;
+    btn.onclick = () => selectMood(i,btn);
+    container.appendChild(btn);
+  });
+}
+init();
+
+function selectMood(i,btn){
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedMood = MOODS[i];
+}
+
+function toggleSwitch(el){
+  el.classList.toggle('on');
+  const key = el.dataset.key;
+  switches[key] = el.classList.contains('on');
+}
+
+function updateBudget(){
+  budget = parseInt(document.getElementById('budgetSlider').value);
+  document.getElementById('budgetValue').textContent = '¥'+budget;
+}
+function updateDays(){
+  days = parseInt(document.getElementById('daysSlider').value);
+  document.getElementById('daysValue').textContent = days+' 天';
+}
+function updateRain(){
+  isRain = parseInt(document.getElementById('rainSlider').value) === 1;
+  document.getElementById('rainValue').textContent = isRain ? '🌧️ 暴雨' : '☀️ 晴天';
+}
+
+// ============================================================
+// WEIGHT MATRIX
+// ============================================================
+const WEIGHT_MATRIX = {
+  'tired_solo':     { mood:0.35, budget:0.15, energy:0.30, crowd:0.15, kid:0, elderly:0, diet:0.05 },
+  'tired_kids':     { mood:0.30, budget:0.10, energy:0.25, crowd:0.15, kid:0.15, elderly:0, diet:0.05 },
+  'tired_elderly':  { mood:0.25, budget:0.15, energy:0.30, crowd:0.15, kid:0, elderly:0.10, diet:0.05 },
+  'excited_solo':   { mood:0.20, budget:0.15, energy:0.10, crowd:0.05, kid:0, elderly:0, diet:0 },
+  'excited_couple': { mood:0.25, budget:0.10, energy:0.05, crowd:0.05, kid:0, elderly:0, diet:0.05 },
+  'sad_kids':       { mood:0.30, budget:0.10, energy:0.15, crowd:0.20, kid:0.20, elderly:0, diet:0.05 },
+  'sad_solo':       { mood:0.35, budget:0.15, energy:0.20, crowd:0.20, kid:0, elderly:0, diet:0.10 },
+  'anxious_solo':   { mood:0.30, budget:0.15, energy:0.20, crowd:0.25, kid:0, elderly:0, diet:0.10 },
+  'happy_budget':   { mood:0.15, budget:0.35, energy:0.10, crowd:0.05, kid:0, elderly:0, diet:0.05 },
+  'calm_family':    { mood:0.20, budget:0.15, energy:0.15, crowd:0.15, kid:0.20, elderly:0, diet:0.15 },
+  'default':        { mood:0.25, budget:0.20, energy:0.15, crowd:0.15, kid:0.10, elderly:0.05, diet:0.10 }
+};
+
+// ============================================================
+// MOCK POI DATABASE (60+ POIs with full tag system)
+// ============================================================
+const POIS = [
+  // 疲惫/低落 → 治愈系
+  { id:1, name:'悦榕庄SPA水疗', category:'leisure', energyLevel:1, crowdednessLevel:2, weatherSensitivity:'indoor',
+    ticketPrice:680, kidsFriendly:false, elderlyFriendly:true, minAge:null,
+    moodScores:{tired:10,anxious:8,sad:9,calm:8,excited:2,happy:5},
+    tags:['高端','放松','按摩'],priceTier:'premium',estimatedDuration:120 },
+  { id:2, name:'猫的天空之城·概念书店', category:'leisure', energyLevel:1, crowdednessLevel:2, weatherSensitivity:'indoor',
+    ticketPrice:35, kidsFriendly:true, elderlyFriendly:true, minAge:3,
+    moodScores:{tired:9,anxious:9,sad:10,calm:9,excited:3,happy:6},
+    tags:['安静','文艺','拍照'],priceTier:'budget',estimatedDuration:90 },
+  { id:3, name:'泰式古法按摩', category:'leisure', energyLevel:1, crowdednessLevel:1, weatherSensitivity:'indoor',
+    ticketPrice:198, kidsFriendly:false, elderlyFriendly:true, minAge:null,
+    moodScores:{tired:10,anxious:7,sad:8,calm:8,excited:4,happy:5},
+    tags:['性价比','放松','拉伸'],priceTier:'value',estimatedDuration:60 },
+  { id:4, name:'永福寺·抄经体验', category:'temple', energyLevel:1, crowdednessLevel:2, weatherSensitivity:'indoor',
+    ticketPrice:45, kidsFriendly:true, elderlyFriendly:true, minAge:6,
+    moodScores:{tired:8,anxious:10,sad:9,calm:9,excited:2,happy:5},
+    tags:['安静','禅意','抄经'],priceTier:'budget',estimatedDuration:120 },
+  { id:5, name:'中国茶叶博物馆', category:'museum', energyLevel:1, crowdednessLevel:2, weatherSensitivity:'indoor',
+    ticketPrice:0, kidsFriendly:true, elderlyFriendly:true, minAge:3,
+    moodScores:{tired:8,anxious:9,sad:8,calm:9,excited:3,happy:6},
+    tags:['免费','安静','品茶'],priceTier:'free',estimatedDuration:90 },
+  { id:6, name:'西湖漫步', category:'scenic', energyLevel:2, crowdednessLevel:3, weatherSensitivity:'outdoor',
+    ticketPrice:0, kidsFriendly:true, elderlyFriendly:true, minAge:0,
+    moodScores:{tired:6,anxious:5,sad:8,calm:8,excited:6,happy:8},
+    tags:['免费','西湖','散步'],priceTier:'free',estimatedDuration:60 },
+
+  // 兴奋/开心 → 高活力
+  { id:7, name:'杭州宋城·千古情', category:'theme_park', energyLevel:4, crowdednessLevel:4, weatherSensitivity:'mixed',
+    ticketPrice:320, kidsFriendly:true, elderlyFriendly:true, minAge:3,
+    moodScores:{tired:2,anxious:2,sad:3,calm:5,excited:10,happy:9},
+    tags:['演出','穿越','亲子'],priceTier:'premium',estimatedDuration:240 },
+  { id:8, name:'苏堤骑行', category:'sport', energyLevel:4, crowdednessLevel:3, weatherSensitivity:'outdoor',
+    ticketPrice:30, kidsFriendly:true, elderlyFriendly:false, minAge:8,
+    moodScores:{tired:2,anxious:4,sad:4,calm:6,excited:9,happy:9},
+    tags:['骑行','户外','运动'],priceTier:'budget',estimatedDuration:120 },
+  { id:9, name:'河坊街夜市', category:'shopping', energyLevel:3, crowdednessLevel:5, weatherSensitivity:'outdoor',
+    ticketPrice:0, kidsFriendly:true, elderlyFriendly:true, minAge:0,
+    moodScores:{tired:3,anxious:2,sad:4,calm:5,excited:8,happy:9},
+    tags:['免费','小吃','古街'],priceTier:'free',estimatedDuration:120 },
+  { id:10, name:'湖滨银泰in77', category:'shopping', energyLevel:3, crowdednessLevel:4, weatherSensitivity:'indoor',
+    ticketPrice:0, kidsFriendly:true, elderlyFriendly:true, minAge:0,
+    moodScores:{tired:4,anxious:3,sad:4,calm:6,excited:8,happy:9},
+    tags:['购物','美食','免费'],priceTier:'free',estimatedDuration:150 },
+
+  // 亲子
+  { id:11, name:'杭州动物园', category:'theme_park', energyLevel:3, crowdednessLevel:3, weatherSensitivity:'outdoor',
+    ticketPrice:20, kidsFriendly:true, elderlyFriendly:true, minAge:0,
+    moodScores:{tired:4,anxious:5,sad:5,calm:7,excited:8,happy:9},
+    tags:['亲子','动物','户外'],priceTier:'budget',estimatedDuration:180 },
+  { id:12, name:'浙江省科技馆', category:'museum', energyLevel:2, crowdednessLevel:3, weatherSensitivity:'indoor',
+    ticketPrice:0, kidsFriendly:true, elderlyFriendly:true, minAge:3,
+    moodScores:{tired:5,anxious:5,sad:5,calm:7,excited:8,happy:8},
+    tags:['免费','亲子','互动'],priceTier:'free',estimatedDuration:120 },
+  { id:13, name:'烂苹果乐园', category:'theme_park', energyLevel:3, crowdednessLevel:4, weatherSensitivity:'indoor',
+    ticketPrice:160, kidsFriendly:true, elderlyFriendly:false, minAge:3,
+    moodScores:{tired:3,anxious:4,sad:4,calm:6,excited:9,happy:9},
+    tags:['亲子','室内','游乐'],priceTier:'premium',estimatedDuration:240 },
+
+  // 焦虑 → 舒缓
+  { id:14, name:'十里琅珰步道', category:'scenic', energyLevel:4, crowdednessLevel:2, weatherSensitivity:'outdoor',
+    ticketPrice:0, kidsFriendly:true, elderlyFriendly:false, minAge:6,
+    moodScores:{tired:3,anxious:6,sad:6,calm:8,excited:7,happy:7},
+    tags:['免费','徒步','茶山'],priceTier:'free',estimatedDuration:180 },
+  { id:15, name:'郭庄园林下午茶', category:'leisure', energyLevel:1, crowdednessLevel:2, weatherSensitivity:'mixed',
+    ticketPrice:68, kidsFriendly:true, elderlyFriendly:true, minAge:3,
+    moodScores:{tired:8,anxious:9,sad:8,calm:9,excited:5,happy:7},
+    tags:['园林','下午茶','安静'],priceTier:'value',estimatedDuration:90 },
+
+  // 减肥
+  { id:16, name:'Wagas轻食沙拉', category:'restaurant', energyLevel:1, crowdednessLevel:3, weatherSensitivity:'indoor',
+    ticketPrice:68, isDietFriendly:true, dietaryTags:['lowFat','highProtein','lightFlavor'], avgCalories:350,
+    kidsFriendly:true, elderlyFriendly:true,
+    moodScores:{tired:7,anxious:6,sad:6,calm:7,excited:5,happy:6},
+    tags:['轻食','沙拉','低卡'],priceTier:'value',estimatedDuration:60,cuisine:'轻食' },
+  { id:17, name:'蒸年轻·蒸汽海鲜', category:'restaurant', energyLevel:1, crowdednessLevel:3, weatherSensitivity:'indoor',
+    ticketPrice:90, isDietFriendly:true, dietaryTags:['lowFat','highProtein','lightFlavor'], avgCalories:400,
+    kidsFriendly:true, elderlyFriendly:true,
+    moodScores:{tired:6,anxious:6,sad:6,calm:7,excited:6,happy:7},
+    tags:['蒸菜','低脂','健康'],priceTier:'value',estimatedDuration:60,cuisine:'蒸菜' },
+  { id:18, name:'楼外楼·杭帮菜', category:'restaurant', energyLevel:1, crowdednessLevel:4, weatherSensitivity:'indoor',
+    ticketPrice:120, isDietFriendly:false, dietaryTags:[], avgCalories:900,
+    kidsFriendly:true, elderlyFriendly:true,
+    moodScores:{tired:5,anxious:4,sad:5,calm:6,excited:7,happy:8},
+    tags:['杭帮菜','百年老店','湖景'],priceTier:'value',estimatedDuration:60,cuisine:'杭帮菜' },
+  { id:19, name:'龙井村农家菜', category:'restaurant', energyLevel:2, crowdednessLevel:3, weatherSensitivity:'outdoor',
+    ticketPrice:80, isDietFriendly:false, dietaryTags:[], avgCalories:800,
+    kidsFriendly:true, elderlyFriendly:true,
+    moodScores:{tired:5,anxious:5,sad:5,calm:7,excited:7,happy:8},
+    tags:['农家菜','龙井','土鸡煲'],priceTier:'value',estimatedDuration:60,cuisine:'农家菜' },
+
+  // 室内雨天备选
+  { id:20, name:'浙江美术馆', category:'museum', energyLevel:1, crowdednessLevel:2, weatherSensitivity:'indoor',
+    ticketPrice:0, kidsFriendly:true, elderlyFriendly:true, minAge:3,
+    moodScores:{tired:7,anxious:8,sad:8,calm:8,excited:4,happy:6},
+    tags:['免费','艺术','安静'],priceTier:'free',estimatedDuration:90 },
+  { id:21, name:'西西弗书店', category:'leisure', energyLevel:1, crowdednessLevel:2, weatherSensitivity:'indoor',
+    ticketPrice:30, kidsFriendly:true, elderlyFriendly:true, minAge:3,
+    moodScores:{tired:9,anxious:8,sad:9,calm:9,excited:3,happy:6},
+    tags:['安静','咖啡','阅读'],priceTier:'budget',estimatedDuration:90 },
+  { id:22, name:'杭州博物馆', category:'museum', energyLevel:2, crowdednessLevel:3, weatherSensitivity:'indoor',
+    ticketPrice:0, kidsFriendly:true, elderlyFriendly:true, minAge:3,
+    moodScores:{tired:6,anxious:6,sad:6,calm:7,excited:5,happy:6},
+    tags:['免费','历史','文化'],priceTier:'free',estimatedDuration:120 },
+  { id:23, name:'灵隐寺', category:'temple', energyLevel:3, crowdednessLevel:5, weatherSensitivity:'outdoor',
+    ticketPrice:75, kidsFriendly:true, elderlyFriendly:true, minAge:3,
+    moodScores:{tired:4,anxious:4,sad:5,calm:6,excited:5,happy:6},
+    tags:['佛教','古迹','人流量大'],priceTier:'value',estimatedDuration:120 },
+  { id:24, name:'九溪烟树', category:'scenic', energyLevel:3, crowdednessLevel:2, weatherSensitivity:'outdoor',
+    ticketPrice:0, kidsFriendly:true, elderlyFriendly:false, minAge:5,
+    moodScores:{tired:4,anxious:6,sad:7,calm:8,excited:7,happy:8},
+    tags:['免费','徒步','溪流'],priceTier:'free',estimatedDuration:180 },
+];
+
+// ============================================================
+// HOTELS
+// ============================================================
+const HOTELS = [
+  { id:1, name:'安缦法云精品酒店', priceRangeLow:3800, priceRangeHigh:5800, priceTier:'luxury', stars:5,
+    has_spa:true, has_gym:true, has_pool:true, has_restaurant:true,
+    kidsFriendly:true, elderlyFriendly:true, breakfastIncluded:true,
+    moodScores:{tired:10,anxious:9,sad:9,calm:10,excited:7,happy:8}, rating:4.9 },
+  { id:2, name:'西溪湿地悦榕庄', priceRangeLow:2200, priceRangeHigh:3200, priceTier:'luxury', stars:5,
+    has_spa:true, has_gym:true, has_pool:true, has_restaurant:true,
+    kidsFriendly:true, elderlyFriendly:true, breakfastIncluded:true,
+    moodScores:{tired:10,anxious:9,sad:9,calm:9,excited:8,happy:8}, rating:4.8 },
+  { id:3, name:'西湖国宾馆', priceRangeLow:1200, priceRangeHigh:1800, priceTier:'premium', stars:5,
+    has_spa:false, has_gym:true, has_pool:true, has_restaurant:true,
+    kidsFriendly:true, elderlyFriendly:true, breakfastIncluded:true,
+    moodScores:{tired:8,anxious:8,sad:8,calm:9,excited:6,happy:7}, rating:4.7 },
+  { id:4, name:'全季酒店（西湖店）', priceRangeLow:350, priceRangeHigh:550, priceTier:'value', stars:3,
+    has_spa:false, has_gym:false, has_pool:false, has_restaurant:false,
+    kidsFriendly:true, elderlyFriendly:true, breakfastIncluded:false,
+    moodScores:{tired:5,anxious:5,sad:5,calm:6,excited:5,happy:6}, rating:4.3 },
+  { id:5, name:'如家快捷酒店', priceRangeLow:180, priceRangeHigh:280, priceTier:'budget', stars:2,
+    has_spa:false, has_gym:false, has_pool:false, has_restaurant:false,
+    kidsFriendly:false, elderlyFriendly:true, breakfastIncluded:false,
+    moodScores:{tired:3,anxious:3,sad:3,calm:4,excited:3,happy:4}, rating:3.8 },
+  { id:6, name:'杭州西子湖四季酒店', priceRangeLow:2800, priceRangeHigh:4500, priceTier:'luxury', stars:5,
+    has_spa:true, has_gym:true, has_pool:true, has_restaurant:true,
+    kidsFriendly:true, elderlyFriendly:true, breakfastIncluded:true,
+    moodScores:{tired:9,anxious:9,sad:9,calm:10,excited:8,happy:9}, rating:4.9 },
+];
+
+// ============================================================
+// 酒店比价模拟
+// ============================================================
+const PLATFORMS = ['携程','美团','飞猪','去哪儿','同程'];
+function generatePrices(basePrice){
+  return PLATFORMS.map(p => {
+    const v = 1 + (Math.random() - 0.5) * 0.3;
+    return { platform:p, price:Math.round(basePrice * v) };
+  }).sort((a,b) => a.price - b.price);
+}
+
+// ============================================================
+// CORE ENGINE (inline)
+// ============================================================
+function getWeightKey(moodLabel){
+  const k = switches.hasKids ? 'kids' : switches.hasElderly ? 'elderly' : 'solo';
+  const key = `${moodLabel}_${k}`;
+  return WEIGHT_MATRIX[key] || WEIGHT_MATRIX.default;
+}
+
+function runEngine(){
+  const btn = document.getElementById('runBtn');
+  const loading = document.getElementById('loading');
+  const loadingText = document.getElementById('loadingText');
+  btn.disabled = true;
+  loading.style.display = 'flex';
+
+  // 模拟加载过程
+  const texts = [
+    '正在分析心情状态...',
+    '正在加载目的地景点数据...',
+    '正在计算多维权重矩阵...',
+    '正在比价酒店平台...',
+    '正在模拟天气影响...',
+    '正在编排最优行程...'
+  ];
+  let i = 0;
+  const interval = setInterval(() => {
+    loadingText.textContent = texts[i] || texts[texts.length-1];
+    i++;
+  }, 400);
+
+  setTimeout(() => {
+    clearInterval(interval);
+    const result = doGenerate();
+    renderResults(result);
+    loading.style.display = 'none';
+    btn.disabled = false;
+    document.getElementById('results').scrollIntoView({behavior:'smooth'});
+  }, 2000);
+}
+
+function doGenerate(){
+  const moodLabel = selectedMood.key;
+  const moodIndex = selectedMood.index;
+  const weights = getWeightKey(moodLabel);
+  const dailyBudget = budget / days;
+
+  // ---- 第 1 层：硬性过滤 ----
+  const candidates = POIS.filter(poi => {
+    if (poi.ticketPrice > dailyBudget * 0.5) return false;
+    if (isRain && poi.weatherSensitivity === 'outdoor') return false;
+    if (switches.hasKids && !poi.kidsFriendly) return false;
+    if (switches.hasKids && poi.minAge && poi.minAge > 5) return false;
+    if (switches.hasElderly && !poi.elderlyFriendly && poi.energyLevel >= 4) return false;
+    if (switches.isDieting && poi.category === 'restaurant' && !poi.isDietFriendly) return false;
+    return true;
+  });
+
+  // ---- 第 2 层：多维评分 ----
+  const energyIdeal = {tired:1,excited:4,happy:3,calm:2,anxious:2,sad:1}[moodLabel] || 2;
+
+  const scored = candidates.map(poi => {
+    const moodScore = (poi.moodScores[moodLabel] || 5) * weights.mood * 10;
+    const budgetRatio = dailyBudget > 0 ? Math.min(poi.ticketPrice / dailyBudget, 1) : 0;
+    const budgetScore = (1 - budgetRatio) * weights.budget * 100;
+    const energyDiff = Math.abs(poi.energyLevel - energyIdeal);
+    const energyScore = (1 - energyDiff / 4) * weights.energy * 100;
+    const crowdScore = (5 - poi.crowdednessLevel) / 4 * weights.crowd * 100;
+    const kidScore = switches.hasKids ? (poi.kidsFriendly ? weights.kid * 100 : 0) : 0;
+    const elderlyScore = switches.hasElderly ? (poi.elderlyFriendly ? weights.elderly * 100 : 0) : 0;
+    const dietScore = switches.isDieting && poi.isDietFriendly ? weights.diet * 100 : 0;
+    const total = moodScore + budgetScore + energyScore + crowdScore + kidScore + elderlyScore + dietScore;
+    return {...poi, _scores:{moodScore,budgetScore,energyScore,crowdScore,kidScore,elderlyScore,dietScore},_total:total};
+  });
+  scored.sort((a,b) => b._total - a._total);
+
+  // ---- 第 3 层：冲突解决 + 编排 ----
+  const maxPerDay = moodIndex <= 3 ? 4 : 5;
+  const used = new Set();
+  const itinerary = [];
+
+  for (let d = 0; d < days; d++) {
+    const items = [];
+    const dayPois = [];
+    for (const poi of scored) {
+      if (dayPois.length >= maxPerDay) break;
+      if (!used.has(poi.id)) { used.add(poi.id); dayPois.push(poi); }
+    }
+    // 确保多样性
+    const cats = new Set(dayPois.map(p => p.category));
+    if (cats.size < 2 && dayPois.length >= 3) {
+      for (const poi of scored) {
+        if (!used.has(poi.id) && !cats.has(poi.category)) {
+          used.delete(dayPois[dayPois.length-1].id);
+          dayPois[dayPois.length-1] = poi;
+          used.add(poi.id);
+          break;
+        }
+      }
+    }
+    // 编排时间
+    let hour = 9;
+    dayPois.forEach((poi, idx) => {
+      // 第 3 个景点后插入午餐
+      if (idx === 2) {
+        const lunchPoi = scored.find(p => p.category === 'restaurant' && !used.has(p.id));
+        if (lunchPoi) {
+          used.add(lunchPoi.id);
+          const isDiet = switches.isDieting && lunchPoi.isDietFriendly;
+          items.push({
+            type:'restaurant', time:fmtTime(hour), endTime:fmtTime(hour+1),
+            name:lunchPoi.name, estimatedCost:lunchPoi.ticketPrice || lunchPoi.avgCost,
+            isDietFriendly:lunchPoi.isDietFriendly, avgCalories:lunchPoi.avgCalories,
+            reason: isDiet ? '根据减肥需求推荐低卡餐食（约'+lunchPoi.avgCalories+'大卡）' : '午餐时间，推荐附近高评分餐厅',
+            reasonTags: isDiet ? ['饮食匹配','低卡健康'] : ['位置便利','高评分'],
+            _scores: lunchPoi._scores, _total: lunchPoi._total
+          });
+          hour += 1;
+        }
+      }
+      // 疲惫模式插入休息
+      if (moodIndex <= 3 && idx === 2) {
+        items.push({
+          type:'rest', time:fmtTime(hour), endTime:fmtTime(hour+0.5),
+          name:'☕ 休息时间', estimatedCost:30,
+          reason:'疲惫模式：自动插入半小时休息，避免体力透支',
+          reasonTags:['心情匹配','体力保护']
+        });
+        hour += 0.5;
+      }
+      const dur = moodIndex <= 3 ? 2 : 1.5;
+      items.push({
+        type:'poi', time:fmtTime(hour), endTime:fmtTime(hour+dur),
+        name:poi.name, category:poi.category, estimatedCost:poi.ticketPrice,
+        energyLevel:poi.energyLevel, weatherSensitivity:poi.weatherSensitivity,
+        reason:genReason(poi, moodLabel),
+        reasonTags:genTags(poi, moodLabel),
+        _scores:poi._scores, _total:poi._total
+      });
+      hour += dur;
+    });
+    itinerary.push({day:d+1, items});
+  }
+
+  // ---- 酒店比价 ----
+  const hotelCandidates = HOTELS.map(h => {
+    const prices = generatePrices(h.priceRangeLow);
+    const best = prices[0];
+    const rack = Math.max(...prices.map(p=>p.price));
+    let score = 0;
+    const ratio = best.price / dailyBudget;
+    if (ratio <= 0.3) score += 30; else if (ratio <= 0.5) score += 25; else if (ratio <= 0.8) score += 20; else if (ratio <= 1.2) score += 15; else score += 5;
+    if (switches.budgetSensitive) score *= 1.5;
+    score += (h.moodScores[moodLabel] || 5) * 3;
+    if (switches.hasKids && h.kidsFriendly) score += 20;
+    if (switches.hasElderly && h.elderlyFriendly) score += 20;
+    score += h.rating * 5;
+    return {...h, platformPrices:prices, bestPrice:best.price, bestPlatform:best.platform, savedAmount:rack-best.price, _score:score};
+  }).sort((a,b) => b._score - a._score);
+
+  // ---- 统计 ----
+  let totalCost = 0, totalSaved = 0;
+  itinerary.forEach(d => d.items.forEach(it => { totalCost += it.estimatedCost || 0; }));
+  totalCost += (hotelCandidates[0]?.bestPrice || 0) * days;
+  totalSaved = hotelCandidates[0]?.savedAmount || 0;
+
+  return { itinerary, hotel:hotelCandidates[0], hotels:hotelCandidates.slice(0,3), stats:{
+    totalCost, totalSaved, totalPois:used.size, filterTotal:POIS.length, filterPassed:candidates.length,
+    moodLabel, moodIndex, weights, dailyBudget, isRain
+  }};
+}
+
+function genReason(poi, moodLabel){
+  const s = poi._scores;
+  const reasons = [];
+  if (s.moodScore > 25) reasons.push('当前心情高度匹配');
+  else if (s.moodScore > 15) reasons.push('适合当前心情状态');
+  if (s.budgetScore > 15) reasons.push(poi.ticketPrice===0?'免费景点，零预算压力':'低价高性价比');
+  if (s.energyScore > 20) reasons.push('体力消耗符合当前状态');
+  if (s.kidScore > 15) reasons.push('亲子游首选');
+  return reasons.join('；') || '综合匹配推荐';
+}
+
+function genTags(poi, moodLabel){
+  const s = poi._scores;
+  const tags = [];
+  if (s.moodScore > 20) tags.push('心情匹配');
+  if (s.budgetScore > 15) tags.push(poi.ticketPrice===0?'免费景点':'高性价比');
+  if (switches.isDieting && poi.isDietFriendly) tags.push('低卡健康');
+  if (switches.hasKids && poi.kidsFriendly) tags.push('亲子推荐');
+  return tags;
+}
+
+function fmtTime(h){ const hh=Math.floor(h); const mm=Math.round((h-hh)*60); return String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0'); }
+
+// ============================================================
+// RENDER
+// ============================================================
+function renderResults(result){
+  const {itinerary, hotel, hotels, stats} = result;
+  const moodEmoji = MOODS.find(m=>m.key===stats.moodLabel)?.emoji || '😌';
+  const moodName = MOODS.find(m=>m.key===stats.moodLabel)?.label || '';
+
+  let html = '';
+
+  // Stats Bar
+  html += `<div class="result-card"><div class="stats-bar">
+    <div class="stat-item"><div class="stat-value">${stats.filterPassed}/${stats.filterTotal}</div><div class="stat-label">通过过滤</div></div>
+    <div class="stat-item"><div class="stat-value">${stats.totalPois}</div><div class="stat-label">精选景点</div></div>
+    <div class="stat-item"><div class="stat-value">¥${stats.totalCost}</div><div class="stat-label">预估总花费</div></div>
+    <div class="stat-item"><div class="stat-value">¥${stats.totalSaved}</div><div class="stat-label">比价节省</div></div>
+    <div class="stat-item"><div class="stat-value">${stats.isRain?'🌧️':'☀️'}</div><div class="stat-label">天气模式</div></div>
+  </div></div>`;
+
+  // Weight Matrix
+  html += `<div class="result-card"><div class="panel" style="margin:0;box-shadow:none"><h2>📊 权重矩阵快照（${moodEmoji} ${moodName} + ${switches.hasKids?'带娃 ':''}${switches.hasElderly?'带老人 ':''}${switches.isDieting?'减肥 ':''}${switches.budgetSensitive?'预算敏感':''}）</h2><div class="matrix"><table><tr><th>维度</th><th>权重</th><th>说明</th></tr>`;
+  const labels = {mood:'心情匹配',budget:'预算匹配',energy:'体力消耗',crowd:'拥挤回避',kid:'亲子友好',elderly:'老人友好',diet:'饮食匹配'};
+  for (const [k,v] of Object.entries(stats.weights)) {
+    if (v > 0) html += `<tr><td>${labels[k]}</td><td><b>${Math.round(v*100)}%</b></td><td>${k==='mood'?'心情越差，此权重越高':k==='energy'?'疲惫/低落时体力消耗权重最高':k==='crowd'?'焦虑时拥挤回避权重最高':k==='kid'?'带娃时自动开启':k==='diet'?'减肥时自动开启':''}</td></tr>`;
+  }
+  html += `</table></div></div></div>`;
+
+  // Itinerary
+  itinerary.forEach(day => {
+    html += `<div class="result-card"><div class="day-header"><span>📅 Day ${day.day}</span><span>${day.items.length} 个节点 · 预估 ¥${day.items.reduce((s,i)=>s+(i.estimatedCost||0),0)}</span></div>`;
+    // Filter stats
+    html += `<div class="filter-stats"><span>🔍 过滤条件：${stats.isRain?'🌧️ 排除户外 ':'☀️ 无限制 '}${switches.hasKids?'👶 仅亲子友好 ':''}${switches.isDieting?'🥗 仅低卡餐食 ':''}${switches.budgetSensitive?'💰 预算敏感 ':''}${switches.hasElderly?'👴 老人友好 ':''}</span></div>`;
+    html += `<div class="timeline">`;
+    day.items.forEach((item, idx) => {
+      const bgColors = {poi:'#E8F0EA',restaurant:'#FDF3E6',rest:'#F0EDF5'};
+      const bg = bgColors[item.type] || '#E8F0EA';
+      const icons = {poi:'📍',restaurant:'🍽️',rest:'☕'};
+      html += `<div class="timeline-item">
+        <div class="timeline-time">${item.time}</div>
+        <div class="timeline-dot" style="background:${bg}">${icons[item.type]||'📍'}</div>
+        <div class="timeline-content">
+          <div class="timeline-name">${item.name}</div>`;
+      if (item.avgCalories) html += `<div class="timeline-desc">🥗 约 ${item.avgCalories} 大卡 · 人均 ¥${item.estimatedCost}</div>`;
+      else if (item.energyLevel) html += `<div class="timeline-desc">体力消耗 ${'⚡'.repeat(item.energyLevel)} · ${item.weatherSensitivity==='indoor'?'🏠 室内':item.weatherSensitivity==='outdoor'?'🌳 户外':'🏠+🌳 混合'}</div>`;
+      html += `<div class="timeline-reason">💡 ${item.reason}</div>
+          <div class="tags">`;
+      item.reasonTags.forEach(t => {
+        let cls = 'tag';
+        if (t.includes('心情')) cls += ' mood';
+        if (t.includes('预算')||t.includes('性价比')||t.includes('免费')) cls += ' budget';
+        if (t.includes('饮食')||t.includes('低卡')||t.includes('健康')) cls += ' diet';
+        if (t.includes('省钱')||t.includes('节省')) cls += ' savings';
+        html += `<span class="${cls}">${t}</span>`;
+      });
+      html += `</div></div></div>`;
+    });
+    html += `</div></div>`;
+  });
+
+  // Hotel
+  if (hotel) {
+    html += `<div class="result-card"><div class="panel" style="margin:0;box-shadow:none"><h2>🏨 酒店推荐</h2>`;
+    html += `<div class="hotel-card"><h4>${hotel.name} ⭐${hotel.stars} · ${hotel.rating}分</h4>
+      <div style="font-size:.9em;color:var(--text)">🏷️ ${hotel.priceTier} · ${hotel.has_spa?'💆 SPA ':''}${hotel.has_pool?'🏊 泳池 ':''}${hotel.has_gym?'🏋️ 健身房 ':''}${hotel.breakfastIncluded?'🍳 含早餐':''}</div>`;
+    html += `<div class="savings" style="margin-top:8px">💰 比价 ${PLATFORMS.length} 个平台，${hotel.bestPlatform} 最低 <b>¥${hotel.bestPrice}</b>，为您节省 <b>¥${hotel.savedAmount}</b></div>`;
+    html += `<div style="margin-top:8px;font-size:.82em;color:var(--text-light)">`;
+    hotel.platformPrices.forEach(p => {
+      html += `<span style="margin-right:12px">${p.platform} ¥${p.price}</span>`;
+    });
+    html += `</div></div>`;
+    // Top 3 hotels
+    html += `<div style="margin-top:12px;font-size:.85em;color:var(--text-light)">其他推荐：`;
+    hotels.slice(1).forEach((h,i) => {
+      html += `<span style="margin-right:12px">${i+2}. ${h.name} ¥${h.bestPrice}</span>`;
+    });
+    html += `</div></div></div>`;
+  }
+
+  document.getElementById('results').innerHTML = html;
+  feather.replace?.();
+}
+</script>
+<script src="https://unpkg.com/feather-icons"></script>
+<script>feather.replace()</script>
+</body>
+</html>

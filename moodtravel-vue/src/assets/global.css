@@ -1,0 +1,377 @@
+/* ================================================================
+   MoodTravel Global Design System — "会呼吸的玻璃"
+   VisionOS-inspired frosted glass + dual-mode adaptive layout
+   ================================================================ */
+
+/* ================================================================
+   1. SPRING CURVES — 非线性动画引擎（参考 iOS）
+   ================================================================ */
+:root {
+  --ease-spring:    cubic-bezier(0.32, 0.72, 0, 1);      /* iOS 弹簧效果 */
+  --ease-spring-out:cubic-bezier(0.16, 1, 0.3, 1);       /* 弹性出场 */
+  --ease-spring-in: cubic-bezier(0.55, 0, 1, 0.45);      /* 弹性入场 */
+  --ease-smooth:    cubic-bezier(0.25, 0.46, 0.45, 0.94); /* 平滑过渡 */
+  --ease-bounce:    cubic-bezier(0.34, 1.56, 0.64, 1);    /* 回弹效果 */
+  --ease-expo-out:  cubic-bezier(0.19, 1, 0.22, 1);       /* 指数衰减 */
+
+  --duration-instant: 0.12s;
+  --duration-fast:    0.18s;
+  --duration-normal:  0.28s;
+  --duration-slow:    0.40s;
+  --duration-spring:  0.55s;
+  --duration-breathe: 4s;
+
+  /* ================================================================
+     2. GLASS SYSTEM — 毛玻璃层级
+     ================================================================ */
+  --glass-blur-sm:     12px;
+  --glass-blur:        20px;
+  --glass-blur-lg:     30px;
+  --glass-saturate:    180%;
+  --glass-opacity:     0.72;
+  --glass-opacity-card:0.82;
+  --glass-border:      rgba(255, 255, 255, 0.18);
+  --glass-bg:          rgba(255, 255, 255, 0.12);
+
+  /* ================================================================
+     3. SHADOWS — 空气感阴影
+     ================================================================ */
+  --shadow-float:  0 4px 20px rgba(0,0,0,0.05);
+  --shadow-card:   0 2px 12px rgba(0,0,0,0.04);
+  --shadow-elevate:0 8px 32px rgba(0,0,0,0.08);
+  --shadow-glow:   0 0 0 3px rgba(122, 158, 118, 0.12);
+
+  /* ================================================================
+     4. DUAL-MODE LAYOUT — 双模态布局变量
+     ================================================================ */
+  /* 青年探索版 (默认) */
+  --layout-card-gap:      12px;
+  --layout-section-gap:   16px;
+  --layout-page-padding:  16px;
+  --layout-card-padding:  14px;
+  --layout-card-radius:   14px;
+  --layout-image-ratio:   0.6;
+  --layout-grid-columns:  2;
+  --layout-info-density:  normal;
+
+  /* ================================================================
+     5. SKELETON SCREEN — 骨架屏
+     ================================================================ */
+  --skeleton-base:    #E8E4DE;
+  --skeleton-shimmer: #F0EDE8;
+  --skeleton-radius:  8px;
+}
+
+/* ================================================================
+   长辈关怀版 — 覆盖所有布局变量 + 极致适老化
+   ================================================================ */
+[data-accessibility="elderly"] {
+  /* ---- 排版放大：全局基础字号提升 1.5 倍，行高 1.8 ---- */
+  font-size: 150%;
+  line-height: 1.8;
+
+  /* ---- 布局变量 ---- */
+  --layout-card-gap:      20px;
+  --layout-section-gap:   24px;
+  --layout-page-padding:  20px;
+  --layout-card-padding:  20px;
+  --layout-card-radius:   18px;
+  --layout-image-ratio:   0;
+  --layout-grid-columns:  1;
+  --layout-info-density:  sparse;
+
+  /* ---- 色彩降级：禁用毛玻璃，纯白底色 + 深灰文字（最高对比度） ---- */
+  --glass-blur:           0px;
+  --glass-blur-lg:        0px;
+  --glass-saturate:       100%;
+  --glass-opacity:        1;
+  --glass-opacity-card:   1;
+  --glass-border:         rgba(0,0,0,0.08);
+  --glass-bg:             rgba(255,255,255,1);
+
+  --shadow-float:  0 2px 8px rgba(0,0,0,0.1);
+  --shadow-card:   0 1px 4px rgba(0,0,0,0.08);
+  --shadow-elevate:0 4px 16px rgba(0,0,0,0.12);
+
+  --color-text:       #333333;
+  --color-text-light: #555555;
+  --color-text-muted: #6A6A6A;
+  --color-bg:         #FFFFFF;
+  --color-card:       #FFFFFF;
+
+  --skeleton-base:    #E0E0E0;
+  --skeleton-shimmer: #F0F0F0;
+
+  /* ---- 触控优化：按钮统一升至 60px 高度，圆角 12px ---- */
+  --btn-min-height: 60px;
+  --btn-border-radius: 12px;
+}
+
+/* ================================================================
+   SKELETON SCREEN ANIMATION
+   ================================================================ */
+@keyframes skeleton-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-base) 0%,
+    var(--skeleton-shimmer) 40%,
+    var(--skeleton-base) 80%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.8s ease-in-out infinite;
+  border-radius: var(--skeleton-radius);
+}
+
+/* ================================================================
+   GLASS BACKGROUND LAYER
+   ================================================================ */
+.glass-bg-layer {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.glass-bg-image {
+  position: absolute;
+  inset: -40px;
+  background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=80&fm=webp');
+  background-size: cover;
+  background-position: center;
+  filter: saturate(0.8) brightness(0.95);
+  transform: scale(1.05);
+  transition: transform 8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* 长辈模式：隐藏装饰背景 */
+[data-accessibility="elderly"] .glass-bg-image {
+  display: none;
+}
+
+/* 毛玻璃叠加层 */
+.glass-bg-overlay {
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  background: var(--glass-bg);
+}
+
+/* ================================================================
+   GLASS CARD — 毛玻璃卡片
+   ================================================================ */
+.glass-card {
+  background: rgba(255, 255, 255, var(--glass-opacity-card));
+  backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--layout-card-radius);
+  box-shadow: var(--shadow-card);
+  transition: transform var(--duration-normal) var(--ease-spring),
+              box-shadow var(--duration-normal) var(--ease-spring),
+              border-color var(--duration-normal) var(--ease-smooth);
+}
+
+.glass-card:active {
+  transform: scale(0.985);
+  box-shadow: var(--shadow-float);
+}
+
+/* 长辈模式：卡片变纯白 */
+[data-accessibility="elderly"] .glass-card {
+  background: #FFFFFF;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+/* ================================================================
+   RUBBER-BAND SCROLL — 橡皮筋拉伸
+   ================================================================ */
+.scroll-container {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  scroll-behavior: smooth;
+  will-change: scroll-position;
+  transform: translateZ(0); /* 硬件加速 */
+}
+
+/* 长辈模式：禁用橡皮筋，避免迷惑 */
+[data-accessibility="elderly"] .scroll-container {
+  overscroll-behavior-y: auto;
+}
+
+/* ================================================================
+   SPRING-SCALE MICRO-INTERACTION
+   ================================================================ */
+.spring-press {
+  transition: transform var(--duration-instant) var(--ease-spring),
+              opacity var(--duration-instant) var(--ease-spring);
+}
+.spring-press:active {
+  transform: scale(0.95);
+  opacity: 0.85;
+}
+
+/* 长辈模式：更明显的反馈 */
+[data-accessibility="elderly"] .spring-press:active {
+  transform: scale(0.93);
+  opacity: 0.75;
+  background: #F0F0F0 !important;
+}
+
+/* ================================================================
+   SPRING-POP ANIMATION — 气泡生长（SOS 等弹窗）
+   ================================================================ */
+@keyframes spring-pop-in {
+  0%   { transform: scale(0.3); opacity: 0; border-radius: 50%; }
+  60%  { transform: scale(1.03); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; border-radius: var(--layout-card-radius); }
+}
+
+@keyframes spring-pop-out {
+  0%   { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.3); opacity: 0; border-radius: 50%; }
+}
+
+.spring-pop-enter-active {
+  animation: spring-pop-in var(--duration-spring) var(--ease-spring) forwards;
+}
+.spring-pop-leave-active {
+  animation: spring-pop-out var(--duration-fast) var(--ease-spring-in) forwards;
+}
+
+/* ================================================================
+   TYPOGRAPHY — 字体层级
+   ================================================================ */
+.display-title {
+  font-family: 'Playfair Display', 'Georgia', 'PingFang SC', serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.display-subtitle {
+  font-family: 'Playfair Display', 'Georgia', 'PingFang SC', serif;
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: 0;
+}
+
+.body-text {
+  font-family: 'Inter', 'PingFang SC', 'Hiragino Sans GB', system-ui, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+/* 长辈模式：全部使用无衬线 */
+[data-accessibility="elderly"] .display-title,
+[data-accessibility="elderly"] .display-subtitle {
+  font-family: 'Inter', 'PingFang SC', 'Hiragino Sans GB', system-ui, sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* ================================================================
+   GESTURE HINTS — 手势提示（青年模式）
+   ================================================================ */
+[data-accessibility="elderly"] .gesture-hint {
+  display: none;
+}
+
+/* ================================================================
+   ELDERLY NAVIGATION — 底部固定导航（长辈模式）
+   ================================================================ */
+.elderly-bottom-nav {
+  display: none;
+}
+[data-accessibility="elderly"] .elderly-bottom-nav {
+  display: flex;
+  position: fixed;
+  bottom: 0;
+  left: 0; right: 0;
+  max-width: 480px;
+  margin: 0 auto;
+  background: #FFFFFF;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  padding: 8px 16px;
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
+  z-index: 100;
+  justify-content: space-around;
+}
+.elderly-nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: #4A4A4A;
+  cursor: pointer;
+  min-width: 60px;
+  transition: background var(--duration-instant) var(--ease-spring);
+}
+.elderly-nav-btn:active {
+  background: #F0F0F0;
+  transform: scale(0.93);
+}
+.elderly-nav-btn .nav-icon {
+  font-size: 22px;
+}
+
+/* ================================================================
+   长辈模式：全局按钮触控优化
+   所有按钮高度升至 60px，圆角 12px，确保手指精准点击
+   ================================================================ */
+[data-accessibility="elderly"] button,
+[data-accessibility="elderly"] [role="button"],
+[data-accessibility="elderly"] .btn {
+  min-height: var(--btn-min-height, 60px);
+  border-radius: var(--btn-border-radius, 12px);
+  font-size: 110%;
+  cursor: pointer;
+}
+
+/* ================================================================
+   长辈模式：交互简化
+   禁用所有长按、滑动等复杂手势，改为显式大按钮点击
+   ================================================================ */
+
+/* 隐藏原生滑块，改用大按钮点击 */
+[data-accessibility="elderly"] input[type="range"] {
+  display: none;
+}
+
+/* 禁用用户选择（避免误触文字选择） */
+[data-accessibility="elderly"] {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* 但不影响输入框内的文字选择 */
+[data-accessibility="elderly"] input,
+[data-accessibility="elderly"] textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* 禁用触摸滚动时的橡皮筋效果 */
+[data-accessibility="elderly"] .scroll-container {
+  overscroll-behavior: auto;
+  -webkit-overflow-scrolling: auto;
+}
+
+/* 隐藏毛玻璃装饰层（长辈模式） */
+[data-accessibility="elderly"] .glass-bg-layer {
+  display: none;
+}

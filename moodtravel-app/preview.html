@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>MoodTravel - 情绪旅行</title>
+<style>
+:root {
+  --sage: #A3B5A6; --sage-light: #C5D5C8; --rose: #C4A8A8;
+  --sand: #DDD0C0; --warm-gray: #9B9790; --text: #4A4640;
+  --text-light: #7A7670; --bg: #F5F2ED; --card: #FFFCF8;
+  --radius: 16px; --radius-sm: 10px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: #EDE8E0; display: flex; justify-content: center; align-items: center;
+  min-height: 100vh; -webkit-font-smoothing: antialiased;
+}
+.phone{
+  width: 390px; height: 844px; background: var(--bg); border-radius: 40px;
+  overflow: hidden; position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,.15), 0 0 0 3px #1a1a1a, 0 0 0 6px #2d2d2d;
+}
+@media(max-width:420px){ .phone{width:100vw;height:100vh;border-radius:0;box-shadow:none} }
+
+/* 状态栏 */
+.status-bar{
+  height: 44px; padding: 14px 24px 0; display: flex; justify-content: space-between;
+  font-size: 12px; font-weight: 600; color: var(--text); position: relative; z-index: 10;
+}
+
+/* 页面容器 */
+.page{display:none;position:absolute;inset:44px 0 0 0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:80px}
+.page.active{display:block}
+.page::-webkit-scrollbar{display:none}
+
+/* ===== TabBar ===== */
+.tabbar{
+  position: absolute; bottom: 0; left: 0; right: 0; height: 76px;
+  background: var(--card); display: flex; align-items: center; border-top: 1px solid #F0EDE8;
+  z-index: 20; padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.tab-item{
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  cursor: pointer; transition: all .2s; padding: 8px 0; border: none; background: none;
+  font-family: inherit;
+}
+.tab-item .t-icon{font-size: 22px; transition: transform .2s}
+.tab-item .t-label{font-size: 10px; font-weight: 600; color: var(--warm-gray); transition: color .2s}
+.tab-item.active .t-label{color: var(--sage)}
+.tab-item:active .t-icon{transform: scale(1.2)}
+
+/* ===== 首页 ===== */
+.home-page{background:linear-gradient(180deg,#E8EDE5 0%,var(--bg) 30%);padding:12px 16px 0}
+.nav-bar{display:flex;justify-content:space-between;align-items:center;padding:8px 0 20px}
+.logo-text{font-size:18px;font-weight:800;color:var(--sage);letter-spacing:1px}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 8px rgba(0,0,0,.06);cursor:pointer}
+.greeting{padding:8px 0 20px}
+.greeting-text{font-size:22px;font-weight:800;color:var(--text);display:block}
+.greeting-sub{font-size:13px;color:var(--text-light);margin-top:2px;display:block}
+.section{margin-bottom:16px}
+.section-title{display:flex;align-items:center;gap:6px;margin-bottom:10px;font-size:15px;font-weight:700;color:var(--text)}
+.mood-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mood-item{background:var(--card);border-radius:var(--radius);padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;border:2px solid transparent;position:relative;cursor:pointer;transition:all .2s}
+.mood-item.active{border-color:var(--sage);background:#F0F5F1;box-shadow:0 0 0 3px rgba(163,181,166,.1)}
+.mood-item:active{transform:scale(.96)}
+.mood-emoji{font-size:28px;line-height:1}
+.mood-label{font-size:13px;font-weight:700;color:var(--text)}
+.mood-hint{font-size:10px;color:var(--text-light)}
+.mood-check{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;background:var(--sage);color:#fff;font-size:10px;display:none;align-items:center;justify-content:center}
+.mood-item.active .mood-check{display:flex}
+.toggle-group{display:flex;flex-direction:column;gap:6px}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--card);border-radius:var(--radius);cursor:pointer}
+.toggle-row:active{background:#F8F6F2}
+.toggle-left{display:flex;align-items:center;gap:8px}
+.toggle-icon{width:36px;height:36px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:16px}
+.toggle-name{font-size:14px;font-weight:600;color:var(--text);display:block}
+.toggle-hint{font-size:10px;color:var(--text-light);display:block}
+.toggle-sw{width:44px;height:26px;border-radius:13px;background:#D0CCC4;position:relative;transition:all .3s;flex-shrink:0}
+.toggle-sw::after{content:'';position:absolute;top:2px;left:2px;width:22px;height:22px;background:#fff;border-radius:50%;transition:all .3s;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.toggle-sw.on{background:var(--sage)}
+.toggle-sw.on::after{left:20px}
+.plan-btn{margin:20px 0;width:100%;height:48px;background:linear-gradient(135deg,var(--sage-light),var(--sage));border-radius:24px;border:none;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;cursor:pointer;box-shadow:0 6px 16px rgba(163,181,166,.3)}
+.plan-btn:active{transform:scale(.97);opacity:.9}
+
+/* ===== 行程页 ===== */
+.plan-page{padding:0 16px}
+.header{padding:20px 0 16px;text-align:center}
+.header-title{font-size:18px;font-weight:800;color:var(--text);display:block}
+.header-sub{font-size:12px;color:var(--text-light);margin-top:2px;display:block}
+.mood-card{background:var(--card);border-radius:var(--radius);padding:14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.mood-card-left{display:flex;align-items:center;gap:8px}
+.mood-emoji-big{font-size:28px}
+.mood-info .m-label{font-size:14px;font-weight:700;display:block}
+.mood-info .m-hint{font-size:11px;color:var(--text-light);display:block}
+.mood-badge{padding:4px 12px;border-radius:12px;font-size:10px;font-weight:600;color:#fff}
+.form-card{background:var(--card);border-radius:var(--radius);padding:14px;margin-bottom:16px}
+.form-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.form-label{font-size:13px;font-weight:600;color:var(--text)}
+.form-input{flex:1;text-align:right;font-size:13px;border:none;background:transparent;color:var(--text);font-family:inherit;outline:none}
+.budget-row{display:flex;align-items:center;gap:10px}
+.budget-val{font-size:13px;font-weight:700;color:var(--sage)}
+.budget-slider{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:#E0DCD4;outline:none}
+.budget-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--sage);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.1)}
+.budget-presets{display:flex;gap:4px;margin-bottom:14px}
+.budget-preset{flex:1;padding:6px 4px;border-radius:var(--radius-sm);background:#F5F2ED;font-size:10px;font-weight:600;text-align:center;color:var(--text-light);cursor:pointer;border:none;font-family:inherit}
+.budget-preset.active{background:var(--sage);color:#fff}
+.stepper{display:flex;align-items:center;gap:12px}
+.stepper-btn{width:28px;height:28px;border-radius:50%;background:#F5F2ED;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;cursor:pointer;border:none;color:var(--text);font-family:inherit}
+.stepper-val{font-size:16px;font-weight:700}
+.timeline{padding-left:22px;position:relative}
+.timeline::before{content:'';position:absolute;left:5px;top:4px;bottom:4px;width:2px;background:#E0DCD4;border-radius:1px}
+.timeline-item{position:relative;margin-bottom:12px}
+.timeline-dot{position:absolute;left:-17px;top:8px;width:12px;height:12px;border-radius:50%;z-index:2}
+.timeline-card{background:var(--card);border-radius:var(--radius);padding:10px 12px;box-shadow:0 1px 6px rgba(0,0,0,.02)}
+.time-row{display:flex;justify-content:space-between;margin-bottom:4px}
+.t-time{font-size:12px;font-weight:700;color:var(--sage)}
+.t-cat{font-size:10px;color:var(--text-light);background:#F5F2ED;padding:2px 6px;border-radius:6px}
+.t-name{font-size:15px;font-weight:700;display:block;margin-bottom:3px}
+.t-desc{font-size:12px;color:var(--text-light);display:block;margin-bottom:6px}
+.t-reason{font-size:11px;color:var(--text-light);background:#F8F6F2;padding:6px 8px;border-radius:var(--radius-sm)}
+.generate-btn{margin:20px 0;width:100%;height:48px;background:linear-gradient(135deg,var(--sage-light),var(--sage));border-radius:24px;border:none;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;cursor:pointer;box-shadow:0 6px 16px rgba(163,181,166,.3);font-family:inherit}
+.generate-btn:active{transform:scale(.97)}
+.generate-btn.loading{opacity:.7;pointer-events:none}
+
+/* ===== 我的页 ===== */
+.mine-page{padding:16px}
+.mine-header{display:flex;flex-direction:column;align-items:center;gap:10px;padding:20px 0}
+.avatar-large{width:64px;height:64px;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 4px 16px rgba(0,0,0,.06)}
+.nickname{font-size:16px;font-weight:700}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:16px}
+.stat-card{background:var(--card);border-radius:var(--radius);padding:16px;text-align:center}
+.stat-val{font-size:20px;font-weight:700;display:block}
+.stat-lab{font-size:11px;color:var(--text-light);margin-top:4px;display:block}
+.setting-list{background:var(--card);border-radius:var(--radius);overflow:hidden}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:14px;border-bottom:1px solid #F0EDE8;cursor:pointer}
+.setting-row:last-child{border-bottom:none}
+.setting-row:active{background:#F8F6F2}
+.setting-left{display:flex;align-items:center;gap:8px}
+.s-icon{font-size:14px}
+.s-name{font-size:13px;font-weight:600}
+.s-right{display:flex;align-items:center;gap:6px}
+.s-val{font-size:12px;color:var(--text-light)}
+.s-arrow{font-size:18px;color:#D0CCC4}
+.reset-btn{margin:20px 0;width:100%;height:44px;background:var(--card);border-radius:22px;border:1px solid #E0DCD4;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text-light);cursor:pointer;font-family:inherit}
+.reset-btn:active{background:#F5F0EB}
+
+/* Toast */
+.toast{position:absolute;top:70px;left:50%;transform:translateX(-50%) translateY(-20px);z-index:40;background:#4A4640;color:#fff;padding:8px 18px;border-radius:16px;font-size:12px;font-weight:600;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="status-bar"><span>9:41</span><span>●●●●○ WiFi</span></div>
+
+  <!-- ===== 首页 ===== -->
+  <div class="page active" id="page-home">
+    <div class="home-page">
+      <div class="nav-bar">
+        <span class="logo-text">MoodTravel</span>
+        <div class="avatar" id="topAvatar">😌</div>
+      </div>
+      <div class="greeting">
+        <span class="greeting-text" id="greetText">嗨，今天想去哪里？</span>
+        <span class="greeting-sub" id="greetSub">不紧不慢，顺其自然</span>
+      </div>
+      <div class="section">
+        <div class="section-title">😊 此刻的心情？</div>
+        <div class="mood-grid" id="moodGrid"></div>
+      </div>
+      <div class="section">
+        <div class="section-title">⚙️ 快速设置</div>
+        <div class="toggle-group">
+          <div class="toggle-row" onclick="toggle('kids')">
+            <div class="toggle-left"><div class="toggle-icon" style="background:rgba(196,168,168,.1)">👶</div><div><span class="toggle-name">带小孩</span><span class="toggle-hint">优先亲子友好景点</span></div></div>
+            <div class="toggle-sw" id="sw-kids"></div>
+          </div>
+          <div class="toggle-row" onclick="toggle('diet')">
+            <div class="toggle-left"><div class="toggle-icon" style="background:rgba(163,181,166,.1)">🥗</div><div><span class="toggle-name">正在减肥</span><span class="toggle-hint">推荐低卡健康餐食</span></div></div>
+            <div class="toggle-sw" id="sw-diet"></div>
+          </div>
+          <div class="toggle-row" onclick="toggle('budget')">
+            <div class="toggle-left"><div class="toggle-icon" style="background:rgba(221,208,192,.1)">💰</div><div><span class="toggle-name">预算敏感</span><span class="toggle-hint">优先免费低价景点</span></div></div>
+            <div class="toggle-sw" id="sw-budget"></div>
+          </div>
+        </div>
+      </div>
+      <button class="plan-btn" onclick="switchTab(1)">✨ 开始规划</button>
+    </div>
+  </div>
+
+  <!-- ===== 行程页 ===== -->
+  <div class="page" id="page-plan">
+    <div class="plan-page">
+      <div class="header">
+        <span class="header-title">行程规划</span>
+        <span class="header-sub">MoodTravel · 情绪旅行</span>
+      </div>
+      <div class="mood-card">
+        <div class="mood-card-left">
+          <span class="mood-emoji-big" id="planMoodEmoji">😌</span>
+          <div class="mood-info">
+            <span class="m-label" id="planMoodLabel">当前心情：平静</span>
+            <span class="m-hint" id="planMoodHint">不紧不慢，顺其自然</span>
+          </div>
+        </div>
+        <span class="mood-badge" id="planMoodBadge" style="background:#A8B5C4">平静</span>
+      </div>
+      <div class="form-card">
+        <div class="form-row">
+          <span class="form-label">目的地</span>
+          <input class="form-input" id="destInput" value="杭州" placeholder="输入城市名">
+        </div>
+        <div class="form-row">
+          <span class="form-label">预算</span>
+          <div class="budget-row">
+            <span class="budget-val" id="budgetVal">¥2000</span>
+            <input type="range" class="budget-slider" id="budgetSlider" min="200" max="5000" step="100" value="2000" oninput="updateBudget(this.value)">
+          </div>
+        </div>
+        <div class="budget-presets">
+          <button class="budget-preset active" data-val="500" data-label="经济穷游" onclick="setBudgetPreset(this)">🎒 经济穷游</button>
+          <button class="budget-preset" data-val="2000" data-label="舒适出行" onclick="setBudgetPreset(this)">🏨 舒适出行</button>
+          <button class="budget-preset" data-val="3500" data-label="品质享受" onclick="setBudgetPreset(this)">✨ 品质享受</button>
+          <button class="budget-preset" data-val="5000" data-label="奢华体验" onclick="setBudgetPreset(this)">👑 奢华体验</button>
+        </div>
+        <div class="form-row">
+          <span class="form-label">同行人数</span>
+          <div class="stepper">
+            <button class="stepper-btn" onclick="changeCompanion(-1)">−</button>
+            <span class="stepper-val" id="companionCount">1</span>
+            <button class="stepper-btn" onclick="changeCompanion(1)">+</button>
+          </div>
+        </div>
+      </div>
+      <div id="itinerarySection" style="display:none">
+        <div class="section-title" style="margin-top:16px">📅 推荐行程</div>
+        <div class="timeline" id="timeline"></div>
+      </div>
+      <button class="generate-btn" id="genBtn" onclick="generatePlan()">✨ 智能生成行程</button>
+    </div>
+  </div>
+
+  <!-- ===== 我的页 ===== -->
+  <div class="page" id="page-mine">
+    <div class="mine-page">
+      <div class="mine-header">
+        <div class="avatar-large" id="mineAvatar">😌</div>
+        <span class="nickname">旅行者</span>
+        <span class="mood-badge" id="mineBadge" style="background:#A8B5C4">平静</span>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><span class="stat-val" id="statMood">😌</span><span class="stat-lab">心情</span></div>
+        <div class="stat-card"><span class="stat-val" id="statBudget">¥2000</span><span class="stat-lab">预算</span></div>
+        <div class="stat-card"><span class="stat-val" id="statCompanion">1</span><span class="stat-lab">同行人数</span></div>
+        <div class="stat-card"><span class="stat-val" id="statDest">杭州</span><span class="stat-lab">目的地</span></div>
+      </div>
+      <div class="section-title">⚙️ 偏好设置</div>
+      <div class="setting-list">
+        <div class="setting-row"><div class="setting-left"><span class="s-icon">👶</span><span class="s-name">带小孩</span></div><div class="s-right"><span class="s-val" id="setKids">已关闭</span><span class="s-arrow">›</span></div></div>
+        <div class="setting-row"><div class="setting-left"><span class="s-icon">🥗</span><span class="s-name">正在减肥</span></div><div class="s-right"><span class="s-val" id="setDiet">已关闭</span><span class="s-arrow">›</span></div></div>
+        <div class="setting-row"><div class="setting-left"><span class="s-icon">💰</span><span class="s-name">预算敏感</span></div><div class="s-right"><span class="s-val" id="setBudget">已关闭</span><span class="s-arrow">›</span></div></div>
+        <div class="setting-row"><div class="setting-left"><span class="s-icon">👥</span><span class="s-name">同行人数</span></div><div class="s-right"><span class="s-val" id="setCompanion">1人</span><span class="s-arrow">›</span></div></div>
+        <div class="setting-row"><div class="setting-left"><span class="s-icon">💳</span><span class="s-name">预算设置</span></div><div class="s-right"><span class="s-val" id="setBudgetVal">¥2000</span><span class="s-arrow">›</span></div></div>
+      </div>
+      <button class="reset-btn" onclick="resetAll()">🔄 重置所有状态</button>
+    </div>
+  </div>
+
+  <!-- TabBar -->
+  <div class="tabbar">
+    <button class="tab-item active" data-tab="0" onclick="switchTab(0)">
+      <span class="t-icon">🏠</span><span class="t-label">首页</span>
+    </button>
+    <button class="tab-item" data-tab="1" onclick="switchTab(1)">
+      <span class="t-icon">📋</span><span class="t-label">行程</span>
+    </button>
+    <button class="tab-item" data-tab="2" onclick="switchTab(2)">
+      <span class="t-icon">👤</span><span class="t-label">我的</span>
+    </button>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+// ===== 全局状态 =====
+var state = {
+  moodLabel: 'calm', moodEmoji: '😌', moodIndex: 5,
+  budget: 2000, budgetLabel: '舒适出行',
+  companionCount: 1,
+  hasKids: false, isDieting: false, budgetSensitive: false,
+  destination: '杭州'
+};
+
+var moodMap = {
+  happy:  { label:'开心', emoji:'😄', hint:'活力满满', index:8, color:'#C4A8A8', tag:'高能量' },
+  excited:{ label:'兴奋', emoji:'🤩', hint:'精彩不停', index:10,color:'#C4A8A8', tag:'高能量' },
+  calm:   { label:'平静', emoji:'😌', hint:'顺其自然', index:5, color:'#A8B5C4', tag:'平静' },
+  anxious:{ label:'焦虑', emoji:'😰', hint:'需要治愈', index:3, color:'#DDD0C0', tag:'低能量' },
+  tired:  { label:'疲惫', emoji:'😴', hint:'放慢节奏', index:2, color:'#DDD0C0', tag:'低能量' },
+  sad:    { label:'低落', emoji:'😢', hint:'温柔对待', index:1, color:'#C4A8A8', tag:'需要治愈' }
+};
+
+// ===== 初始化心情网格 =====
+(function initMoodGrid(){
+  var grid = document.getElementById('moodGrid');
+  var html = '';
+  Object.keys(moodMap).forEach(function(key){
+    var m = moodMap[key];
+    html += '<div class="mood-item" data-mood="'+key+'" onclick="selectMood(\''+key+'\')">';
+    html += '<span class="mood-emoji">'+m.emoji+'</span>';
+    html += '<span class="mood-label">'+m.label+'</span>';
+    html += '<span class="mood-hint">'+m.hint+'</span>';
+    html += '<span class="mood-check">✓</span>';
+    html += '</div>';
+  });
+  grid.innerHTML = html;
+  // 默认选中平静
+  document.querySelector('.mood-item[data-mood="calm"]').classList.add('active');
+})();
+
+// ===== 选择心情 =====
+function selectMood(key){
+  document.querySelectorAll('.mood-item').forEach(function(el){ el.classList.remove('active'); });
+  document.querySelector('.mood-item[data-mood="'+key+'"]').classList.add('active');
+  var m = moodMap[key];
+  state.moodLabel = key; state.moodEmoji = m.emoji; state.moodIndex = m.index;
+  document.getElementById('greetText').textContent = '好的，交给我吧！';
+  document.getElementById('greetSub').textContent = m.hint;
+  syncAll();
+  toast('心情已切换为「'+m.label+'」');
+}
+
+// ===== 开关 =====
+function toggle(key){
+  state[key === 'kids' ? 'hasKids' : key === 'diet' ? 'isDieting' : 'budgetSensitive'] = !state[key === 'kids' ? 'hasKids' : key === 'diet' ? 'isDieting' : 'budgetSensitive'];
+  var sw = document.getElementById('sw-'+key);
+  sw.classList.toggle('on');
+  syncAll();
+}
+
+// ===== 预算 =====
+function updateBudget(val){
+  state.budget = parseInt(val);
+  document.getElementById('budgetVal').textContent = '¥'+val;
+  document.getElementById('budgetSlider').value = val;
+  document.querySelectorAll('.budget-preset').forEach(function(b){ b.classList.remove('active'); });
+  syncAll();
+}
+
+function setBudgetPreset(el){
+  var val = parseInt(el.getAttribute('data-val'));
+  var label = el.getAttribute('data-label');
+  state.budget = val; state.budgetLabel = label;
+  document.getElementById('budgetVal').textContent = '¥'+val;
+  document.getElementById('budgetSlider').value = val;
+  document.querySelectorAll('.budget-preset').forEach(function(b){ b.classList.remove('active'); });
+  el.classList.add('active');
+  syncAll();
+}
+
+// ===== 同行人数 =====
+function changeCompanion(delta){
+  var n = state.companionCount + delta;
+  if(n < 1 || n > 6) return;
+  state.companionCount = n;
+  document.getElementById('companionCount').textContent = n;
+  syncAll();
+}
+
+// ===== 生成行程 =====
+function generatePlan(){
+  var btn = document.getElementById('genBtn');
+  btn.textContent = '⏳ AI 正在规划中...';
+  btn.classList.add('loading');
+  setTimeout(function(){
+    var trips = [
+      {time:'09:00',cat:'景点',name:'龙井茶园漫步',desc:'清晨茶园人少安静，沿茶山步道缓缓而行，空气中弥漫着茶香。',reason:'清晨光线柔和适合拍照，体力消耗低，适合当前心情',color:'#A3B5A6'},
+      {time:'11:00',cat:'博物馆',name:'中国茶叶博物馆',desc:'室内空调舒适，了解千年茶文化，还有免费品茶体验。',reason:'室内舒适安静，免费参观，按照心情推荐'+moodMap[state.moodLabel].hint,color:'#C4A8A8'},
+      {time:'12:30',cat:'午餐',name:state.isDieting?'轻食沙拉碗 🥗':'楼外楼杭帮菜',desc:state.isDieting?'鸡胸肉藜麦沙拉，约380大卡':'东坡肉、西湖醋鱼、龙井虾仁',reason:state.isDieting?'根据减肥需求自动筛选低卡餐食':'百年老字号，杭州必打卡',color:'#A8B5C4'},
+      {time:'14:00',cat:state.moodLabel==='tired'?'休息':'咖啡馆',name:state.moodLabel==='tired'?'SPA按摩放松':'湖畔咖啡馆发呆',desc:state.moodLabel==='tired'?'90分钟全身按摩，放松紧绷的肌肉':'在西湖边喝咖啡看湖景，享受慢时光',reason:state.moodLabel==='tired'?'疲惫旅行者的终极治愈方案':'根据心情推荐，放慢节奏享受当下',color:'#DDD0C0'},
+      {time:'17:00',cat:'景点',name:'西湖夕阳漫步',desc:'柳浪闻莺公园，看夕阳西下，看情侣散步，看老人打太极。',reason:'免费景点，日落时分最治愈，零预算压力',color:'#A3B5A6'}
+    ];
+    if(state.budgetSensitive){ trips.forEach(function(t){ t.reason = t.reason.replace('零预算压力','预算敏感模式推荐'); }); }
+    if(state.hasKids){ trips[1] = {time:'11:00',cat:'动物园',name:'杭州动物园',desc:'带小朋友看大熊猫、金丝猴，儿童游乐区',reason:'亲子友好，有婴儿车通道和休息区',color:'#C4A8A8'}; }
+    var html = '';
+    trips.forEach(function(t){
+      html += '<div class="timeline-item"><div class="timeline-dot" style="background:'+t.color+'"></div><div class="timeline-card">';
+      html += '<div class="time-row"><span class="t-time">'+t.time+'</span><span class="t-cat">'+t.cat+'</span></div>';
+      html += '<span class="t-name">'+t.name+'</span><span class="t-desc">'+t.desc+'</span>';
+      html += '<div class="t-reason">💡 '+t.reason+'</div></div></div>';
+    });
+    document.getElementById('timeline').innerHTML = html;
+    document.getElementById('itinerarySection').style.display = 'block';
+    btn.textContent = '✨ 智能生成行程';
+    btn.classList.remove('loading');
+    toast('✅ 行程已根据「'+moodMap[state.moodLabel].label+'」心情生成');
+  }, 1800);
+}
+
+// ===== 同步所有视图 =====
+function syncAll(){
+  var m = moodMap[state.moodLabel];
+  // 首页
+  document.getElementById('topAvatar').textContent = state.moodEmoji;
+  // 行程页
+  document.getElementById('planMoodEmoji').textContent = state.moodEmoji;
+  document.getElementById('planMoodLabel').textContent = '当前心情：'+m.label;
+  document.getElementById('planMoodHint').textContent = m.hint;
+  var badge = document.getElementById('planMoodBadge');
+  badge.textContent = m.tag; badge.style.background = m.color;
+  // 我的页
+  document.getElementById('mineAvatar').textContent = state.moodEmoji;
+  document.getElementById('mineBadge').textContent = m.tag;
+  document.getElementById('mineBadge').style.background = m.color;
+  document.getElementById('statMood').textContent = state.moodEmoji;
+  document.getElementById('statBudget').textContent = '¥'+state.budget;
+  document.getElementById('statCompanion').textContent = state.companionCount;
+  document.getElementById('statDest').textContent = state.destination;
+  document.getElementById('setKids').textContent = state.hasKids ? '已开启' : '已关闭';
+  document.getElementById('setDiet').textContent = state.isDieting ? '已开启' : '已关闭';
+  document.getElementById('setBudget').textContent = state.budgetSensitive ? '已开启' : '已关闭';
+  document.getElementById('setCompanion').textContent = state.companionCount+'人';
+  document.getElementById('setBudgetVal').textContent = '¥'+state.budget;
+}
+
+// ===== TabBar切换 =====
+function switchTab(idx){
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.tab-item').forEach(function(t){ t.classList.remove('active'); });
+  var pages = ['page-home','page-plan','page-mine'];
+  document.getElementById(pages[idx]).classList.add('active');
+  document.querySelectorAll('.tab-item')[idx].classList.add('active');
+  syncAll();
+}
+
+// ===== 重置 =====
+function resetAll(){
+  state = { moodLabel:'calm',moodEmoji:'😌',moodIndex:5,budget:2000,budgetLabel:'舒适出行',companionCount:1,hasKids:false,isDieting:false,budgetSensitive:false,destination:'杭州' };
+  document.querySelectorAll('.mood-item').forEach(function(el){ el.classList.remove('active'); });
+  var calmEl = document.querySelector('.mood-item[data-mood="calm"]');
+  if(calmEl) calmEl.classList.add('active');
+  document.getElementById('greetText').textContent = '嗨，今天想去哪里？';
+  document.getElementById('getSub').textContent = '不紧不慢，顺其自然';
+  ['sw-kids','sw-diet','sw-budget'].forEach(function(id){ document.getElementById(id).classList.remove('on'); });
+  document.getElementById('budgetVal').textContent = '¥2000';
+  document.getElementById('budgetSlider').value = 2000;
+  document.getElementById('companionCount').textContent = '1';
+  document.getElementById('itinerarySection').style.display = 'none';
+  document.getElementById('timeline').innerHTML = '';
+  document.querySelectorAll('.budget-preset').forEach(function(b,i){ b.classList.toggle('active',i===1); });
+  syncAll();
+  toast('所有状态已重置');
+}
+
+// ===== Toast =====
+function toast(msg){
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2000);
+}
+
+// 目的地输入联动
+document.getElementById('destInput').addEventListener('input',function(){
+  state.destination = this.value || '杭州';
+  syncAll();
+});
+</script>
+</body>
+</html>

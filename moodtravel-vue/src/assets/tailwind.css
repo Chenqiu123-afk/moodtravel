@@ -1,0 +1,262 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ================================================================
+   MoodTravel Design Tokens — CSS 变量层
+   与 Tailwind 配置 + global.css 对齐
+   ================================================================ */
+
+@layer base {
+  :root {
+    /* ---- 主色 Sage Green ---- */
+    --color-sage:        #7A9E76;
+    --color-sage-light:  #AFC9AC;
+    --color-sage-lighter:#E6EFE5;
+    --color-sage-dark:   #526A50;
+
+    /* ---- 强调色 Dusty Blue ---- */
+    --color-dust:        #5C7E9A;
+    --color-dust-light:  #A7BBCB;
+    --color-dust-lighter:#E4EBF0;
+    --color-dust-dark:   #405568;
+
+    /* ---- 暖灰背景 ---- */
+    --color-warm-50:  #FDFCF9;
+    --color-warm-100: #FAF7F2;
+    --color-warm-200: #F5F2ED;
+    --color-warm-300: #EDE8E0;
+    --color-warm-400: #DDD6CB;
+    --color-warm-500: #CCC4B6;
+    --color-warm-600: #A8A094;
+    --color-warm-700: #8B8478;
+    --color-warm-800: #726C63;
+    --color-warm-900: #5F5A52;
+
+    /* ---- 莫兰迪色板 ---- */
+    --morandi-sage:  #B5C4B1;
+    --morandi-rose:  #C9B8B8;
+    --morandi-warm:  #D4C9B8;
+    --morandi-mist:  #C8D0C8;
+    --morandi-dusk:  #B8B8C9;
+    --morandi-sand:  #DDD0C0;
+    --morandi-clay:  #C4A8A0;
+    --morandi-olive: #B8BFA4;
+    --morandi-mauve: #C4B8C4;
+
+    /* ---- 文本色 ---- */
+    --color-text:       #4A4640;
+    --color-text-light: #7A7670;
+    --color-text-muted: #A8A094;
+
+    /* ---- 卡片/表面 ---- */
+    --color-card:  #FFFCF8;
+    --color-bg:    var(--color-warm-200);
+
+    /* ---- 动态主题（由 Pinia 运行时注入）---- */
+    --theme-primary:       var(--color-sage);
+    --theme-primary-light: var(--color-sage-light);
+    --theme-bg:            var(--color-warm-200);
+    --theme-bg-gradient:   #E8EDE5;
+    --theme-accent:        var(--color-sage-dark);
+  }
+
+  * {
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply font-body font-light;
+    font-size: 14px;
+    line-height: 1.6;
+    letter-spacing: 0.5px;
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 2px; }
+
+  ::selection {
+    background: rgba(122, 158, 118, 0.2);
+    color: var(--color-text);
+  }
+}
+
+/* ================================================================
+   长辈关怀模式 — 全局样式覆盖
+   通过 <html data-accessibility="elderly"> 触发
+   ================================================================ */
+[data-accessibility="elderly"] {
+  --text-scale: 1.5;
+}
+
+[data-accessibility="elderly"] body {
+  font-size: 18px;
+  line-height: 1.8;
+  letter-spacing: 0.8px;
+  background: #FFFFFF !important;
+  color: #1A1A1A !important;
+}
+
+/* 所有按钮：60px 高 + 大圆角 */
+[data-accessibility="elderly"] button:not(.keep-size):not(.elderly-nav-btn),
+[data-accessibility="elderly"] .btn-soft,
+[data-accessibility="elderly"] .book-btn,
+[data-accessibility="elderly"] .generate-btn,
+[data-accessibility="elderly"] .plan-btn,
+[data-accessibility="elderly"] .logout-btn,
+[data-accessibility="elderly"] .reset-btn,
+[data-accessibility="elderly"] .start-trip-btn,
+[data-accessibility="elderly"] .guide-btn,
+[data-accessibility="elderly"] .popup-confirm-btn,
+[data-accessibility="elderly"] .booking-action-btn {
+  min-height: 60px !important;
+  height: auto !important;
+  border-radius: 30px !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  padding: 16px 28px !important;
+}
+
+/* 小按钮 */
+[data-accessibility="elderly"] .stepper-btn,
+[data-accessibility="elderly"] .tag {
+  min-height: 48px !important;
+  height: auto !important;
+  font-size: 16px !important;
+  padding: 10px 18px !important;
+}
+
+/* 输入框 */
+[data-accessibility="elderly"] input[type="text"],
+[data-accessibility="elderly"] .form-input {
+  height: 56px !important;
+  font-size: 17px !important;
+  padding: 14px 18px !important;
+  border-radius: 16px !important;
+  border: 2px solid #D0D0D0 !important;
+}
+
+/* 选择器 */
+[data-accessibility="elderly"] select,
+[data-accessibility="elderly"] .companion-select {
+  height: 44px !important;
+  font-size: 16px !important;
+  padding: 8px 16px !important;
+}
+
+/* 卡片间距 */
+[data-accessibility="elderly"] .section { margin-bottom: 28px !important; }
+[data-accessibility="elderly"] .timeline-card,
+[data-accessibility="elderly"] .hotel-card,
+[data-accessibility="elderly"] .toggle-row,
+[data-accessibility="elderly"] .setting-row {
+  padding: 20px 16px !important;
+}
+
+/* 进度条 */
+[data-accessibility="elderly"] .progress-bar-wrap { height: 8px !important; }
+
+/* 开关 */
+[data-accessibility="elderly"] .switch-wrapper {
+  width: 60px !important; height: 32px !important;
+}
+[data-accessibility="elderly"] .switch-slider::before {
+  height: 26px !important; width: 26px !important;
+  left: 3px !important; bottom: 3px !important;
+}
+[data-accessibility="elderly"] .switch-wrapper input:checked + .switch-slider::before {
+  transform: translateX(28px) !important;
+}
+
+/* 标签 */
+[data-accessibility="elderly"] .tag {
+  font-size: 14px !important;
+  padding: 8px 14px !important;
+  border-radius: 12px !important;
+}
+
+/* 心情卡片 */
+[data-accessibility="elderly"] .mood-item { padding: 20px 12px !important; }
+[data-accessibility="elderly"] .mood-emoji { font-size: 36px !important; }
+[data-accessibility="elderly"] .mood-label { font-size: 16px !important; }
+
+/* 头像 */
+[data-accessibility="elderly"] .avatar {
+  width: 48px !important; height: 48px !important;
+  font-size: 24px !important;
+}
+
+/* 导航文字 */
+[data-accessibility="elderly"] .logo-text { font-size: 22px !important; }
+[data-accessibility="elderly"] .greeting-text { font-size: 28px !important; }
+
+/* 时间轴 */
+[data-accessibility="elderly"] .timeline-dot { width: 14px !important; height: 14px !important; }
+[data-accessibility="elderly"] .guide-tl-dot { width: 14px !important; height: 14px !important; }
+
+/* 长辈模式：禁用所有装饰背景 */
+[data-accessibility="elderly"] .glass-bg-image,
+[data-accessibility="elderly"] .atmosphere,
+[data-accessibility="elderly"] .light-dust,
+[data-accessibility="elderly"] .aura,
+[data-accessibility="elderly"] .blur-veil,
+[data-accessibility="elderly"] .brand-float,
+[data-accessibility="elderly"] .dust-particle {
+  display: none !important;
+}
+
+/* 长辈模式：纯白底黑字 */
+[data-accessibility="elderly"] .glass-bg-overlay {
+  background: #FFFFFF !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* 长辈模式：禁用复杂手势相关样式 */
+[data-accessibility="elderly"] .gesture-area,
+[data-accessibility="elderly"] .swipe-hint {
+  display: none !important;
+}
+
+/* 长辈模式：页面底部留出固定导航的空间 */
+[data-accessibility="elderly"] .safe-bottom {
+  height: 80px !important;
+}
+
+/* ================================================================
+   Utility Components
+   ================================================================ */
+@layer components {
+  .glass-card {
+    background: rgba(255, 255, 255, var(--glass-opacity-card));
+    backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-saturate));
+    -webkit-backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-saturate));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--layout-card-radius);
+    box-shadow: var(--shadow-card);
+  }
+
+  .btn-soft {
+    @apply px-5 py-2.5 rounded-full font-medium text-sm
+           transition-all duration-normal ease-spring
+           active:scale-95;
+  }
+  .btn-soft-primary {
+    @apply btn-soft bg-sage-500 text-white shadow-glow-sm
+           hover:bg-sage-600;
+  }
+  .btn-soft-secondary {
+    @apply btn-soft bg-warm-100 text-warm-800 border border-warm-300
+           hover:bg-warm-200;
+  }
+  .btn-soft-xl {
+    @apply btn-soft px-6 py-3 text-base;
+  }
+}

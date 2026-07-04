@@ -19,6 +19,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <style>
 /* ================================================================
    CSS 变量 & 全局重置
@@ -1548,76 +1550,49 @@ body.mood-insomnia .bg-geo { opacity:0.5; }
 .export-btn:active { transform:scale(0.95); }
 
 /* ================================================================
-   地图可视化 — 升级版
+   地图可视化 — Leaflet + 高德瓦片
    ================================================================ */
 .map-section { display:none; }
 .map-section.show { display:block; }
 .map-container {
   width:100%; height:420px; border-radius:20px; position:relative; overflow:hidden;
-  background:linear-gradient(180deg, #0F1729 0%, #1A2333 40%, #1E2D3D 100%);
   border:1px solid rgba(255,255,255,0.14);
 }
-.map-svg { width:100%; height:100%; }
-.map-svg * { transition:opacity 0.5s var(--easing); }
-/* 地形感背景 */
-.map-terrain { fill-opacity:0.12; stroke:rgba(255,255,255,0.12); stroke-width:0.5; }
-.map-water { fill-opacity:0.15; }
-.map-water-label { fill:rgba(100,180,220,0.35); font-size:4px; letter-spacing:1px; }
-.map-city-dot { fill:rgba(255,255,255,0.45); cursor:pointer; transition:fill 0.3s, r 0.3s; }
-.map-city-dot:hover { fill:rgba(139,168,140,0.8); r:2; }
-.map-city-label { fill:rgba(255,255,255,0.22); font-size:3.5px; font-weight:500; }
-.map-city-vibe { fill:rgba(255,255,255,0.14); font-size:2.2px; font-weight:300; letter-spacing:0.5px; }
-
-/* 路线丝带 */
-.map-route-group { transition:opacity 0.5s var(--easing); }
-.map-route-group.dimmed { opacity:0.15; }
-.map-route-path {
-  fill:none; stroke-linecap:round; stroke-linejoin:round;
-  filter:drop-shadow(0 0 6px rgba(255,165,0,0.4));
+.map-container .leaflet-container {
+  background:#1A2333; border-radius:20px;
 }
-.map-route-path.business {
-  filter:drop-shadow(0 0 6px rgba(70,130,180,0.4));
+.map-container .leaflet-control-zoom a {
+  background:rgba(20,25,36,0.85) !important; color:rgba(255,255,255,0.8) !important;
+  border-color:rgba(255,255,255,0.15) !important;
 }
-
-/* 动态光点动画 */
-.map-traveler {
-  animation:travelDash var(--travel-duration) linear infinite;
-  filter:drop-shadow(0 0 8px rgba(255,200,100,0.9));
+.map-container .leaflet-control-attribution {
+  background:rgba(0,0,0,0.5) !important; color:rgba(255,255,255,0.4) !important;
+  font-size:9px !important;
 }
-.map-traveler.business {
-  filter:drop-shadow(0 0 8px rgba(100,180,255,0.9));
+.map-container .leaflet-popup-content-wrapper {
+  background:rgba(20,25,36,0.95) !important; color:#fff !important;
+  border-radius:12px !important; border:1px solid rgba(255,255,255,0.15);
 }
-@keyframes travelDash {
-  0% { stroke-dashoffset: 0; }
-  100% { stroke-dashoffset: var(--travel-length); }
+.map-container .leaflet-popup-tip { background:rgba(20,25,36,0.95) !important; }
+.map-container .leaflet-popup-close-button { color:rgba(255,255,255,0.6) !important; }
+.map-container .custom-marker {
+  background:transparent !important; border:none !important;
 }
-
-/* POI 节点 */
-.map-poi-group { cursor:pointer; }
-.map-poi-group:hover .map-poi-outer { r:11; opacity:0.5; }
-.map-poi-outer { transition:all 0.3s var(--easing); }
-.map-poi-inner { transition:all 0.3s var(--easing); }
-.map-poi-group:hover .map-poi-inner { filter:brightness(1.4); }
-.map-poi-bubble {
-  fill:rgba(20,25,36,0.9); stroke-width:0.8;
-  filter:drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+.map-container .marker-inner {
+  width:14px; height:14px; border-radius:50%; border:2px solid #fff;
+  box-shadow:0 0 8px rgba(0,0,0,0.5); transition:all 0.3s var(--easing);
 }
-.map-poi-bubble-text {
-  font-size:5px; font-weight:700; fill:#fff; pointer-events:none;
-  text-anchor:middle; dominant-baseline:central;
+.map-container .marker-inner:hover { transform:scale(1.4); }
+.map-container .marker-inner.poi { background:#8BA88C; }
+.map-container .marker-inner.restaurant { background:#E8A85A; }
+.map-container .marker-inner.rest { background:rgba(163,181,166,0.9); }
+.map-container .marker-start { background:#FFD700; width:18px; height:18px; }
+.map-container .marker-end { background:#FF6B6B; width:18px; height:18px; }
+.map-container .day-label-marker {
+  background:rgba(20,25,36,0.9); color:#fff; border:1px solid rgba(255,255,255,0.3);
+  border-radius:50%; width:28px; height:28px; display:flex; align-items:center;
+  justify-content:center; font-size:12px; font-weight:700; box-shadow:0 2px 8px rgba(0,0,0,0.4);
 }
-.map-poi-label-text {
-  font-size:3.5px; fill:rgba(255,255,255,0.65); pointer-events:none;
-  text-anchor:middle;
-}
-
-/* 起点/终点标记 */
-.map-start-marker { fill:#FFD700; filter:drop-shadow(0 0 4px rgba(255,215,0,0.5)); }
-.map-end-marker { fill:#FF6B6B; filter:drop-shadow(0 0 4px rgba(255,107,107,0.5)); }
-
-/* 跨城交通指示 */
-.map-transit-icon { font-size:5px; pointer-events:none; }
-.map-transit-arrow { stroke:rgba(255,255,255,0.5); stroke-width:0.8; stroke-dasharray:2 2; fill:none; }
 
 /* 图例 */
 .map-legend {
@@ -1642,6 +1617,32 @@ body.mood-insomnia .bg-geo { opacity:0.5; }
 }
 .map-ctrl-btn:hover { background:rgba(255,255,255,0.12); color:#fff; }
 .map-ctrl-btn.active { background:rgba(255,255,255,0.12); color:#fff; border-color:rgba(255,255,255,0.55); }
+
+/* 目的地图片画廊 */
+.photo-gallery-section { display:none; }
+.photo-gallery-section.show { display:block; }
+.photo-gallery {
+  display:grid; grid-template-columns:repeat(3, 1fr); gap:12px;
+}
+.photo-gallery-item {
+  border-radius:14px; overflow:hidden; aspect-ratio:4/3; position:relative;
+  cursor:pointer; transition:all 0.3s var(--easing);
+  border:1px solid rgba(255,255,255,0.1);
+}
+.photo-gallery-item:hover { transform:translateY(-4px); box-shadow:0 8px 24px rgba(0,0,0,0.3); }
+.photo-gallery-item img {
+  width:100%; height:100%; object-fit:cover; display:block;
+}
+.photo-gallery-item .photo-label {
+  position:absolute; bottom:0; left:0; right:0; padding:8px 12px;
+  background:linear-gradient(transparent, rgba(0,0,0,0.6));
+  color:#fff; font-size:12px; font-weight:500;
+}
+.photo-gallery-item .photo-credit {
+  position:absolute; top:8px; right:10px; font-size:9px;
+  color:rgba(255,255,255,0.5); background:rgba(0,0,0,0.4);
+  padding:2px 6px; border-radius:4px;
+}
 
 /* 行程卡片 — 地图联动指示 */
 .day-header {
@@ -2403,6 +2404,11 @@ body.night-mode .bg-geo { opacity:0.2; }
 .search-no-result {
   padding:24px; text-align:center; color:rgba(255,255,255,0.6); font-size:14px;
 }
+.search-divider {
+  padding:8px 16px; font-size:11px; color:rgba(255,255,255,0.4); border-top:1px solid rgba(255,255,255,0.08);
+  text-transform:uppercase; letter-spacing:1px;
+}
+.search-result-amap { border-left:2px solid #5BA0D0; }
 
 /* ================================================================
    POI 详情弹窗
@@ -2652,6 +2658,21 @@ body.light-mode .crowd-indicator.crowded { color:#A84030 !important; }
 body.light-mode .transit-time { color:#555 !important; }
 body.light-mode .rain-plan-detail { color:#555 !important; background:rgba(0,0,0,0.03) !important; }
 body.light-mode .companion-tip-banner { color:#555 !important; }
+
+/* 地图 Leaflet 浅色模式 */
+body.light-mode .map-container .leaflet-control-zoom a {
+  background:rgba(255,255,255,0.85) !important; color:#555 !important;
+  border-color:rgba(0,0,0,0.15) !important;
+}
+body.light-mode .map-container .leaflet-control-attribution {
+  background:rgba(255,255,255,0.7) !important; color:rgba(0,0,0,0.5) !important;
+}
+body.light-mode .map-container .leaflet-popup-content-wrapper {
+  background:rgba(255,255,255,0.95) !important; color:#2D3436 !important;
+  border-color:rgba(0,0,0,0.1) !important;
+}
+body.light-mode .map-container .leaflet-popup-tip { background:rgba(255,255,255,0.95) !important; }
+body.light-mode .map-container .leaflet-popup-close-button { color:rgba(0,0,0,0.5) !important; }
 
 /* 语言切换 */
 body.light-mode .lang-btn { color:#555 !important; border-color:rgba(0,0,0,0.15) !important; background:rgba(0,0,0,0.04) !important; }
@@ -4487,6 +4508,7 @@ button:active:not(:disabled),
           <div class="export-bar" id="exportBar" style="display:none">
             <button class="export-btn" onclick="exportMarkdown()">📋 复制 Markdown</button>
             <button class="export-btn" onclick="exportHTML()">🖨️ 打印版行程单</button>
+            <button class="export-btn" onclick="exportICS()">📅 导出日历(.ics)</button>
             <button class="export-btn" onclick="generateQRCode()">📱 生成分享二维码</button>
           </div>
           <!-- 预算超标警告 -->
@@ -4554,21 +4576,30 @@ button:active:not(:disabled),
         <!-- 地图可视化 -->
         <section class="map-section" id="mapSection">
           <div class="section-header">
-            <h2 class="section-title">🗺️ 浙江全域动线</h2>
-            <span class="section-hint">跨城旅行 · 路线一目了然</span>
+            <h2 class="section-title">🗺️ 长三角全域动线</h2>
+            <span class="section-hint">实时地图 · 路线一目了然</span>
           </div>
           <div class="map-container glass-panel" id="mapContainer">
-            <svg class="map-svg" id="mapSvg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"></svg>
+            <div id="leafletMap" style="width:100%;height:100%"></div>
           </div>
           <div class="map-controls" id="mapControls"></div>
           <div class="map-legend">
             <span class="map-legend-item"><span class="map-legend-dot" style="background:#8BA88C"></span>景点</span>
             <span class="map-legend-item"><span class="map-legend-dot" style="background:#E8A85A"></span>餐饮</span>
-            <span class="map-legend-item"><span class="map-legend-dot" style="background:rgba(255,255,255,0.5)"></span>休息</span>
+            <span class="map-legend-item"><span class="map-legend-dot" style="background:rgba(163,181,166,0.9)"></span>休息</span>
             <span class="map-legend-item"><span class="map-legend-line warm"></span>旅游路线</span>
             <span class="map-legend-item"><span class="map-legend-line cool"></span>出行路线</span>
-            <span class="map-legend-item" style="margin-left:auto">💡 点击行程卡片高亮当天路线</span>
+            <span class="map-legend-item" style="margin-left:auto">💡 点击 Marker 查看详情</span>
           </div>
+        </section>
+
+        <!-- 目的地图片画廊 -->
+        <section class="photo-gallery-section" id="photoGallerySection" style="display:none">
+          <div class="section-header">
+            <h2 class="section-title">📸 目的地掠影</h2>
+            <span class="section-hint">Powered by Unsplash</span>
+          </div>
+          <div class="photo-gallery" id="photoGallery"></div>
         </section>
 
         <!-- 酒店推荐 -->
@@ -4648,6 +4679,7 @@ button:active:not(:disabled),
           <div class="share-card-preview" id="shareCardPreview" onclick="downloadShareCard()"></div>
           <div class="share-actions">
             <button class="share-btn" id="shareDownloadBtn" style="background:#8BA88C" onclick="downloadShareCard()">📥 下载图片</button>
+            <button class="share-btn" id="webShareBtn" style="background:rgba(255,255,255,0.1)" onclick="shareViaWeb()">🔄 原生分享</button>
             <button class="share-btn" style="background:rgba(255,255,255,0.1)" onclick="copyShareLink()">🔗 复制链接</button>
           </div>
         </section>
@@ -8328,6 +8360,7 @@ function generatePlan() {
     renderItinerary();
     renderHotel();
     renderMap();
+    loadPhotoGallery();
     renderChecklist();
     renderCareLetter();
     renderStats();
@@ -9539,6 +9572,34 @@ var ZJ_CITY_MAP = {
 };
 
 // 判断POI属于哪个城市（基于坐标最近的城市）
+// ================================================================
+//  城市坐标映射（长三角真实经纬度）
+// ================================================================
+var CITY_COORDS = {
+  '上海': { lat:31.23, lng:121.47 },
+  '杭州': { lat:30.28, lng:120.15 },
+  '南京': { lat:32.06, lng:118.78 },
+  '苏州': { lat:31.30, lng:120.58 },
+  '宁波': { lat:29.87, lng:121.54 },
+  '无锡': { lat:31.57, lng:120.30 },
+  '嘉兴': { lat:30.75, lng:120.76 },
+  '湖州': { lat:30.89, lng:120.09 },
+  '绍兴': { lat:30.03, lng:120.58 },
+  '舟山': { lat:30.02, lng:122.20 },
+  '温州': { lat:28.00, lng:120.70 },
+  '台州': { lat:28.66, lng:121.43 },
+  '金华': { lat:29.08, lng:119.65 },
+  '衢州': { lat:28.94, lng:118.87 },
+  '丽水': { lat:28.47, lng:119.92 }
+};
+
+function mapXYToLatLng(mapX, mapY, city) {
+  var coords = CITY_COORDS[city] || CITY_COORDS['杭州'];
+  var offsetLng = (mapX - 60) * 0.008;
+  var offsetLat = (mapY - 18) * 0.008;
+  return [coords.lat + offsetLat, coords.lng + offsetLng];
+}
+
 function getPoiCity(mapX, mapY) {
   var minDist = Infinity, city = '杭州';
   for (var c in ZJ_CITY_MAP) {
@@ -9550,12 +9611,14 @@ function getPoiCity(mapX, mapY) {
   return city;
 }
 
-// 当前高亮的天数（-1 = 全部显示）
+// Leaflet 地图实例 & 图层
+var leafletMap = null;
+var mapMarkers = [];
+var mapRouteLines = [];
 var highlightedDay = -1;
 
 function renderMap() {
   if (!itinerary || itinerary.length === 0) return;
-  var svg = document.getElementById('mapSvg');
   var section = document.getElementById('mapSection');
   section.classList.add('show');
   highlightedDay = -1;
@@ -9564,344 +9627,110 @@ function renderMap() {
   itinerary.forEach(function(day, di) {
     day.items.forEach(function(item, ii) {
       if (item.mapX !== undefined && item.mapY !== undefined) {
+        var city = item.city || getPoiCity(item.mapX, item.mapY);
+        var latlng = mapXYToLatLng(item.mapX, item.mapY, city);
         allPoints.push({
-          x: item.mapX, y: item.mapY,
+          lat: latlng[0], lng: latlng[1],
           name: item.name, type: item.type,
-          dayIndex: di, itemIndex: ii,
-          city: getPoiCity(item.mapX, item.mapY)
+          dayIndex: di, itemIndex: ii, city: city,
+          details: item.desc || item.reason || ''
         });
       }
     });
   });
+  if (allPoints.length === 0) return;
 
-  if (allPoints.length === 0) { svg.innerHTML = ''; return; }
+  var mapEl = document.getElementById('leafletMap');
+  if (leafletMap) { leafletMap.remove(); leafletMap = null; }
+  mapEl.innerHTML = '';
 
-  var isBusiness = travelMode === 'business';
-  var routeColor = isBusiness ? '#4682B4' : '#FFA500';
-  var routeColorEnd = isBusiness ? '#60A5FA' : '#FFD700';
+  leafletMap = L.map('leafletMap', {
+    center: [30.8, 120.5], zoom: 8,
+    zoomControl: true, attributionControl: true
+  });
 
-  var html = '';
+  L.tileLayer('https://webrd0{bc}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
+    subdomains: '1234', maxZoom: 18,
+    attribution: '&copy; 高德地图'
+  }).addTo(leafletMap);
 
-  // ═══════════════════════════════════════════════
-  //  DEFS: 所有渐变和路径定义
-  // ═══════════════════════════════════════════════
-  html += '<defs>';
-  // 海洋渐变
-  html += '<radialGradient id="oceanGrad" cx="70%" cy="40%"><stop offset="0%" stop-color="#1A4060"/><stop offset="100%" stop-color="#0F1A2A"/></radialGradient>';
-  // 路线渐变
-  for (var di = 0; di < itinerary.length; di++) {
-    html += '<linearGradient id="routeGrad_' + di + '" x1="0%" y1="0%" x2="100%" y2="0%">';
-    html += '<stop offset="0%" stop-color="' + routeColor + '" stop-opacity="0.9"/>';
-    html += '<stop offset="100%" stop-color="' + routeColorEnd + '" stop-opacity="0.9"/>';
-    html += '</linearGradient>';
-  }
-  html += '</defs>';
+  mapMarkers.forEach(function(m) { leafletMap.removeLayer(m); });
+  mapRouteLines.forEach(function(l) { leafletMap.removeLayer(l); });
+  mapMarkers = [];
+  mapRouteLines = [];
 
-  // ═══════════════════════════════════════════════
-  //  LAYER 0: 浙江地形底图
-  // ═══════════════════════════════════════════════
-  html += drawZhejiangBase();
-
-  // ═══════════════════════════════════════════════
-  //  LAYER 1: 分组路线（每天一个 group）
-  // ═══════════════════════════════════════════════
-  var totalRouteLength = 0;
-  var daySegments = {}; // { dayIndex: [ {x1,y1,x2,y2,length} ] }
-
+  var dayColors = ['#FFA500','#E8759A','#5BA0D0','#8BA88C','#D4A574'];
   itinerary.forEach(function(day, di) {
-    daySegments[di] = [];
     var dayPoints = [];
     day.items.forEach(function(item) {
-      if (item.mapX !== undefined && item.mapY !== undefined) {
-        dayPoints.push({ x: item.mapX, y: item.mapY, city: getPoiCity(item.mapX, item.mapY) });
+      if (item.mapX !== undefined) {
+        var city = item.city || getPoiCity(item.mapX, item.mapY);
+        dayPoints.push(mapXYToLatLng(item.mapX, item.mapY, city));
       }
     });
-
-    for (var i = 1; i < dayPoints.length; i++) {
-      var prev = dayPoints[i-1], curr = dayPoints[i];
-      var dx = prev.x - curr.x, dy = prev.y - curr.y;
-      var segLen = Math.sqrt(dx*dx + dy*dy);
-      totalRouteLength += segLen;
-      daySegments[di].push({ x1: prev.x, y1: prev.y, x2: curr.x, y2: curr.y, length: segLen, sameCity: prev.city === curr.city });
-    }
-  });
-
-  // 绘制每天路线
-  for (var di = 0; di < itinerary.length; di++) {
-    html += '<g class="map-route-group" id="routeGroup_' + di + '">';
-
-    itinerary[di].items.forEach(function(item, ii) {
-      // 跨城交通指示
-      if (ii > 0) {
-        var prevItem = itinerary[di].items[ii-1];
-        if (prevItem.mapX !== undefined && item.mapX !== undefined) {
-          var prevCity = getPoiCity(prevItem.mapX, prevItem.mapY);
-          var currCity = getPoiCity(item.mapX, item.mapY);
-          if (prevCity !== currCity) {
-            var mx = (prevItem.mapX + item.mapX) / 2;
-            var my = (prevItem.mapY + item.mapY) / 2;
-            html += '<line x1="' + prevItem.mapX + '" y1="' + prevItem.mapY + '" x2="' + item.mapX + '" y2="' + item.mapY + '" class="map-transit-arrow" stroke-dasharray="2 2" stroke="rgba(255,255,255,0.4)" stroke-width="0.6" fill="none"/>';
-            html += '<text x="' + (mx - 1.5) + '" y="' + (my - 1.5) + '" class="map-transit-icon" fill="rgba(255,255,255,0.55)">🚄</text>';
-          }
-        }
-      }
-    });
-
-    // 路线路径（贝塞尔曲线丝带）
-    var dayPoints = [];
-    itinerary[di].items.forEach(function(item) {
-      if (item.mapX !== undefined && item.mapY !== undefined) {
-        dayPoints.push({ x: item.mapX, y: item.mapY });
-      }
-    });
-
     if (dayPoints.length >= 2) {
-      var pathD = buildSmoothPath(dayPoints);
-      html += '<path d="' + pathD + '" class="map-route-path' + (isBusiness ? ' business' : '') + '" stroke="url(#routeGrad_' + di + ')" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>';
+      var line = L.polyline(dayPoints, {
+        color: dayColors[di % dayColors.length], weight: 3, opacity: 0.7, smoothFactor: 1
+      }).addTo(leafletMap);
+      mapRouteLines.push(line);
     }
+  });
 
-    html += '</g>';
-  }
-
-  // ═══════════════════════════════════════════════
-  //  LAYER 2: 动态光点（沿全部路线循环）
-  // ═══════════════════════════════════════════════
-  if (totalRouteLength > 0) {
-    // 构建完整路线路径用于动画
-    var allPathPoints = [];
-    allPoints.forEach(function(p) { allPathPoints.push({ x: p.x, y: p.y }); });
-    var fullPathD = buildSmoothPath(allPathPoints);
-    var dur = Math.max(4, totalRouteLength * 0.5);
-    html += '<defs><path id="travelerPath" d="' + fullPathD + '"/></defs>';
-    html += '<circle r="2.5" fill="' + (isBusiness ? '#60A5FA' : '#FFD700') + '" class="map-traveler' + (isBusiness ? ' business' : '') + '" style="--travel-duration:' + dur + 's;--travel-length:' + (totalRouteLength * 2) + '" opacity="0.9">';
-    html += '<animateMotion dur="' + dur + 's" repeatCount="indefinite" rotate="auto"><mpath href="#travelerPath"/></animateMotion>';
-    html += '</circle>';
-    // 光晕
-    html += '<circle r="6" fill="' + (isBusiness ? '#60A5FA' : '#FFD700') + '" class="map-traveler' + (isBusiness ? ' business' : '') + '" style="--travel-duration:' + dur + 's;--travel-length:' + (totalRouteLength * 2) + '" opacity="0.25">';
-    html += '<animateMotion dur="' + dur + 's" repeatCount="indefinite" rotate="auto"><mpath href="#travelerPath"/></animateMotion>';
-    html += '</circle>';
-  }
-
-  // ═══════════════════════════════════════════════
-  //  LAYER 4: POI 节点
-  // ═══════════════════════════════════════════════
-  var allPoiNodes = [];
   allPoints.forEach(function(pt, idx) {
-    var color = pt.type === 'rest' ? 'rgba(163,181,166,0.8)' : pt.type === 'restaurant' ? '#E8A85A' : '#8BA88C';
-    var isStart = (idx === 0);
-    var isEnd = (idx === allPoints.length - 1);
-
-    allPoiNodes.push({ pt: pt, color: color, isStart: isStart, isEnd: isEnd, globalIdx: idx });
+    var color = pt.type === 'rest' ? '#A3B5A6' : pt.type === 'restaurant' ? '#E8A85A' : '#8BA88C';
+    var isStart = (idx === 0), isEnd = (idx === allPoints.length - 1);
+    var size = (isStart || isEnd) ? 18 : 14;
+    var html = '<div class="marker-inner ' + pt.type + (isStart ? ' marker-start' : '') + (isEnd ? ' marker-end' : '') + '" style="background:' + color + ';width:' + size + 'px;height:' + size + 'px"></div>';
+    var icon = L.divIcon({ className: 'custom-marker', html: html, iconSize: [size+4, size+4], iconAnchor: [(size+4)/2, (size+4)/2] });
+    var marker = L.marker([pt.lat, pt.lng], { icon: icon }).addTo(leafletMap);
+    var label = (isStart ? '🚩 起点：' : isEnd ? '🏁 终点：' : '') + pt.name;
+    marker.bindPopup('<b>' + label + '</b><br><small style="opacity:0.6">' + pt.city + ' · Day ' + (pt.dayIndex + 1) + '</small>' + (pt.details ? '<br><small>' + pt.details + '</small>' : ''));
+    mapMarkers.push(marker);
   });
 
-  allPoiNodes.forEach(function(node) {
-    var pt = node.pt, color = node.color;
-    html += '<g class="map-poi-group" id="poiNode_' + node.globalIdx + '" data-day="' + pt.dayIndex + '">';
+  var bounds = L.latLngBounds(allPoints.map(function(p) { return [p.lat, p.lng]; }));
+  leafletMap.fitBounds(bounds, { padding: [30, 30], maxZoom: 12 });
 
-    // 外发光环
-    html += '<circle class="map-poi-outer" cx="' + pt.x + '" cy="' + pt.y + '" r="8" fill="' + color + '" opacity="0.2"/>';
-
-    // 内点
-    html += '<circle class="map-poi-inner" cx="' + pt.x + '" cy="' + pt.y + '" r="3.5" fill="' + color + '" stroke="rgba(255,255,255,0.4)" stroke-width="0.8"/>';
-
-    // 起点标记
-    if (node.isStart) {
-      html += '<polygon class="map-start-marker" points="' + pt.x + ',' + (pt.y - 8) + ' ' + (pt.x - 3.5) + ',' + (pt.y - 3) + ' ' + (pt.x + 3.5) + ',' + (pt.y - 3) + '"/>';
-      html += '<text x="' + pt.x + '" y="' + (pt.y - 10) + '" text-anchor="middle" fill="' + activeMoodColor + '" font-size="3.5" font-weight="700">出发</text>';
-    }
-    // 终点标记
-    if (node.isEnd && !node.isStart) {
-      html += '<circle cx="' + pt.x + '" cy="' + pt.y + '" r="3.5" fill="none" stroke="#FF6B6B" stroke-width="1.5" stroke-dasharray="1.5 1"/>';
-      html += '<text x="' + pt.x + '" y="' + (pt.y - 7) + '" text-anchor="middle" fill="#FF6B6B" font-size="3" font-weight="600">终点</text>';
-    }
-
-    // 每天第一个POI：数字气泡
-    if (pt.itemIndex === 0 && pt.type === 'poi') {
-      html += '<rect x="' + (pt.x - 5) + '" y="' + (pt.y - 12) + '" width="10" height="7" rx="3.5" class="map-poi-bubble" stroke="' + color + '"/>';
-      html += '<text x="' + pt.x + '" y="' + (pt.y - 8.5) + '" class="map-poi-bubble-text">D' + (pt.dayIndex + 1) + '</text>';
-    }
-
-    // 标签
-    var label = pt.name.length > 5 ? pt.name.substring(0, 5) + '…' : pt.name;
-    html += '<text class="map-poi-label-text" x="' + pt.x + '" y="' + (pt.y + 9) + '">' + label + '</text>';
-
-    html += '</g>';
-  });
-
-  // ═══════════════════════════════════════════════
-  //  LAYER 5: 跨城标识
-  // ═══════════════════════════════════════════════
-  var cities = [];
-  allPoints.forEach(function(p) { if (cities.indexOf(p.city) === -1) cities.push(p.city); });
-  if (cities.length > 1) {
-    html += '<text x="2" y="97" fill="rgba(255,255,255,0.35)" font-size="2.5">跨城旅行：' + cities.join(' → ') + '</text>';
-  }
-
-  svg.innerHTML = html;
-
-  // ═══════════════════════════════════════════════
-  //  地图控制按钮
-  // ═══════════════════════════════════════════════
   var controlsEl = document.getElementById('mapControls');
   var ctrlHtml = '<button class="map-ctrl-btn active" onclick="flyToDay(-1)">全部路线</button>';
   for (var di = 0; di < itinerary.length; di++) {
     ctrlHtml += '<button class="map-ctrl-btn" id="mapCtrlBtn_' + di + '" onclick="flyToDay(' + di + ')">Day ' + (di + 1) + '</button>';
   }
   controlsEl.innerHTML = ctrlHtml;
+  setTimeout(function() { if (leafletMap) leafletMap.invalidateSize(); }, 300);
 }
 
-// ================================================================
-//  绘制浙江地形底图（SVG）
-// ================================================================
-function drawZhejiangBase() {
-  var h = '';
-  // 背景海域 — 东海
-  h += '<rect x="0" y="0" width="100" height="100" fill="url(#oceanGrad)" opacity="0.3"/>';
-
-  // 浙江陆地轮廓（简化多边形 — 更精确的轮廓）
-  h += '<path class="map-terrain" fill="rgba(40,60,50,0.5)" stroke="rgba(100,160,140,0.15)" stroke-width="0.3" d="' +
-    'M12,48 L10,46 L8,40 L12,32 L18,22 L26,18 L32,15 L36,12 L44,14 L52,18 L56,22 L58,28 L62,30 L68,28 L76,24 L82,28 L84,32 ' +
-    'L78,36 L74,40 L72,48 L70,54 L66,60 L62,64 L58,70 L54,74 L48,76 L42,74 L36,70 L30,68 L24,64 L20,60 L16,56 L12,48 Z' +
-  '"/>';
-
-  // 陆地纹理叠加
-  h += '<path class="map-terrain" fill="rgba(50,80,65,0.15)" d="' +
-    'M14,46 L12,34 L20,24 L28,18 L34,14 L42,16 L50,20 L54,24 L56,30 L60,32 L66,30 L74,26 L80,30 L82,34 L76,38 L72,42 L70,50 L68,56 L64,62 L60,66 L56,72 L50,74 L44,72 L38,68 L32,66 L26,62 L22,58 L18,52 L14,46 Z' +
-  '"/>';
-
-  // 水系 — 钱塘江、杭州湾、千岛湖
-  h += '<path class="map-water" fill="rgba(60,150,200,0.12)" d="' +
-    'M36,24 Q40,28 44,26 Q48,24 50,22 Q54,20 56,24 Q58,28 56,32" stroke="rgba(80,170,220,0.15)" stroke-width="0.3" fill="none"/>';
-  h += '<ellipse class="map-water" cx="56" cy="22" rx="8" ry="3" fill="rgba(60,150,200,0.1)"/>';
-  h += '<ellipse class="map-water" cx="26" cy="52" rx="3" ry="2" fill="rgba(60,150,200,0.08)"/>'; // 千岛湖
-
-  // 山脉 — 天目山、雁荡山、天台山
-  h += '<path fill="rgba(60,100,80,0.08)" d="M20,22 Q24,18 28,20 Q26,24 22,26 Z"/>';
-  h += '<path fill="rgba(60,100,80,0.08)" d="M60,56 Q64,52 66,56 Q64,60 60,60 Z"/>';
-  h += '<path fill="rgba(60,100,80,0.06)" d="M30,64 Q34,60 36,64 Q34,68 30,68 Z"/>';
-  h += '<path fill="rgba(60,100,80,0.06)" d="M62,58 Q66,54 68,58 Q66,62 62,60 Z"/>'; // 天台山
-
-  // 舟山群岛小点
-  h += '<circle cx="80" cy="28" r="1.5" class="map-city-dot" fill="rgba(255,255,255,0.35)"/>';
-  h += '<circle cx="82" cy="26" r="0.8" class="map-city-dot" fill="rgba(255,255,255,0.1)"/>';
-  h += '<circle cx="83" cy="30" r="0.6" class="map-city-dot" fill="rgba(255,255,255,0.14)"/>';
-
-  // 11个城市标记 — 增强版（发光圆点 + 城市名 + 特色标签）
-  var cityVibes = {
-    '杭州': '人间天堂', '宁波': '港通天下', '温州': '山水之城',
-    '嘉兴': '梦里水乡', '湖州': '清丽之地', '绍兴': '没有围墙的博物馆',
-    '金华': '东方好莱坞', '衢州': '南孔圣地', '舟山': '海天佛国',
-    '台州': '和合圣地', '丽水': '浙江绿谷'
-  };
-  for (var c in ZJ_CITY_MAP) {
-    var p = ZJ_CITY_MAP[c];
-    // 发光光晕
-    h += '<circle cx="' + p.x + '" cy="' + p.y + '" r="2.5" fill="rgba(139,168,140,0.15)"/>';
-    // 城市点
-    h += '<circle cx="' + p.x + '" cy="' + p.y + '" r="1.2" class="map-city-dot" data-city="' + c + '"/>';
-    // 城市名
-    h += '<text x="' + p.x + '" y="' + (p.y + 3.5) + '" class="map-city-label" text-anchor="middle" data-city="' + c + '">' + c + '</text>';
-    // 特色标签（小字）
-    var vibe = cityVibes[c] || '';
-    if (vibe) {
-      h += '<text x="' + p.x + '" y="' + (p.y - 2.5) + '" class="map-city-vibe" text-anchor="middle" data-city="' + c + '">' + vibe + '</text>';
-    }
-  }
-
-  // 城市间连线（虚线，展示浙江城市群）
-  var cityPairs = [
-    ['杭州','宁波'], ['杭州','嘉兴'], ['杭州','绍兴'], ['杭州','湖州'],
-    ['宁波','舟山'], ['宁波','台州'], ['温州','台州'], ['金华','丽水'],
-    ['绍兴','宁波'], ['嘉兴','湖州']
-  ];
-  cityPairs.forEach(function(pair) {
-    var a = ZJ_CITY_MAP[pair[0]], b = ZJ_CITY_MAP[pair[1]];
-    if (a && b) {
-      h += '<line x1="' + a.x + '" y1="' + a.y + '" x2="' + b.x + '" y2="' + b.y + '" stroke="rgba(255,255,255,0.1)" stroke-width="0.3" stroke-dasharray="1,2"/>';
-    }
-  });
-
-  // 水系标签
-  h += '<text x="56" y="22" class="map-water-label" text-anchor="middle">杭州湾</text>';
-  h += '<text x="80" y="34" class="map-water-label" text-anchor="middle">东海</text>';
-
-  return h;
-}
-
-// ================================================================
-//  构建平滑贝塞尔路径
-// ================================================================
-function buildSmoothPath(points) {
-  if (points.length < 2) return '';
-  if (points.length === 2) {
-    return 'M' + points[0].x + ' ' + points[0].y + ' L' + points[1].x + ' ' + points[1].y;
-  }
-  var d = 'M' + points[0].x + ' ' + points[0].y;
-  for (var i = 0; i < points.length - 1; i++) {
-    var cp1x = points[i].x + (points[i+1].x - (i > 0 ? points[i-1].x : points[i].x)) * 0.25;
-    var cp1y = points[i].y + (points[i+1].y - (i > 0 ? points[i-1].y : points[i].y)) * 0.25;
-    var cp2x = points[i+1].x - (points[i+1].x - points[i].x) * 0.25;
-    var cp2y = points[i+1].y - (points[i+1].y - points[i].y) * 0.25;
-    d += ' C' + cp1x + ' ' + cp1y + ',' + cp2x + ' ' + cp2y + ',' + points[i+1].x + ' ' + points[i+1].y;
-  }
-  return d;
-}
-
-// ================================================================
-//  地图联动：Fly-to 高亮某天
-// ================================================================
 function flyToDay(dayIndex) {
   highlightedDay = dayIndex;
-
-  // 更新路线可见性
-  var groups = document.querySelectorAll('.map-route-group');
-  groups.forEach(function(g) {
-    if (dayIndex === -1) {
-      g.classList.remove('dimmed');
-    } else {
-      var gDay = parseInt(g.id.replace('routeGroup_', ''));
-      if (gDay === dayIndex) {
-        g.classList.remove('dimmed');
-      } else {
-        g.classList.add('dimmed');
+  if (!leafletMap) return;
+  mapRouteLines.forEach(function(line, i) {
+    line.setStyle({ opacity: dayIndex === -1 ? 0.7 : (i === dayIndex ? 0.9 : 0.1), weight: dayIndex === -1 ? 3 : (i === dayIndex ? 4 : 1) });
+  });
+  var allDayIndices = [];
+  itinerary.forEach(function(day, di) {
+    day.items.forEach(function(item) {
+      if (item.mapX !== undefined) allDayIndices.push(di);
+    });
+  });
+  mapMarkers.forEach(function(marker, i) {
+    if (i < allDayIndices.length) {
+      marker.setOpacity(dayIndex === -1 ? 1 : (allDayIndices[i] === dayIndex ? 1 : 0.2));
+    }
+  });
+  if (dayIndex >= 0 && itinerary[dayIndex]) {
+    var dayLatLngs = [];
+    itinerary[dayIndex].items.forEach(function(item) {
+      if (item.mapX !== undefined) {
+        var city = item.city || getPoiCity(item.mapX, item.mapY);
+        dayLatLngs.push(mapXYToLatLng(item.mapX, item.mapY, city));
       }
-    }
-  });
-
-  // 更新 POI 节点可见性
-  var poiGroups = document.querySelectorAll('.map-poi-group');
-  poiGroups.forEach(function(g) {
-    var poiDay = parseInt(g.getAttribute('data-day') || '0');
-    if (dayIndex === -1) {
-      g.style.opacity = '1';
-    } else {
-      g.style.opacity = (poiDay === dayIndex) ? '1' : '0.2';
-    }
-  });
-
-  // 更新控制按钮状态
+    });
+    if (dayLatLngs.length > 0) leafletMap.fitBounds(L.latLngBounds(dayLatLngs), { padding: [40, 40], maxZoom: 14 });
+  }
   var ctrlBtns = document.querySelectorAll('.map-ctrl-btn');
   ctrlBtns.forEach(function(btn) { btn.classList.remove('active'); });
-  if (dayIndex === -1) {
-    ctrlBtns[0].classList.add('active');
-  } else {
-    var targetBtn = document.getElementById('mapCtrlBtn_' + dayIndex);
-    if (targetBtn) targetBtn.classList.add('active');
-  }
-
-  // 更新行程卡片高亮
-  var dayHeaders = document.querySelectorAll('.day-header');
-  dayHeaders.forEach(function(h) { h.classList.remove('active-day'); });
-  if (dayIndex >= 0) {
-    var targetHeader = document.getElementById('dayHeader_' + dayIndex);
-    if (targetHeader) targetHeader.classList.add('active-day');
-  }
-
-  // Fly-to 动画：滚动到地图
-  var mapSection = document.getElementById('mapSection');
-  if (mapSection && dayIndex >= 0) {
-    mapSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
+  if (dayIndex === -1) { ctrlBtns[0] && ctrlBtns[0].classList.add('active'); }
+  else { var btn = document.getElementById('mapCtrlBtn_' + dayIndex); if (btn) btn.classList.add('active'); }
 }
 
 // ================================================================
@@ -10030,6 +9859,68 @@ function exportHTML() {
   document.getElementById('exportModalTitle').textContent = '🖨️ HTML 行程单预览';
   document.getElementById('exportModalContent').textContent = html;
   document.getElementById('exportModalOverlay').classList.add('show');
+}
+
+function exportICS() {
+  if (!itinerary || itinerary.length === 0) return;
+  // 生成符合 RFC 5545 标准的 .ics 日历文件
+  var now = new Date();
+  var ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//MoodTravel//CN\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nX-WR-CALNAME:MoodTravel 行程\r\nX-WR-TIMEZONE:Asia/Shanghai\r\n';
+
+  itinerary.forEach(function(day) {
+    // 假设行程从今天开始
+    var dayDate = new Date(now);
+    dayDate.setDate(dayDate.getDate() + day.day - 1);
+    var dateStr = dayDate.toISOString().replace(/[-:]/g, '').substring(0, 8);
+    var nextStr = new Date(dayDate.getTime() + 86400000).toISOString().replace(/[-:]/g, '').substring(0, 8);
+
+    day.items.forEach(function(item, idx) {
+      var icon = item.type === 'rest' ? '☕ ' : item.type === 'restaurant' ? '🍽️ ' : '📍 ';
+      var summary = icon + item.name;
+      var desc = item.reason || '';
+      if (item.estimatedCost) desc += '\\n费用：¥' + item.estimatedCost;
+      if (item.rain_plan) desc += '\\n雨天备选：' + item.rain_plan.name;
+
+      // 使用每项的时间来估算开始时间
+      var hour = 9 + idx * 2;
+      var startTime = dateStr + 'T' + (hour < 10 ? '0' : '') + hour + '0000';
+      var endTime = dateStr + 'T' + (hour + 1 < 10 ? '0' : '') + (hour + 1) + '0000';
+
+      ics += 'BEGIN:VEVENT\r\n';
+      ics += 'DTSTART:' + startTime + '\r\n';
+      ics += 'DTEND:' + endTime + '\r\n';
+      ics += 'SUMMARY:' + summary + '\r\n';
+      ics += 'DESCRIPTION:' + desc + '\r\n';
+      ics += 'LOCATION:' + (item.city || '') + ' ' + item.name + '\r\n';
+      ics += 'END:VEVENT\r\n';
+    });
+  });
+
+  if (hotel) {
+    var hotelDate = new Date(now);
+    var hotelStart = hotelDate.toISOString().replace(/[-:]/g, '').substring(0, 8);
+    var hotelEnd = new Date(hotelDate.getTime() + days * 86400000).toISOString().replace(/[-:]/g, '').substring(0, 8);
+    ics += 'BEGIN:VEVENT\r\n';
+    ics += 'DTSTART;VALUE=DATE:' + hotelStart + '\r\n';
+    ics += 'DTEND;VALUE=DATE:' + hotelEnd + '\r\n';
+    ics += 'SUMMARY:🏨 ' + hotel.name + '\\n⭐' + hotel.rating + ' · ¥' + hotel.bestPrice + '起\r\n';
+    ics += 'LOCATION:' + (hotel.city || '') + ' ' + hotel.name + '\r\n';
+    ics += 'END:VEVENT\r\n';
+  }
+
+  ics += 'END:VCALENDAR\r\n';
+
+  // 下载文件
+  var blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'MoodTravel_行程_' + now.toISOString().substring(0, 10) + '.ics';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('📅 日历文件已下载，可导入 Apple/Google/Outlook 日历');
 }
 
 function closeExportModal() {
@@ -11208,6 +11099,51 @@ function copyShareLink() {
   }
 }
 
+function shareViaWeb() {
+  if (!itinerary || itinerary.length === 0) return;
+  var text = '✨ MoodTravel 情绪旅行：' + days + '天长三角之旅\n';
+  text += '心情：' + ((MOODS.find(function(m) { return m.key === activeMood; }) || {}).label || '') + '\n';
+  var firstDay = itinerary[0];
+  if (firstDay && firstDay.items.length > 0) {
+    text += '首站：' + firstDay.items[0].name + '\n';
+  }
+  text += '快来生成你的专属旅行路线吧！';
+
+  var shareData = {
+    title: 'MoodTravel · 情绪旅行',
+    text: text,
+    url: window.location.href
+  };
+
+  // 如果有分享卡片Canvas，尝试获取图片
+  var canvas = document.querySelector('#shareCardPreview canvas');
+  if (canvas && navigator.share && navigator.canShare) {
+    canvas.toBlob(function(blob) {
+      if (blob) {
+        var file = new File([blob], 'moodtravel-share.png', { type: 'image/png' });
+        shareData.files = [file];
+        if (navigator.canShare({ files: [file] })) {
+          navigator.share(shareData).catch(function() {});
+          return;
+        }
+      }
+      fallbackShare(shareData);
+    }, 'image/png');
+  } else {
+    fallbackShare(shareData);
+  }
+}
+
+function fallbackShare(shareData) {
+  if (navigator.share) {
+    navigator.share(shareData).catch(function() {
+      copyShareLink();
+    });
+  } else {
+    copyShareLink();
+  }
+}
+
 // ================================================================
 //  PWA Service Worker 注册
 // ================================================================
@@ -11304,6 +11240,8 @@ function toggleTheme() {
     showToast('已切换至深色模式');
   }
   try { localStorage.setItem('moodtravel_theme', isLightMode ? 'light' : 'dark'); } catch(e) {}
+  // 刷新地图（如果存在）
+  setTimeout(function() { if (leafletMap) leafletMap.invalidateSize(); }, 200);
 }
 
 // 启动时恢复主题
@@ -11472,6 +11410,46 @@ function doSearch(query) {
     }).join('');
   }
   dropdown.classList.add('show');
+
+  // 并行调用高德API实时搜索
+  fetchAmapPoiSearch(query);
+}
+
+function fetchAmapPoiSearch(query) {
+  var url = '/.netlify/functions/poi-search?query=' + encodeURIComponent(query);
+  fetch(url).then(function(r) { return r.json(); }).then(function(data) {
+    if (!data.results || data.results.length === 0) return;
+    var dropdown = document.getElementById('searchDropdown');
+    if (!dropdown || !dropdown.classList.contains('show')) return;
+
+    var amapHtml = '<div class="search-divider">🌐 高德实时搜索</div>';
+    data.results.forEach(function(r) {
+      var loc = r.location ? r.location.split(',') : null;
+      var amapData = { name: r.name, address: r.address, location: r.location, type: 'amap_poi' };
+      amapHtml += '<div class="search-result-item search-result-amap" onclick="selectAmapPoi(' + JSON.stringify(amapData).replace(/"/g, '&quot;') + ')">' +
+        '<span class="search-result-icon">📍</span>' +
+        '<div class="search-result-info"><div class="search-result-name">' + r.name + '</div><div class="search-result-detail">' + r.address + '</div></div>' +
+        '<span class="search-result-tag">高德</span></div>';
+    });
+    dropdown.innerHTML += amapHtml;
+  }).catch(function() { /* 高德API不可用时静默降级 */ });
+}
+
+function selectAmapPoi(data) {
+  var dropdown = document.getElementById('searchDropdown');
+  var input = document.getElementById('searchInput');
+  if (dropdown) dropdown.classList.remove('show');
+  if (input) { input.value = ''; input.blur(); }
+  showToast('📍 ' + data.name + ' · ' + (data.address || ''));
+  // 在地图上显示该POI
+  if (leafletMap && data.location) {
+    var loc = data.location.split(',');
+    var lng = parseFloat(loc[0]), lat = parseFloat(loc[1]);
+    var marker = L.marker([lat, lng]).addTo(leafletMap);
+    marker.bindPopup('<b>📍 ' + data.name + '</b><br><small>' + (data.address || '') + '</small>').openPopup();
+    leafletMap.setView([lat, lng], 14);
+    mapMarkers.push(marker);
+  }
 }
 
 function selectSearchResult(type, data) {
@@ -11579,6 +11557,36 @@ function fetchPoiImage(query, container) {
   };
   // Unsplash 随机图片（使用 search photos 的 source URL）
   img.src = 'https://source.unsplash.com/800x400/?' + encodeURIComponent(query + ' China travel');
+}
+
+function loadPhotoGallery() {
+  if (!itinerary || itinerary.length === 0) return;
+  var section = document.getElementById('photoGallerySection');
+  var gallery = document.getElementById('photoGallery');
+  if (!section || !gallery) return;
+
+  // 收集行程中的POI名称
+  var poiNames = [];
+  itinerary.forEach(function(day) {
+    day.items.forEach(function(item) {
+      if (item.type === 'poi' && poiNames.length < 6) {
+        poiNames.push(item.name);
+      }
+    });
+  });
+  if (poiNames.length === 0) return;
+
+  section.style.display = 'block';
+  var html = '';
+  poiNames.forEach(function(name) {
+    var imgUrl = 'https://source.unsplash.com/400x300/?' + encodeURIComponent(name + ' China travel');
+    html += '<div class="photo-gallery-item" onclick="window.open(\'https://unsplash.com/s/photos/' + encodeURIComponent(name) + '\', \'_blank\')">';
+    html += '<img src="' + imgUrl + '" alt="' + name + '" loading="lazy" onerror="this.parentElement.style.display=\'none\'">';
+    html += '<div class="photo-label">' + name + '</div>';
+    html += '<div class="photo-credit">Unsplash</div>';
+    html += '</div>';
+  });
+  gallery.innerHTML = html;
 }
 
 // ================================================================
