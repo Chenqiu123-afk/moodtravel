@@ -76,7 +76,7 @@ body::before {
   position: fixed;
   inset: 0;
   background: rgba(5,5,15,0.75);
-  z-index: 1;
+  z-index: -1;
   pointer-events: none;
 }
 
@@ -101,6 +101,15 @@ body.light-mode::before { background: transparent !important; }
   overflow: hidden;
   position: relative; z-index: 2;
 }
+/* 深色遮罩 — 在premium-page内部，bg-layer之上，内容之下 */
+.premium-page::after {
+  content: '';
+  position: fixed; inset: 0;
+  background: rgba(5,5,15,0.75);
+  z-index: 0;
+  pointer-events: none;
+}
+body.light-mode .premium-page::after { background: transparent !important; }
 
 /* ================================================================
    背景层 — 固定全屏，多层 CSS 动画
