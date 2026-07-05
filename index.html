@@ -71,6 +71,25 @@ html, body {
   /* 极细硬描边 — 清晰锐利，不发虚 */
   -webkit-text-stroke: 0.55px rgba(0,0,0,0.7);
   text-shadow: 0 0 2px rgba(0,0,0,0.5);
+  /* 主题切换过渡 */
+  transition: -webkit-text-stroke 0.6s var(--easing), text-shadow 0.6s var(--easing);
+}
+
+/* 全局玻璃面板、卡片、按钮的主题切换过渡 */
+.glass-panel, .section-card, .section-block, .plan-card, .timeline-card, .poi-card,
+.insight-card, .agent-card, .safety-card, .price-prediction-card, .price-summary,
+.lang-btn, .theme-toggle-btn, .mood-btn, .companion-chip, .scene-btn, .quick-link,
+.budget-slider-track, .budget-slider-fill, .search-input-wrap, .daily-scenario-chip,
+.preset-chip, .explicit-mood-btn, .carbon-section, .hot-route-item, .ai-insight-card,
+.ai-insights-panel, .care-letter, .safety-panel, .care-letter-body, .care-letter-body2,
+.care-letter-action, .care-letter-companion-note, .travel-tips, .culture-text,
+.trip-history-date, .trip-history-summary, .postcard-preview, .compare-verdict,
+.map-legend, .photo-tip, .local-tip, .rain-plan-detail, .warm-greeting, .daily-tip,
+.booking-popup, .mbti-option, .edit-mode-toggle, .voice-btn, .soundtrack-btn,
+.share-btn, .category, .tag, .load-more-btn, .plan-card-switch {
+  transition: background 0.6s var(--easing), color 0.6s var(--easing),
+              border-color 0.6s var(--easing), box-shadow 0.6s var(--easing),
+              -webkit-text-stroke 0.6s var(--easing), text-shadow 0.6s var(--easing);
 }
 
 body::before {
@@ -80,6 +99,7 @@ body::before {
   background: rgba(5,5,15,0.75);
   z-index: 1;
   pointer-events: none;
+  transition: background 0.6s var(--easing);
 }
 
 /* 浅色模式：深色文字 + 去掉描边和阴影 */
@@ -2763,15 +2783,31 @@ body.light-mode .map-container .leaflet-popup-content-wrapper {
 body.light-mode .map-container .leaflet-popup-tip { background:rgba(255,255,255,0.95) !important; }
 body.light-mode .map-container .leaflet-popup-close-button { color:rgba(0,0,0,0.5) !important; }
 
-/* ===== 安全出行 / 绿色出行 / 智能价格预测 — 浅色模式暴力修复 ===== */
-/* 核心策略：先全部重置为深色，再单独保留特殊色 */
+/* ===== 安全出行 / 绿色出行 / 智能价格预测 — 浅色模式修复 ===== */
+/* 使用 #555 灰色（与语言切换按钮一致），清晰可读 */
+body.light-mode .safety-panel,
 body.light-mode .safety-panel *,
+body.light-mode .safety-grid,
 body.light-mode .safety-grid *,
+body.light-mode .carbon-section,
 body.light-mode .carbon-section *,
+body.light-mode #pricePredictionSection,
 body.light-mode #pricePredictionSection * {
+  color: #555 !important;
+  transition: color 0.5s var(--easing), background 0.5s var(--easing), border-color 0.5s var(--easing);
+}
+/* 标题类文字更深一点，增强层次感 */
+body.light-mode .safety-panel .section-title,
+body.light-mode .carbon-section .section-title,
+body.light-mode #pricePredictionSection .section-title,
+body.light-mode .safety-card-title,
+body.light-mode .carbon-detail-val,
+body.light-mode .price-prediction-title,
+body.light-mode .price-prediction-current,
+body.light-mode .price-summary-val {
   color: #2D3436 !important;
 }
-/* 保留绿色数值（提高特异性以覆盖 #pricePredictionSection *） */
+/* 保留绿色数值 */
 body.light-mode .carbon-detail-val[style*="8BA88C"],
 body.light-mode .carbon-detail-val[style*="8ba88c"],
 body.light-mode .carbon-section .carbon-score-value,
@@ -2798,6 +2834,8 @@ body.light-mode .price-summary { background:rgba(0,0,0,0.02) !important; border-
 body.light-mode .price-prediction-tip { background:rgba(139,168,140,0.06) !important; }
 body.light-mode .price-prediction-trend.stable { background:rgba(0,0,0,0.04) !important; }
 body.light-mode .price-prediction-save { background:rgba(139,168,140,0.08) !important; }
+/* 保护绿底白字徽章 */
+body.light-mode .price-best-badge { color: #fff !important; }
 
 /* 语言切换 */
 body.light-mode .lang-btn { color:#555 !important; border-color:rgba(0,0,0,0.15) !important; background:rgba(0,0,0,0.04) !important; }
@@ -7315,9 +7353,9 @@ function renderPricePrediction() {
     var rowBg = isBest ? 'background:rgba(139,168,140,0.12);border:1px solid rgba(139,168,140,0.3)' :
       (isLight ? 'background:rgba(0,0,0,0.03)' : 'background:rgba(255,255,255,0.04)');
     html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:10px;' + rowBg + '">';
-    html += '<span style="font-size:14px;color:' + (isLight ? '#2D3436' : '') + '">' + (pp.icon || '🏨') + ' <strong>' + pp.name + '</strong></span>';
-    html += '<span style="font-size:16px;font-weight:700;' + (isBest ? 'color:#8BA88C' : (isLight ? 'color:#2D3436' : '')) + '">¥' + pp.price.toLocaleString() + '</span>';
-    if (isBest) html += '<span style="font-size:11px;background:#8BA88C;color:#fff;padding:2px 8px;border-radius:10px">最低价</span>';
+    html += '<span style="font-size:14px;color:' + (isLight ? '#555' : '') + '">' + (pp.icon || '🏨') + ' <strong>' + pp.name + '</strong></span>';
+    html += '<span style="font-size:16px;font-weight:700;' + (isBest ? 'color:#8BA88C' : (isLight ? 'color:#555' : '')) + '">¥' + pp.price.toLocaleString() + '</span>';
+    if (isBest) html += '<span class="price-best-badge" style="font-size:11px;background:#8BA88C;color:#fff;padding:2px 8px;border-radius:10px">最低价</span>';
     html += '</div>';
   });
   html += '</div>';
@@ -11516,32 +11554,51 @@ function fixLightModeText() {
   var isLight = document.body.classList.contains('light-mode');
   if (!isLight) {
     // 恢复暗色模式：清除所有inline颜色
-    var allEls = document.querySelectorAll('.safety-panel *, .safety-grid *, .carbon-section *, #pricePredictionSection *');
+    var allEls = document.querySelectorAll('.safety-panel, .safety-panel *, .safety-grid, .safety-grid *, .carbon-section, .carbon-section *, #pricePredictionSection, #pricePredictionSection *');
     allEls.forEach(function(el) { el.style.color = ''; el.style.background = ''; });
     return;
   }
-  // 浅色模式：暴力覆盖所有文字
+  // 浅色模式：使用 #555 灰色（与语言切换按钮一致）
   var sections = document.querySelectorAll('.safety-panel, .safety-grid, .carbon-section, #pricePredictionSection');
   sections.forEach(function(sec) {
+    // 先设置容器自身
+    if (sec.matches('.safety-panel, .safety-grid, .carbon-section, #pricePredictionSection')) {
+      sec.style.color = '#555';
+    }
     var els = sec.querySelectorAll('*');
     els.forEach(function(el) {
-      // 跳过纯装饰性元素
       if (el.tagName === 'BR' || el.tagName === 'HR') return;
-      // 跳过绿色/红色特殊元素
+      // 标题类元素更深色
+      if (el.classList.contains('section-title') ||
+          el.classList.contains('safety-card-title') ||
+          el.classList.contains('carbon-detail-val') ||
+          el.classList.contains('price-prediction-title') ||
+          el.classList.contains('price-prediction-current') ||
+          el.classList.contains('price-summary-val')) {
+        el.style.color = '#2D3436';
+        return;
+      }
+      // 绿色特殊元素
       if (el.classList.contains('carbon-score-value') ||
           el.classList.contains('price-prediction-low') ||
           el.classList.contains('price-prediction-save') ||
-          el.classList.contains('price-summary-val') && el.classList.contains('highlight') ||
-          el.classList.contains('price-prediction-trend') && el.classList.contains('down') ||
+          (el.classList.contains('price-summary-val') && el.classList.contains('highlight')) ||
+          (el.classList.contains('price-prediction-trend') && el.classList.contains('down')) ||
           el.tagName === 'STRONG') {
         el.style.color = '#8BA88C';
         return;
       }
+      // 绿底白字徽章（保持白色）
+      if (el.classList.contains('price-best-badge')) {
+        el.style.color = '#fff';
+        return;
+      }
+      // 红色趋势
       if (el.classList.contains('price-prediction-trend') && el.classList.contains('up')) {
         el.style.color = '#D32F2F';
         return;
       }
-      el.style.color = '#2D3436';
+      el.style.color = '#555';
     });
   });
   // 卡片背景
