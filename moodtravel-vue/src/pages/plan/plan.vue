@@ -36,7 +36,7 @@
             class="form-input"
             :value="store.destination"
             @input="onDestInput"
-            placeholder="输入城市名（试试输入"好累"）"
+            placeholder="输入城市名（试试输入'好累'）"
           />
         </div>
         <div class="form-row">
@@ -270,7 +270,9 @@
           <span class="booking-popup-title">🔍 全网比价中</span>
         </div>
         <div class="booking-popup-body">
-          <div class="booking-spinner" :style="{ borderTopColor: theme.primary }" />
+          <div class="booking-dots">
+            <div class="booking-dot" v-for="i in 3" :key="i" :style="{ animationDelay: (i-1)*0.2 + 's' }" />
+          </div>
           <span class="booking-popup-text">正在为您查询 {{ platforms.length }} 个平台...</span>
           <div class="platform-list">
             <div v-for="(p, i) in platforms" :key="p.name" class="platform-item" :class="{ checked: i <= checkedPlatform }">
@@ -472,10 +474,6 @@ const PLATFORM_LIST = [
   { name: '去哪儿', icon: '✈️', baseMultiplier: 0.97 },
   { name: '同程', icon: '🎫', baseMultiplier: 0.93 }
 ]
-
-function onBudgetChange(e) {
-  store.budget = parseInt(e.target.value)
-}
 
 function openCompanionPopup() {
   store.showCompanionPopup = true
@@ -1018,8 +1016,8 @@ function fmtTime(h) {
 .header {
   padding: 44px 0 16px; text-align: center;
 }
-.header-title { font-size: 18px; font-weight: 800; color: var(--color-text); display: block }
-.header-sub { font-size: 12px; color: var(--color-text-light); margin-top: 4px; display: block }
+.header-title { font-size: 22px; font-weight: 300; letter-spacing: 1px; color: var(--color-text-primary); display: block }
+.header-sub { font-size: 13px; color: var(--color-text-light); margin-top: 4px; display: block }
 
 /* 模式标签 */
 .mode-tag {
@@ -1028,17 +1026,16 @@ function fmtTime(h) {
   padding: 3px 10px;
   border-radius: 10px;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 400;
   letter-spacing: 0.5px;
-  transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: all 0.35s var(--spring-responsive);
 }
-
-/* 预算区间提示 */
 .budget-range-hint {
   font-size: 11px;
   color: var(--color-text-light);
   margin-bottom: 6px;
   text-align: right;
+  font-weight: 300;
 }
 
 /* 预算校验提示 */
@@ -1051,11 +1048,10 @@ function fmtTime(h) {
   background: #FFF3E0;
   color: #E8945A;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 400;
   margin-bottom: 8px;
   animation: fadeIn 0.25s ease;
 }
-
 .budget-warning.luxury {
   background: #FDF0E6;
   color: #D4A060;
@@ -1063,48 +1059,50 @@ function fmtTime(h) {
 
 /* 心情卡片 */
 .mood-card {
-  background: var(--color-card); border-radius: 8px;
+  background: var(--material-card); border-radius: var(--layout-card-radius);
   padding: 12px; display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,.03);
+  margin-bottom: 16px; box-shadow: var(--shadow-float);
 }
 .mood-card-left { display: flex; align-items: center; gap: 8px }
 .mood-emoji { font-size: 24px }
-.mood-label { font-size: 14px; font-weight: 700; color: var(--color-text); display: block }
-.mood-hint { font-size: 11px; color: var(--color-text-light); margin-top: 2px; display: block }
+.mood-label { font-size: 14px; font-weight: 400; color: var(--color-text-primary); display: block }
+.mood-hint { font-size: 11px; color: var(--color-text-light); margin-top: 2px; display: block; font-weight: 300 }
 .mood-badge {
   padding: 4px 10px; border-radius: 10px;
-  font-size: 11px; font-weight: 600; color: #fff;
+  font-size: 11px; font-weight: 500; color: #fff;
   transition: background 0.5s;
 }
 
 /* 表单 */
 .section { margin-bottom: 16px }
-.section-title { font-size: 14px; font-weight: 700; margin-bottom: 8px }
-.form-card { background: var(--color-card); border-radius: 8px; padding: 12px }
+.section-title { font-size: 17px; font-weight: 400; margin-bottom: 8px }
+.form-card { background: var(--material-card); border-radius: var(--layout-card-radius); padding: 12px; box-shadow: var(--shadow-float) }
 .form-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px }
-.form-label { font-size: 13px; font-weight: 600; color: var(--color-text); flex-shrink: 0 }
+.form-label { font-size: 13px; font-weight: 400; color: var(--color-text); flex-shrink: 0 }
 .form-input { flex: 1; text-align: right; font-size: 13px; color: var(--color-text); border: none; outline: none; background: transparent }
-.form-value { font-size: 13px; color: var(--theme-primary); font-weight: 600; transition: color 0.5s; cursor: pointer }
+.form-value { font-size: 13px; color: var(--theme-primary); font-weight: 400; transition: color 0.5s; cursor: pointer }
 .budget-slider { flex: 1; display: flex; align-items: center; gap: 8px }
-.budget-value { font-size: 13px; font-weight: 700; flex-shrink: 0 }
+.budget-value { font-size: 28px; font-weight: 500; flex-shrink: 0 }
 .range-input { flex: 1; accent-color: var(--range-color, #A3B5A6) }
 .budget-presets { display: flex; gap: 4px; margin-bottom: 10px }
 .budget-preset {
   flex: 1; padding: 6px 4px; border-radius: 5px;
-  background: #F5F2ED; font-size: 10px; font-weight: 600;
+  background: var(--color-bg); font-size: 10px; font-weight: 400;
   text-align: center; color: var(--color-text-light);
   transition: all 0.2s;
   cursor: pointer;
+  box-shadow: var(--shadow-float);
 }
 .budget-preset.active { color: #fff }
 .stepper { display: flex; align-items: center; gap: 12px }
 .stepper-btn {
   width: 28px; height: 28px; border-radius: 50%;
-  background: #F5F2ED; display: flex; align-items: center; justify-content: center;
-  font-size: 16px; font-weight: 700; color: var(--color-text);
+  background: var(--color-bg); display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 500; color: var(--color-text);
   cursor: pointer;
+  box-shadow: var(--shadow-float);
 }
-.stepper-value { font-size: 16px; font-weight: 700 }
+.stepper-value { font-size: 16px; font-weight: 500 }
 .weather-toggle {
   display: flex; align-items: center; gap: 6px;
   font-size: 13px; color: var(--color-text);
@@ -1154,12 +1152,13 @@ function fmtTime(h) {
 }
 .gauge-card {
   flex: 1;
-  background: var(--color-card);
+  background: var(--material-card);
   border-radius: 8px;
   padding: 10px;
+  box-shadow: var(--shadow-float);
 }
 .gauge-label {
-  font-size: 12px; font-weight: 600; color: var(--color-text);
+  font-size: 12px; font-weight: 400; color: var(--color-text);
   display: block; margin-bottom: 6px;
 }
 .gauge-bar {
@@ -1172,24 +1171,25 @@ function fmtTime(h) {
   transition: width 0.8s ease;
 }
 .gauge-value {
-  font-size: 11px; font-weight: 600;
+  font-size: 11px; font-weight: 500;
 }
 .stats-row {
   display: flex; gap: 6px; margin-top: 8px;
 }
 .stat-item {
   flex: 1; text-align: center;
-  background: var(--color-card); border-radius: 8px;
+  background: var(--material-card); border-radius: 8px;
   padding: 8px 4px;
+  box-shadow: var(--shadow-float);
 }
-.stat-num { font-size: 14px; font-weight: 700; color: var(--color-text); display: block }
-.stat-label { font-size: 10px; color: var(--color-text-light); margin-top: 2px; display: block }
+.stat-num { font-size: 20px; font-weight: 500; color: var(--color-text-primary); display: block }
+.stat-label { font-size: 10px; color: var(--color-text-light); margin-top: 2px; display: block; font-weight: 400 }
 
 /* 日期标题 */
 .day-header {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 8px 12px; border-radius: 8px;
-  font-size: 13px; font-weight: 700;
+  padding: 8px 12px; border-radius: var(--layout-card-radius);
+  font-size: 13px; font-weight: 500;
   margin-bottom: 8px;
   transition: all 0.5s;
 }
@@ -1206,18 +1206,18 @@ function fmtTime(h) {
   width: 10px; height: 10px; border-radius: 50%; z-index: 2;
 }
 .timeline-card {
-  background: var(--color-card); border-radius: 8px;
-  padding: 10px; box-shadow: 0 1px 6px rgba(0,0,0,.02);
+  background: var(--material-card); border-radius: 8px;
+  padding: 10px; box-shadow: var(--shadow-float);
 }
 .time-row { display: flex; justify-content: space-between; margin-bottom: 4px }
-.time { font-size: 12px; font-weight: 700; color: var(--theme-primary); transition: color 0.5s }
-.category { font-size: 10px; color: var(--color-text-light); background: #F5F2ED; padding: 2px 6px; border-radius: 4px }
-.poi-name { font-size: 15px; font-weight: 700; display: block; margin-bottom: 3px }
-.poi-desc { font-size: 12px; color: var(--color-text-light); display: block; margin-bottom: 6px }
-.reason-bar { font-size: 11px; color: var(--color-text-light); background: #F8F6F2; padding: 6px; border-radius: 5px }
+.time { font-size: 12px; font-weight: 500; color: var(--theme-primary); transition: color 0.5s }
+.category { font-size: 10px; color: var(--color-text-light); background: var(--color-bg); padding: 2px 6px; border-radius: 4px; font-weight: 400 }
+.poi-name { font-size: 15px; font-weight: 500; display: block; margin-bottom: 3px }
+.poi-desc { font-size: 12px; color: var(--color-text-secondary); display: block; margin-bottom: 6px; font-weight: 400 }
+.reason-bar { font-size: 11px; color: var(--color-text-light); background: #F8F6F2; padding: 6px; border-radius: 5px; font-weight: 400 }
 .tags { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px }
 .tag {
-  font-size: 10px; padding: 2px 6px; border-radius: 6px;
+  font-size: 10px; padding: 2px 6px; border-radius: 6px; font-weight: 400;
 }
 
 /* 预订按钮行 */
@@ -1227,13 +1227,13 @@ function fmtTime(h) {
   border-top: 1px solid #F0EDE8;
 }
 .price-tag {
-  font-size: 14px; font-weight: 700;
+  font-size: 14px; font-weight: 500;
   transition: color 0.5s;
 }
 .book-btn {
   padding: 5px 14px;
   border-radius: 12px;
-  font-size: 12px; font-weight: 600; color: #fff;
+  font-size: 12px; font-weight: 500; color: #fff;
   transition: all 0.2s;
   cursor: pointer;
 }
@@ -1244,32 +1244,32 @@ function fmtTime(h) {
 .compare-inline {
   margin-top: 6px;
   padding: 6px 8px;
-  background: linear-gradient(135deg, #F8FFF0, #F2FDE8);
+  background: linear-gradient(135deg, #F8FAF5, #F0F5EC);
   border-radius: 6px;
   display: flex; align-items: center; gap: 4px;
   font-size: 11px;
 }
 .compare-inline-icon { font-size: 10px }
-.compare-inline-text { color: #6B8E6C; font-weight: 600; flex: 1 }
-.compare-inline-save { color: #E8945A; font-weight: 700 }
+.compare-inline-text { color: #6B8E6C; font-weight: 400; flex: 1 }
+.compare-inline-save { color: #E8945A; font-weight: 500 }
 
 /* 酒店卡片 */
 .hotel-card {
-  background: var(--color-card);
+  background: var(--material-card);
   border-radius: 8px;
   padding: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.03);
+  box-shadow: var(--shadow-elevated);
 }
 .hotel-header {
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 6px;
 }
-.hotel-name { font-size: 15px; font-weight: 700; color: var(--color-text) }
-.hotel-rating { font-size: 12px; color: var(--color-text-light); display: block; margin-top: 2px }
-.hotel-price { font-size: 18px; font-weight: 800; transition: color 0.5s }
-.hotel-reason { font-size: 12px; color: var(--color-text-light); display: block; margin-bottom: 4px }
-.hotel-savings { font-size: 12px; color: #8BA88C; font-weight: 600; margin-bottom: 8px }
-.hotel-book-btn { width: 100%; text-align: center; padding: 8px 0; border-radius: 16px; font-size: 14px; font-weight: 600; }
+.hotel-name { font-size: 15px; font-weight: 500; color: var(--color-text-primary) }
+.hotel-rating { font-size: 12px; color: var(--color-text-light); display: block; margin-top: 2px; font-weight: 400 }
+.hotel-price { font-size: 18px; font-weight: 500; transition: color 0.5s }
+.hotel-reason { font-size: 12px; color: var(--color-text-light); display: block; margin-bottom: 4px; font-weight: 400 }
+.hotel-savings { font-size: 12px; color: #8BA88C; font-weight: 400; margin-bottom: 8px }
+.hotel-book-btn { width: 100%; text-align: center; padding: 8px 0; border-radius: 16px; font-size: 14px; font-weight: 400; }
 
 /* 开启旅程按钮 */
 .start-trip-btn {
@@ -1277,8 +1277,8 @@ function fmtTime(h) {
   width: 100%; height: 48px;
   border-radius: 24px; border: none;
   display: flex; align-items: center; justify-content: center;
-  font-size: 16px; font-weight: 700; color: #fff;
-  transition: all 0.3s;
+  font-size: 16px; font-weight: 500; color: #fff;
+  transition: transform var(--duration-200) var(--spring-responsive), box-shadow var(--duration-300) var(--ease-out-expo);
   cursor: pointer;
   animation: pulse 2s ease-in-out infinite;
 }
@@ -1294,8 +1294,8 @@ function fmtTime(h) {
   width: 100%; height: 48px;
   border-radius: 24px; border: none;
   display: flex; align-items: center; justify-content: center;
-  font-size: 16px; font-weight: 700; color: #fff;
-  transition: all 0.3s;
+  font-size: 16px; font-weight: 500; color: #fff;
+  transition: transform var(--duration-200) var(--spring-responsive), box-shadow var(--duration-300) var(--ease-out-expo);
   cursor: pointer;
 }
 .generate-btn:active { transform: scale(.97) }
@@ -1313,10 +1313,11 @@ function fmtTime(h) {
 .booking-popup {
   width: 85%;
   max-width: 300px;
-  background: #FFFCF8;
+  background: var(--material-card);
   border-radius: 16px;
   padding: 20px;
   animation: popIn 0.3s ease;
+  box-shadow: var(--shadow-modal);
 }
 @keyframes popIn {
   from { transform: scale(0.9); opacity: 0 }
@@ -1326,17 +1327,26 @@ function fmtTime(h) {
   text-align: center; margin-bottom: 12px;
 }
 .booking-popup-title {
-  font-size: 16px; font-weight: 700; color: var(--color-text);
+  font-size: 16px; font-weight: 500; color: var(--color-text);
 }
 .booking-popup-body {
   display: flex; flex-direction: column; align-items: center;
 }
-.booking-spinner {
-  width: 28px; height: 28px;
-  border: 2px solid #E0DCD4;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+.booking-dots {
+  display: flex;
+  gap: 6px;
   margin-bottom: 8px;
+}
+.booking-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--theme-primary);
+  animation: dotBounce 1.2s var(--spring-responsive) infinite;
+}
+@keyframes dotBounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1.2); opacity: 1; }
 }
 .booking-popup-text {
   font-size: 13px; color: var(--color-text-light);
@@ -1349,37 +1359,120 @@ function fmtTime(h) {
 .platform-item {
   display: flex; align-items: center; gap: 6px;
   padding: 8px;
-  background: #F5F2ED;
+  background: var(--color-bg);
   border-radius: 6px;
   font-size: 13px;
+  font-weight: 400;
 }
 .platform-item.checked {
   background: #E4F0E6;
 }
 .platform-icon { font-size: 16px }
-.platform-name { flex: 1; font-weight: 600; color: var(--color-text) }
-.platform-price { font-weight: 700; color: #8BA88C }
+.platform-name { flex: 1; font-weight: 500; color: var(--color-text) }
+.platform-price { font-weight: 500; color: #8BA88C }
 .platform-wait { color: var(--color-text-light); font-size: 11px }
 .booking-popup-footer {
   margin-top: 12px; text-align: center;
 }
 .booking-best {
-  font-size: 14px; font-weight: 700; color: var(--color-text);
+  font-size: 14px; font-weight: 500; color: var(--color-text);
   display: block;
 }
 .booking-save {
-  font-size: 12px; color: #8BA88C; font-weight: 600;
+  font-size: 12px; color: #8BA88C; font-weight: 400;
   margin: 4px 0 8px; display: block;
 }
 .booking-action-btn {
   width: 100%; height: 40px;
   border-radius: 20px; border: none;
   display: flex; align-items: center; justify-content: center;
-  font-size: 14px; font-weight: 700; color: #fff;
+  font-size: 14px; font-weight: 500; color: #fff;
   transition: background 0.5s;
   cursor: pointer;
 }
 .booking-action-btn:active { transform: scale(.97) }
 
-.safe-bottom { height: 20px }
+.safe-bottom { height: 80px }
+
+/* ================================================================
+   桌面端响应式 — 行程规划页
+   ================================================================ */
+@media (min-width: 768px) {
+  .plan-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px var(--layout-page-padding);
+  }
+
+  .plan-content {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  .plan-sidebar {
+    position: sticky;
+    top: 24px;
+  }
+
+  .plan-main {
+    min-width: 0;
+  }
+
+  .plan-nav {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px 24px;
+  }
+
+  /* 玻璃卡片 */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 20px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+    transition: transform 0.3s var(--spring-responsive),
+                box-shadow 0.4s;
+  }
+  .glass-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  }
+
+  /* 行程时间轴卡片悬停 */
+  .timeline-card {
+    transition: transform 0.3s var(--spring-responsive),
+                box-shadow 0.4s;
+  }
+  .timeline-card:hover {
+    transform: translateX(4px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  }
+
+  /* 酒店卡片悬停 */
+  .hotel-card {
+    transition: transform 0.3s var(--spring-responsive),
+                box-shadow 0.4s;
+  }
+  .hotel-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  }
+
+  /* 预订按钮悬停 */
+  .book-btn {
+    transition: transform 0.2s, box-shadow 0.3s;
+  }
+  .book-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  }
+
+  .safe-bottom {
+    height: 40px;
+  }
+}
 </style>

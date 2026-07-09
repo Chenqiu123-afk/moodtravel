@@ -1,377 +1,399 @@
 /* ================================================================
-   MoodTravel Global Design System — "会呼吸的玻璃"
-   VisionOS-inspired frosted glass + dual-mode adaptive layout
+   MoodTravel "Air" Design System v2
+   ── 苹果级空气感：轻字重 + 可见阴影 + 纹理背景 + 磨砂玻璃
+   120fps GPU-only animations
    ================================================================ */
 
 /* ================================================================
-   1. SPRING CURVES — 非线性动画引擎（参考 iOS）
+   1. SPRING CURVES
    ================================================================ */
 :root {
-  --ease-spring:    cubic-bezier(0.32, 0.72, 0, 1);      /* iOS 弹簧效果 */
-  --ease-spring-out:cubic-bezier(0.16, 1, 0.3, 1);       /* 弹性出场 */
-  --ease-spring-in: cubic-bezier(0.55, 0, 1, 0.45);      /* 弹性入场 */
-  --ease-smooth:    cubic-bezier(0.25, 0.46, 0.45, 0.94); /* 平滑过渡 */
-  --ease-bounce:    cubic-bezier(0.34, 1.56, 0.64, 1);    /* 回弹效果 */
-  --ease-expo-out:  cubic-bezier(0.19, 1, 0.22, 1);       /* 指数衰减 */
+  --spring-responsive: cubic-bezier(0.16, 1, 0.3, 1);
+  --spring-smooth:     cubic-bezier(0.32, 0.72, 0, 1);
+  --spring-bouncy:     cubic-bezier(0.34, 1.56, 0.64, 1);
+  --spring-snappy:     cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-expo:     cubic-bezier(0.19, 1, 0.22, 1);
 
-  --duration-instant: 0.12s;
-  --duration-fast:    0.18s;
-  --duration-normal:  0.28s;
-  --duration-slow:    0.40s;
-  --duration-spring:  0.55s;
-  --duration-breathe: 4s;
-
-  /* ================================================================
-     2. GLASS SYSTEM — 毛玻璃层级
-     ================================================================ */
-  --glass-blur-sm:     12px;
-  --glass-blur:        20px;
-  --glass-blur-lg:     30px;
-  --glass-saturate:    180%;
-  --glass-opacity:     0.72;
-  --glass-opacity-card:0.82;
-  --glass-border:      rgba(255, 255, 255, 0.18);
-  --glass-bg:          rgba(255, 255, 255, 0.12);
+  --duration-75:  0.075s;
+  --duration-100: 0.1s;
+  --duration-150: 0.15s;
+  --duration-200: 0.2s;
+  --duration-300: 0.3s;
+  --duration-400: 0.4s;
+  --duration-500: 0.5s;
+  --duration-700: 0.7s;
 
   /* ================================================================
-     3. SHADOWS — 空气感阴影
+     2. COLOR SYSTEM — 暖调象牙色板
+     永不使用纯白，永不使用纯黑
      ================================================================ */
-  --shadow-float:  0 4px 20px rgba(0,0,0,0.05);
-  --shadow-card:   0 2px 12px rgba(0,0,0,0.04);
-  --shadow-elevate:0 8px 32px rgba(0,0,0,0.08);
-  --shadow-glow:   0 0 0 3px rgba(122, 158, 118, 0.12);
+  --color-bg:            #F9F6F1;
+  --color-surface:       #FEFDFB;
+  --color-surface-warm:  #FDFAF5;
+  --color-divider:       rgba(0, 0, 0, 0.05);
+  --color-border:        rgba(0, 0, 0, 0.06);
+  --color-text-primary:  #1C1C1E;
+  --color-text-secondary:#48484A;
+  --color-text-tertiary: #8E8E93;
+  --color-text-quaternary:#AEAEB2;
+  --color-accent:        #7A9E76;
+  --color-accent-light:  #AFC9AC;
+  --color-accent-warm:   #D4B896;
 
   /* ================================================================
-     4. DUAL-MODE LAYOUT — 双模态布局变量
+     3. SHADOW SYSTEM — 可见的深度（手机端能看清）
      ================================================================ */
-  /* 青年探索版 (默认) */
+  --shadow-float:    0 1px 2px rgba(0,0,0,0.04),
+                     0 2px 6px rgba(0,0,0,0.04);
+  --shadow-elevated: 0 2px 4px rgba(0,0,0,0.05),
+                     0 4px 12px rgba(0,0,0,0.06),
+                     0 8px 24px rgba(0,0,0,0.04);
+  --shadow-pop:      0 4px 8px rgba(0,0,0,0.06),
+                     0 8px 24px rgba(0,0,0,0.07),
+                     0 16px 40px rgba(0,0,0,0.05);
+  --shadow-modal:    0 8px 16px rgba(0,0,0,0.06),
+                     0 16px 40px rgba(0,0,0,0.08),
+                     0 32px 64px rgba(0,0,0,0.06);
+  --shadow-inset:    inset 0 1px 3px rgba(0,0,0,0.04);
+  --glow-accent:     0 0 0 3px rgba(122,158,118,0.12),
+                     0 0 24px rgba(122,158,118,0.06);
+
+  /* ================================================================
+     4. TYPOGRAPHY — 空气感轻字重（告别塑料味的第一要素）
+     苹果 iOS 使用 SF Pro Display 200-400
+     ================================================================ */
+  --font-display: 'Playfair Display', 'Georgia', 'PingFang SC', 'Noto Serif SC', serif;
+  --font-body:    'Inter', 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', system-ui, sans-serif;
+
+  --weight-thin:       200;
+  --weight-light:      300;
+  --weight-regular:    400;
+  --weight-medium:     500;
+  --weight-semibold:   600;
+
+  --tracking-tight:   -0.02em;
+  --tracking-normal:   0;
+  --tracking-wide:     0.02em;
+
+  --leading-tight:   1.2;
+  --leading-normal:  1.5;
+  --leading-relaxed: 1.7;
+
+  /* ================================================================
+     5. LAYOUT
+     ================================================================ */
   --layout-card-gap:      12px;
-  --layout-section-gap:   16px;
+  --layout-section-gap:   20px;
   --layout-page-padding:  16px;
-  --layout-card-padding:  14px;
-  --layout-card-radius:   14px;
-  --layout-image-ratio:   0.6;
+  --layout-card-padding:  16px;
+  --layout-card-radius:   16px;
+  --layout-image-ratio:   0.55;
   --layout-grid-columns:  2;
-  --layout-info-density:  normal;
+  --touch-min-size:       44px;
 
   /* ================================================================
-     5. SKELETON SCREEN — 骨架屏
+     6. SKELETON
      ================================================================ */
-  --skeleton-base:    #E8E4DE;
-  --skeleton-shimmer: #F0EDE8;
+  --skeleton-base:    #EBE7E0;
+  --skeleton-shimmer: #F5F2EC;
   --skeleton-radius:  8px;
+
+  /* ================================================================
+     7. MATERIAL — 卡片材质
+     ================================================================ */
+  --material-card:  #FEFDFB;
+  --material-glass: rgba(254, 253, 251, 0.88);
+}
+
+/* Responsive breakpoints */
+@media (min-width: 640px) {
+  :root {
+    --layout-card-gap:      14px;
+    --layout-section-gap:   24px;
+    --layout-page-padding:  20px;
+    --layout-card-padding:  18px;
+    --layout-card-radius:   18px;
+  }
+}
+@media (min-width: 768px) {
+  :root {
+    --layout-card-gap:      16px;
+    --layout-section-gap:   32px;
+    --layout-page-padding:  24px;
+    --layout-card-padding:  22px;
+    --layout-card-radius:   20px;
+  }
 }
 
 /* ================================================================
-   长辈关怀版 — 覆盖所有布局变量 + 极致适老化
+   Desktop layout
+   ================================================================ */
+@media (min-width: 768px) {
+  .page-container, [class*="-page"] { max-width: 100% !important; }
+  .desktop-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 1200px; margin: 0 auto; }
+  .desktop-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1200px; margin: 0 auto; }
+  .desktop-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto; }
+  .desktop-content { max-width: 900px; margin: 0 auto; }
+  .safe-bottom { height: 40px; }
+}
+
+/* ================================================================
+   Desktop glass
+   ================================================================ */
+@media (min-width: 768px) {
+  .glass-card {
+    background: rgba(255,255,255,0.45);
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
+    border: 0.5px solid rgba(255,255,255,0.4);
+    border-radius: var(--layout-card-radius);
+    box-shadow: var(--shadow-elevated);
+    transition: transform 0.35s var(--spring-responsive), box-shadow 0.45s var(--ease-out-expo);
+  }
+  .glass-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-pop); }
+  .hover-lift { transition: transform 0.35s var(--spring-responsive), box-shadow 0.45s var(--ease-out-expo); }
+  .hover-lift:hover { transform: translateY(-6px); box-shadow: var(--shadow-pop); }
+  .hover-glow:hover { box-shadow: var(--glow-accent); }
+  .text-display { font-family: var(--font-display); font-weight: var(--weight-semibold); letter-spacing: var(--tracking-tight); }
+  .text-heading { font-weight: var(--weight-light); letter-spacing: var(--tracking-wide); }
+  .text-body { font-weight: var(--weight-light); letter-spacing: 0.01em; line-height: var(--leading-relaxed); }
+}
+
+/* ================================================================
+   Elderly mode
    ================================================================ */
 [data-accessibility="elderly"] {
-  /* ---- 排版放大：全局基础字号提升 1.5 倍，行高 1.8 ---- */
   font-size: 150%;
   line-height: 1.8;
-
-  /* ---- 布局变量 ---- */
-  --layout-card-gap:      20px;
-  --layout-section-gap:   24px;
-  --layout-page-padding:  20px;
-  --layout-card-padding:  20px;
-  --layout-card-radius:   18px;
-  --layout-image-ratio:   0;
-  --layout-grid-columns:  1;
-  --layout-info-density:  sparse;
-
-  /* ---- 色彩降级：禁用毛玻璃，纯白底色 + 深灰文字（最高对比度） ---- */
-  --glass-blur:           0px;
-  --glass-blur-lg:        0px;
-  --glass-saturate:       100%;
-  --glass-opacity:        1;
-  --glass-opacity-card:   1;
-  --glass-border:         rgba(0,0,0,0.08);
-  --glass-bg:             rgba(255,255,255,1);
-
-  --shadow-float:  0 2px 8px rgba(0,0,0,0.1);
-  --shadow-card:   0 1px 4px rgba(0,0,0,0.08);
-  --shadow-elevate:0 4px 16px rgba(0,0,0,0.12);
-
-  --color-text:       #333333;
-  --color-text-light: #555555;
-  --color-text-muted: #6A6A6A;
-  --color-bg:         #FFFFFF;
-  --color-card:       #FFFFFF;
-
-  --skeleton-base:    #E0E0E0;
-  --skeleton-shimmer: #F0F0F0;
-
-  /* ---- 触控优化：按钮统一升至 60px 高度，圆角 12px ---- */
-  --btn-min-height: 60px;
-  --btn-border-radius: 12px;
+  --layout-card-gap: 20px; --layout-section-gap: 24px;
+  --layout-page-padding: 20px; --layout-card-padding: 20px;
+  --layout-card-radius: 18px; --layout-image-ratio: 0; --layout-grid-columns: 1;
+  --material-card: #FFFFFF; --material-glass: #FFFFFF;
+  --shadow-float: 0 1px 4px rgba(0,0,0,0.1);
+  --shadow-elevated: 0 2px 8px rgba(0,0,0,0.12);
+  --shadow-pop: 0 4px 16px rgba(0,0,0,0.14);
+  --color-text-primary: #333; --color-text-secondary: #555; --color-text-tertiary: #6A6A6A;
+  --color-bg: #FFF; --skeleton-base: #E0E0E0; --skeleton-shimmer: #F0F0F0;
 }
 
 /* ================================================================
-   SKELETON SCREEN ANIMATION
+   SKELETON
    ================================================================ */
 @keyframes skeleton-shimmer {
-  0%   { background-position: -200% 0; }
+  0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
-
 .skeleton {
-  background: linear-gradient(
-    90deg,
-    var(--skeleton-base) 0%,
-    var(--skeleton-shimmer) 40%,
-    var(--skeleton-base) 80%
-  );
+  background: linear-gradient(90deg, var(--skeleton-base) 0%, var(--skeleton-shimmer) 40%, var(--skeleton-base) 80%);
   background-size: 200% 100%;
   animation: skeleton-shimmer 1.8s ease-in-out infinite;
   border-radius: var(--skeleton-radius);
 }
 
 /* ================================================================
-   GLASS BACKGROUND LAYER
+   MATERIAL CARDS — 手机端可见的材质卡片
    ================================================================ */
-.glass-bg-layer {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  overflow: hidden;
-}
 
-.glass-bg-image {
-  position: absolute;
-  inset: -40px;
-  background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=80&fm=webp');
-  background-size: cover;
-  background-position: center;
-  filter: saturate(0.8) brightness(0.95);
-  transform: scale(1.05);
-  transition: transform 8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-/* 长辈模式：隐藏装饰背景 */
-[data-accessibility="elderly"] .glass-bg-image {
-  display: none;
-}
-
-/* 毛玻璃叠加层 */
-.glass-bg-overlay {
-  position: absolute;
-  inset: 0;
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  background: var(--glass-bg);
-}
-
-/* ================================================================
-   GLASS CARD — 毛玻璃卡片
-   ================================================================ */
-.glass-card {
-  background: rgba(255, 255, 255, var(--glass-opacity-card));
-  backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-saturate));
-  -webkit-backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-saturate));
-  border: 1px solid var(--glass-border);
+/* 基础卡片：象牙白 + 可见浮起阴影 */
+.material-card {
+  background: var(--material-card);
   border-radius: var(--layout-card-radius);
-  box-shadow: var(--shadow-card);
-  transition: transform var(--duration-normal) var(--ease-spring),
-              box-shadow var(--duration-normal) var(--ease-spring),
-              border-color var(--duration-normal) var(--ease-smooth);
+  box-shadow: var(--shadow-float);
+  transition: transform var(--duration-200) var(--spring-responsive),
+              box-shadow var(--duration-300) var(--ease-out-expo);
+  will-change: transform;
+  transform: translateZ(0);
+}
+.material-card:active {
+  transform: scale(0.98);
+  box-shadow: var(--shadow-inset);
+  transition: transform var(--duration-75) var(--spring-snappy),
+              box-shadow var(--duration-100) var(--ease-out-expo);
 }
 
+/* 玻璃卡片：半透象牙白 */
+.glass-card {
+  background: var(--material-glass);
+  border-radius: var(--layout-card-radius);
+  box-shadow: var(--shadow-float);
+  transition: transform var(--duration-200) var(--spring-responsive),
+              box-shadow var(--duration-300) var(--ease-out-expo);
+  will-change: transform;
+  transform: translateZ(0);
+}
 .glass-card:active {
-  transform: scale(0.985);
+  transform: scale(0.98);
+  box-shadow: var(--shadow-inset);
+}
+
+/* 深度卡片：明显浮起 */
+.depth-card {
+  background: var(--material-card);
+  border-radius: var(--layout-card-radius);
+  box-shadow: var(--shadow-elevated);
+  transition: transform var(--duration-200) var(--spring-responsive),
+              box-shadow var(--duration-300) var(--ease-out-expo);
+  will-change: transform;
+  transform: translateZ(0);
+}
+.depth-card:active {
+  transform: scale(0.97);
   box-shadow: var(--shadow-float);
 }
 
-/* 长辈模式：卡片变纯白 */
-[data-accessibility="elderly"] .glass-card {
-  background: #FFFFFF;
+/* 弹出层 */
+.popup-card {
+  background: var(--material-card);
+  border-radius: 20px;
+  box-shadow: var(--shadow-modal);
+}
+
+@media (min-width: 768px) {
+  .glass-card {
+    background: rgba(255,255,255,0.45);
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
+    border: 0.5px solid rgba(255,255,255,0.4);
+  }
+  .material-card { background: rgba(255,255,255,0.7); }
+}
+
+[data-accessibility="elderly"] .material-card,
+[data-accessibility="elderly"] .glass-card,
+[data-accessibility="elderly"] .depth-card {
+  background: #FFF;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  border: 1px solid rgba(0,0,0,0.08);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
 }
 
 /* ================================================================
-   RUBBER-BAND SCROLL — 橡皮筋拉伸
+   SPRING INTERACTIONS — 120fps GPU-only
    ================================================================ */
-.scroll-container {
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
-  scroll-behavior: smooth;
-  will-change: scroll-position;
-  transform: translateZ(0); /* 硬件加速 */
+.spring-touch {
+  transition: transform var(--duration-150) var(--spring-responsive);
+  will-change: transform;
+  transform: translateZ(0);
+}
+.spring-touch:active {
+  transform: scale(0.96);
+  transition: transform var(--duration-75) var(--spring-snappy);
 }
 
-/* 长辈模式：禁用橡皮筋，避免迷惑 */
-[data-accessibility="elderly"] .scroll-container {
-  overscroll-behavior-y: auto;
-}
-
-/* ================================================================
-   SPRING-SCALE MICRO-INTERACTION
-   ================================================================ */
 .spring-press {
-  transition: transform var(--duration-instant) var(--ease-spring),
-              opacity var(--duration-instant) var(--ease-spring);
+  transition: transform var(--duration-200) var(--spring-responsive),
+              opacity var(--duration-150) var(--ease-out-expo);
+  will-change: transform;
+  transform: translateZ(0);
 }
 .spring-press:active {
   transform: scale(0.95);
   opacity: 0.85;
 }
 
-/* 长辈模式：更明显的反馈 */
-[data-accessibility="elderly"] .spring-press:active {
-  transform: scale(0.93);
-  opacity: 0.75;
-  background: #F0F0F0 !important;
+.ripple-btn {
+  position: relative;
+  overflow: hidden;
+  will-change: transform;
+  transform: translateZ(0);
 }
+.ripple-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(0,0,0,0.06) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity var(--duration-300) var(--ease-out-expo);
+}
+.ripple-btn:active::after { opacity: 1; transition: opacity 0s; }
+
+[data-accessibility="elderly"] .spring-press:active { transform: scale(0.9); opacity: 0.7; }
+[data-accessibility="elderly"] .spring-touch:active { transform: scale(0.92); }
 
 /* ================================================================
-   SPRING-POP ANIMATION — 气泡生长（SOS 等弹窗）
+   KEYFRAMES — GPU-only
    ================================================================ */
 @keyframes spring-pop-in {
-  0%   { transform: scale(0.3); opacity: 0; border-radius: 50%; }
-  60%  { transform: scale(1.03); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; border-radius: var(--layout-card-radius); }
+  0% { transform: scale(0.3); opacity: 0; }
+  60% { transform: scale(1.04); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
 }
-
 @keyframes spring-pop-out {
-  0%   { transform: scale(1); opacity: 1; }
-  100% { transform: scale(0.3); opacity: 0; border-radius: 50%; }
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.3); opacity: 0; }
 }
-
-.spring-pop-enter-active {
-  animation: spring-pop-in var(--duration-spring) var(--ease-spring) forwards;
+@keyframes fade-up-in {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
-.spring-pop-leave-active {
-  animation: spring-pop-out var(--duration-fast) var(--ease-spring-in) forwards;
+@keyframes breathe-glow {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.06); opacity: 0.75; }
 }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
 /* ================================================================
-   TYPOGRAPHY — 字体层级
+   TYPOGRAPHY CLASSES
    ================================================================ */
-.display-title {
-  font-family: 'Playfair Display', 'Georgia', 'PingFang SC', serif;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
+.display-title { font-family: var(--font-display); font-weight: var(--weight-semibold); letter-spacing: var(--tracking-tight); }
+.display-subtitle { font-family: var(--font-display); font-weight: var(--weight-regular); font-style: italic; }
+.body-text { font-family: var(--font-body); font-weight: var(--weight-regular); letter-spacing: 0.01em; }
+.caption-text { font-family: var(--font-body); font-weight: var(--weight-light); letter-spacing: 0.02em; font-size: 11px; color: var(--color-text-tertiary); }
 
-.display-subtitle {
-  font-family: 'Playfair Display', 'Georgia', 'PingFang SC', serif;
-  font-weight: 400;
-  font-style: italic;
-  letter-spacing: 0;
-}
-
-.body-text {
-  font-family: 'Inter', 'PingFang SC', 'Hiragino Sans GB', system-ui, sans-serif;
-  font-weight: 400;
-  letter-spacing: 0.01em;
-}
-
-/* 长辈模式：全部使用无衬线 */
 [data-accessibility="elderly"] .display-title,
-[data-accessibility="elderly"] .display-subtitle {
-  font-family: 'Inter', 'PingFang SC', 'Hiragino Sans GB', system-ui, sans-serif;
-  font-weight: 700;
-  font-style: normal;
-}
+[data-accessibility="elderly"] .display-subtitle { font-family: var(--font-body); font-weight: 700; font-style: normal; }
 
 /* ================================================================
-   GESTURE HINTS — 手势提示（青年模式）
+   GLOBAL SAFEGUARDS
    ================================================================ */
-[data-accessibility="elderly"] .gesture-hint {
-  display: none;
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+#app { max-width: 100vw; overflow-x: hidden; }
+img { max-width: 100%; height: auto; }
+
+@media (max-width: 767px) {
+  input, textarea, select { font-size: 16px !important; }
 }
 
-/* ================================================================
-   ELDERLY NAVIGATION — 底部固定导航（长辈模式）
-   ================================================================ */
-.elderly-bottom-nav {
-  display: none;
-}
-[data-accessibility="elderly"] .elderly-bottom-nav {
-  display: flex;
-  position: fixed;
-  bottom: 0;
-  left: 0; right: 0;
-  max-width: 480px;
-  margin: 0 auto;
-  background: #FFFFFF;
-  border-top: 1px solid rgba(0,0,0,0.08);
-  padding: 8px 16px;
-  padding-bottom: max(8px, env(safe-area-inset-bottom));
-  z-index: 100;
-  justify-content: space-around;
-}
-.elderly-nav-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 8px 16px;
-  border-radius: 12px;
-  border: none;
-  background: transparent;
-  font-size: 14px;
-  font-weight: 600;
-  color: #4A4A4A;
-  cursor: pointer;
-  min-width: 60px;
-  transition: background var(--duration-instant) var(--ease-spring);
-}
-.elderly-nav-btn:active {
-  background: #F0F0F0;
-  transform: scale(0.93);
-}
-.elderly-nav-btn .nav-icon {
-  font-size: 22px;
-}
-
-/* ================================================================
-   长辈模式：全局按钮触控优化
-   所有按钮高度升至 60px，圆角 12px，确保手指精准点击
-   ================================================================ */
-[data-accessibility="elderly"] button,
-[data-accessibility="elderly"] [role="button"],
-[data-accessibility="elderly"] .btn {
-  min-height: var(--btn-min-height, 60px);
-  border-radius: var(--btn-border-radius, 12px);
-  font-size: 110%;
-  cursor: pointer;
-}
-
-/* ================================================================
-   长辈模式：交互简化
-   禁用所有长按、滑动等复杂手势，改为显式大按钮点击
-   ================================================================ */
-
-/* 隐藏原生滑块，改用大按钮点击 */
-[data-accessibility="elderly"] input[type="range"] {
-  display: none;
-}
-
-/* 禁用用户选择（避免误触文字选择） */
 [data-accessibility="elderly"] {
   -webkit-user-select: none;
   user-select: none;
 }
-
-/* 但不影响输入框内的文字选择 */
 [data-accessibility="elderly"] input,
 [data-accessibility="elderly"] textarea {
   -webkit-user-select: text;
   user-select: text;
 }
 
-/* 禁用触摸滚动时的橡皮筋效果 */
-[data-accessibility="elderly"] .scroll-container {
-  overscroll-behavior: auto;
-  -webkit-overflow-scrolling: auto;
+/* ================================================================
+   BACKGROUND — CSS 噪点纹理 + 径向光晕
+   ================================================================ */
+.glass-bg-layer {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.glass-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.3);
 }
 
-/* 隐藏毛玻璃装饰层（长辈模式） */
-[data-accessibility="elderly"] .glass-bg-layer {
-  display: none;
+@media (min-width: 768px) {
+  .glass-bg-overlay {
+    backdrop-filter: blur(80px) saturate(1.2);
+    -webkit-backdrop-filter: blur(80px) saturate(1.2);
+    background: rgba(255,255,255,0.2);
+  }
 }

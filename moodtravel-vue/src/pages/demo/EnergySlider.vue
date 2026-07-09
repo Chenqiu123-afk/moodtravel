@@ -453,15 +453,20 @@ function tagClass(tag) {
   padding: 8px 14px;
   border-radius: 20px;
   border: 1px solid rgba(0,0,0,0.08);
-  background: rgba(255,255,255,0.9);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(255,255,255,0.92);
   font-size: 12px;
   font-weight: 600;
   color: #5C7E9A;
   cursor: pointer;
   box-shadow: 0 1px 4px rgba(0,0,0,0.06);
   transition: transform 0.12s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@media (min-width: 768px) {
+  .rain-test-btn {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
 }
 .rain-test-btn:active {
   transform: scale(0.95);
@@ -475,9 +480,14 @@ function tagClass(tag) {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  background: rgba(0,0,0,0.15);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
+  background: rgba(0,0,0,0.25);
+}
+
+@media (min-width: 768px) {
+  .bplan-overlay {
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
 }
 
 /* --- 毛玻璃卡片 --- */
@@ -485,14 +495,19 @@ function tagClass(tag) {
   width: 90%;
   max-width: 420px;
   margin-bottom: max(20px, env(safe-area-inset-bottom));
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.88);
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.5);
   box-shadow: 0 8px 32px rgba(0,0,0,0.1);
   padding: 18px;
   overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .bplan-card {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
 }
 
 /* --- 头部 --- */

@@ -694,7 +694,6 @@ onUnmounted(() => {
   position: absolute;
   background: rgba(255, 255, 255, 0.35);
   border-radius: 50%;
-  will-change: transform;
 }
 .cloud::before,
 .cloud::after {
@@ -743,7 +742,6 @@ onUnmounted(() => {
 .balloon {
   position: absolute;
   animation: balloonFloat 18s ease-in-out infinite;
-  will-change: transform;
 }
 .balloon-1 { left: 15%; animation-duration: 20s; animation-delay: -3s; }
 .balloon-2 { right: 12%; animation-duration: 22s; animation-delay: -8s; }
@@ -791,7 +789,6 @@ onUnmounted(() => {
   top: 8%;
   left: -80px;
   animation: airplaneFly 18s linear infinite;
-  will-change: transform;
   z-index: 2;
 }
 
@@ -837,7 +834,6 @@ onUnmounted(() => {
   background: rgba(255, 255, 255, 0.5);
   border-radius: 50%;
   animation: particleRise linear infinite;
-  will-change: transform, opacity;
 }
 
 @keyframes particleRise {
@@ -917,7 +913,6 @@ onUnmounted(() => {
 /* 品牌区 */
 .brand-section {
   text-align: left;
-  will-change: transform, opacity;
 }
 
 .brand-icon {
@@ -992,12 +987,9 @@ onUnmounted(() => {
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   color: rgba(255, 255, 255, 0.75);
   cursor: pointer;
   transition: all 0.35s var(--easing);
-  will-change: transform;
 }
 
 .mood-btn:hover {
@@ -1039,7 +1031,6 @@ onUnmounted(() => {
 /* 快捷入口 */
 .left-quick {
   opacity: 0;
-  will-change: opacity;
 }
 
 .quick-link {
@@ -1051,8 +1042,6 @@ onUnmounted(() => {
   font-family: var(--font-body);
   font-size: 16px;
   cursor: pointer;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   transition: all 0.3s var(--easing);
 }
 
@@ -1096,8 +1085,6 @@ onUnmounted(() => {
    ================================================================ */
 .glass-panel {
   background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 24px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
@@ -1113,7 +1100,6 @@ onUnmounted(() => {
    预算面板
    ================================================================ */
 .budget-section {
-  will-change: transform, opacity;
 }
 
 .budget-panel {
@@ -1269,8 +1255,6 @@ onUnmounted(() => {
   font-size: 16px;
   font-weight: 500;
   cursor: pointer;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   transition: all 0.25s var(--easing);
 }
 
@@ -1327,7 +1311,6 @@ onUnmounted(() => {
    热门路线 — 横向滚动
    ================================================================ */
 .hot-routes-section {
-  will-change: transform, opacity;
 }
 
 .section-header {
@@ -1432,7 +1415,6 @@ onUnmounted(() => {
    方案卡片瀑布流
    ================================================================ */
 .plans-section {
-  will-change: transform, opacity;
 }
 
 .plans-waterfall {
@@ -1691,8 +1673,6 @@ onUnmounted(() => {
   padding: 12px 28px;
   border-radius: 24px;
   background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   color: #FFFFFF;
   font-family: var(--font-body);
   font-size: 13px;

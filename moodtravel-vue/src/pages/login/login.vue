@@ -1,27 +1,11 @@
 <template>
   <div class="login-page" :style="pageStyle">
-    <!-- 呼吸感背景层 -->
+    <!-- 极简单层光晕背景 -->
     <div class="atmosphere">
-      <!-- 大光晕：缓慢呼吸 -->
-      <div class="aura aura-1" :style="auraStyle(1)" />
-      <div class="aura aura-2" :style="auraStyle(2)" />
-      <div class="aura aura-3" :style="auraStyle(3)" />
-
-      <!-- 高斯模糊遮罩 -->
-      <div class="blur-veil" />
+      <div class="aura" :style="auraStyle" />
     </div>
 
-    <!-- 浮动光粒子 -->
-    <div class="light-dust">
-      <div
-        v-for="i in 8"
-        :key="'d' + i"
-        class="dust-particle"
-        :style="dustStyle(i)"
-      />
-    </div>
-
-    <!-- 极简品牌区 -->
+    <!-- 品牌区 -->
     <div class="brand">
       <div class="brand-mark" :style="{ background: theme.primaryLight + '18', borderColor: theme.primaryLight + '30' }">
         <span class="brand-emoji">{{ store.moodEmoji }}</span>
@@ -30,11 +14,8 @@
       <span class="brand-tagline">情绪旅行</span>
     </div>
 
-    <!-- 玻璃态登录卡片 -->
-    <div class="glass-card">
-      <!-- 卡片内光晕 -->
-      <div class="card-glow" :style="{ background: `radial-gradient(ellipse at 50% 0%, ${theme.primaryLight}10, transparent 60%)` }" />
-
+    <!-- 登录卡片 -->
+    <div class="login-card">
       <div class="card-header">
         <span class="welcome">欢迎回来</span>
         <span class="subtitle">用心情感知，定制专属旅程</span>
@@ -66,6 +47,7 @@
             placeholder="手机号"
             maxlength="11"
             class="field"
+            inputmode="numeric"
           />
         </div>
         <div class="input-row">
@@ -75,6 +57,7 @@
             placeholder="验证码"
             maxlength="6"
             class="field flex-1"
+            inputmode="numeric"
           />
           <button
             class="code-btn"
@@ -96,7 +79,7 @@
       <!-- 协议 -->
       <p class="terms">
         <span>登录即表示同意</span>
-        <a class="link">《用户协议》</a>
+        <a class="link" @click="$router.push({name:'userAgreement'})">《用户协议》</a>
         <span>和</span>
         <a class="link">《隐私政策》</a>
       </p>
@@ -126,46 +109,23 @@ const router = useRouter()
 
 const theme = computed(() => store.activeTheme)
 
-// 页面背景：极浅莫兰迪渐变
+// 页面背景
 const pageStyle = computed(() => {
   const t = theme.value
   return {
-    background: `linear-gradient(165deg, ${t.bg} 0%, ${t.bgGradient} 40%, ${t.primaryLight}18 100%)`
+    background: `linear-gradient(165deg, ${t.bg} 0%, ${t.bgGradient} 40%, ${t.primaryLight}12 100%)`
   }
 })
 
-// 大光晕样式
-function auraStyle(i) {
-  const configs = {
-    1: { size: 320, top: -80, right: -100, color: theme.value.primaryLight, opacity: 0.18, duration: 14, delay: 0 },
-    2: { size: 240, bottom: 60, left: -80, color: theme.value.accent, opacity: 0.12, duration: 18, delay: 3 },
-    3: { size: 200, top: '35%', right: -60, color: theme.value.primary, opacity: 0.10, duration: 16, delay: 6 }
-  }
-  const c = configs[i]
-  return {
-    width: c.size + 'px',
-    height: c.size + 'px',
-    top: typeof c.top === 'number' ? c.top + 'px' : c.top,
-    bottom: typeof c.bottom === 'number' ? c.bottom + 'px' : c.bottom,
-    right: typeof c.right === 'number' ? c.right + 'px' : c.right,
-    left: typeof c.left === 'number' ? c.left + 'px' : c.left,
-    background: `radial-gradient(circle, ${c.color}30, ${c.color}08 60%, transparent)`,
-    opacity: c.opacity,
-    animation: `breathe ${c.duration}s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${c.delay}s infinite alternate`
-  }
-}
-
-// 光粒子样式
-function dustStyle(i) {
-  const seed = (i * 137.5) % 100
-  return {
-    left: (10 + seed * 0.8) + '%',
-    top: (5 + (i * 73) % 90) + '%',
-    animationDelay: (i * 1.3) + 's',
-    animationDuration: (8 + i * 2.5) + 's',
-    opacity: 0.15 + (i % 3) * 0.08
-  }
-}
+// 单层光晕
+const auraStyle = computed(() => ({
+  width: '280px',
+  height: '280px',
+  top: '-60px',
+  right: '-80px',
+  background: `radial-gradient(circle, ${theme.value.primaryLight}20, ${theme.value.primaryLight}05 60%, transparent)`,
+  opacity: 0.15
+}))
 
 // 登录逻辑
 const isLogging = ref(false)
@@ -216,165 +176,130 @@ function handleSkip() { router.push('/home') }
 
 <style scoped>
 /* ============================================================
-   呼吸感背景系统
+   移动优先：登录页 — 极简呼吸背景
    ============================================================ */
 .login-page {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0 32px;
+  padding: 0 24px;
   position: relative;
   overflow: hidden;
-  transition: background 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: background 0.8s var(--spring-responsive);
 }
 
+/* 单层光晕 */
 .atmosphere {
   position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
 }
-
 .aura {
   position: absolute;
   border-radius: 50%;
-  will-change: transform, opacity;
+  animation: breathe 18s var(--spring-responsive) infinite alternate;
 }
 @keyframes breathe {
   0%   { transform: scale(1) translate(0, 0); }
-  33%  { transform: scale(1.04) translate(4px, -6px); }
-  66%  { transform: scale(0.97) translate(-3px, 4px); }
-  100% { transform: scale(1.02) translate(2px, -2px); }
-}
-
-.blur-veil {
-  position: absolute;
-  inset: 0;
-  backdrop-filter: blur(60px);
-  -webkit-backdrop-filter: blur(60px);
-  mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
-  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
-}
-
-/* 光粒子 */
-.light-dust {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-.dust-particle {
-  position: absolute;
-  width: 2px;
-  height: 2px;
-  border-radius: 50%;
-  background: #fff;
-  animation: dustFloat linear infinite;
-}
-@keyframes dustFloat {
-  0%   { transform: translateY(0) scale(0); opacity: 0; }
-  20%  { opacity: 0.6; }
-  50%  { opacity: 0.3; transform: scale(1.5); }
-  80%  { opacity: 0.1; }
-  100% { transform: translateY(-60px) scale(0); opacity: 0; }
+  50%  { transform: scale(1.08) translate(6px, -8px); }
+  100% { transform: scale(0.96) translate(-4px, 4px); }
 }
 
 /* ============================================================
-   品牌区 —— 极简、大量留白
+   品牌区
    ============================================================ */
 .brand {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 48px;
+  margin-bottom: 36px;
   position: relative;
   z-index: 1;
 }
 .brand-mark {
-  width: 72px;
-  height: 72px;
-  border-radius: 20px;
-  border: 1px solid;
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  box-shadow: var(--shadow-float);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 20px;
-  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  animation: brandFloat 6s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+  margin-bottom: 16px;
+  transition: all 0.6s var(--spring-responsive);
 }
-@keyframes brandFloat {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-6px); }
-}
-.brand-emoji {
-  font-size: 32px;
-}
+.brand-emoji { font-size: 28px; }
 .brand-name {
-  font-size: 26px;
+  font-size: 32px;
   font-weight: 200;
   letter-spacing: 6px;
-  color: var(--color-text);
+  color: var(--color-text-primary);
   opacity: 0.85;
 }
 .brand-tagline {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 300;
-  letter-spacing: 4px;
+  letter-spacing: 3px;
   color: var(--color-text-light);
-  margin-top: 8px;
-  opacity: 0.6;
+  margin-top: 6px;
+  opacity: 0.55;
 }
 
 /* ============================================================
-   玻璃态卡片
+   登录卡片 — 移动端禁用backdrop-filter
    ============================================================ */
-.glass-card {
+.login-card {
   width: 100%;
   max-width: 340px;
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(32px);
-  -webkit-backdrop-filter: blur(32px);
-  border-radius: 24px;
-  padding: 36px 28px 28px;
+  background: var(--material-card);
+  border-radius: 20px;
+  padding: 28px 22px 24px;
   position: relative;
   z-index: 1;
-  overflow: hidden;
   box-shadow:
-    0 2px 40px rgba(0, 0, 0, 0.04),
-    0 0 0 1px rgba(255, 255, 255, 0.4) inset;
-  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    0 -0.5px 0 rgba(255,255,255,0.7),
+    0 1px 0 rgba(0,0,0,0.03),
+    var(--shadow-elevated),
+    0 0 0 0.5px rgba(255,255,255,0.4) inset;
+  transition: all 0.6s var(--spring-responsive);
 }
 
-.card-glow {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 120px;
-  pointer-events: none;
+/* 仅大屏保留backdrop-filter */
+@media (min-width: 768px) {
+  .login-card {
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-radius: 24px;
+    padding: 36px 28px 28px;
+    box-shadow:
+      0 2px 40px rgba(0, 0, 0, 0.04),
+      0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+  }
 }
 
 .card-header {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 }
 .welcome {
   display: block;
-  font-size: 22px;
+  font-size: 16px;
   font-weight: 300;
-  letter-spacing: 3px;
-  color: var(--color-text);
+  letter-spacing: 2px;
+  color: var(--color-text-primary);
 }
 .subtitle {
   display: block;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 300;
   color: var(--color-text-light);
-  margin-top: 8px;
+  margin-top: 6px;
   letter-spacing: 1px;
-  opacity: 0.7;
+  opacity: 0.65;
 }
 
 /* ============================================================
@@ -382,24 +307,22 @@ function handleSkip() { router.push('/home') }
    ============================================================ */
 .wechat-btn {
   width: 100%;
-  height: 50px;
+  height: 48px;
+  min-height: 44px;
   border: none;
-  border-radius: 25px;
+  border-radius: 24px;
   background: linear-gradient(135deg, #2DC85C, #1FA84A);
   color: #fff;
   font-size: 15px;
   font-weight: 400;
   letter-spacing: 2px;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  box-shadow: 0 4px 20px rgba(7, 193, 96, 0.18);
-}
-.wechat-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 24px rgba(7, 193, 96, 0.25);
+  transition: transform var(--duration-150) var(--spring-responsive),
+              box-shadow var(--duration-200) var(--ease-out-expo);
+  box-shadow: 0 4px 16px rgba(7, 193, 96, 0.15);
 }
 .wechat-btn:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 .wechat-btn:disabled {
   opacity: 0.7;
@@ -411,15 +334,13 @@ function handleSkip() { router.push('/home') }
   justify-content: center;
   gap: 8px;
 }
-.btn-icon {
-  font-size: 18px;
-}
+.btn-icon { font-size: 18px; }
 .btn-dot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.4);
-  animation: dotPulse 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+  background: rgba(255,255,255,0.5);
+  animation: dotPulse 1s var(--spring-responsive) infinite;
 }
 @keyframes dotPulse {
   0%, 100% { transform: scale(0.8); opacity: 0.4; }
@@ -432,20 +353,20 @@ function handleSkip() { router.push('/home') }
 .sep {
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin: 28px 0;
+  gap: 12px;
+  margin: 24px 0;
 }
 .sep-line {
   flex: 1;
   height: 1px;
-  background: rgba(0, 0, 0, 0.06);
+  background: var(--divider-light);
 }
 .sep-text {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 300;
   color: var(--color-text-light);
   letter-spacing: 2px;
-  opacity: 0.5;
+  opacity: 0.45;
 }
 
 /* ============================================================
@@ -459,12 +380,13 @@ function handleSkip() { router.push('/home') }
 .input-group {
   display: flex;
   align-items: center;
-  gap: 0;
-  background: rgba(0, 0, 0, 0.025);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-inset);
   border-radius: 12px;
   padding: 0 14px;
   height: 48px;
-  transition: background 0.3s;
+  min-height: 44px;
+  transition: background 0.2s;
 }
 .input-group:focus-within {
   background: rgba(0, 0, 0, 0.04);
@@ -472,9 +394,8 @@ function handleSkip() { router.push('/home') }
 .prefix {
   font-size: 14px;
   font-weight: 400;
-  color: var(--color-text);
+  color: var(--color-text-primary);
   padding-right: 12px;
-  border-right: 1px solid rgba(0,0,0,0.08);
   margin-right: 12px;
 }
 .field {
@@ -482,10 +403,11 @@ function handleSkip() { router.push('/home') }
   border: none;
   outline: none;
   background: transparent;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 300;
-  color: var(--color-text);
+  color: var(--color-text-primary);
   letter-spacing: 1px;
+  min-height: 44px;
 }
 .field::placeholder {
   color: rgba(0,0,0,0.2);
@@ -498,7 +420,9 @@ function handleSkip() { router.push('/home') }
 }
 .code-btn {
   width: 110px;
+  min-width: 100px;
   height: 48px;
+  min-height: 44px;
   border: none;
   border-radius: 12px;
   background: var(--theme-primary);
@@ -507,7 +431,7 @@ function handleSkip() { router.push('/home') }
   font-weight: 400;
   letter-spacing: 1px;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: transform var(--duration-150) var(--spring-responsive);
   flex-shrink: 0;
 }
 .code-btn:disabled {
@@ -517,22 +441,24 @@ function handleSkip() { router.push('/home') }
 .submit-btn {
   width: 100%;
   height: 48px;
+  min-height: 44px;
   border: none;
   border-radius: 24px;
   background: var(--color-text);
   color: #fff;
-  font-size: 14px;
-  font-weight: 400;
+  font-size: 17px;
+  font-weight: 500;
   letter-spacing: 3px;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: transform var(--duration-150) var(--spring-responsive),
+              box-shadow var(--duration-200) var(--ease-out-expo);
 }
 .submit-btn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
 }
 .submit-btn:not(:disabled):active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 
 /* ============================================================
@@ -540,9 +466,10 @@ function handleSkip() { router.push('/home') }
    ============================================================ */
 .terms {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   gap: 2px;
-  margin-top: 20px;
+  margin-top: 18px;
   font-size: 10px;
   font-weight: 300;
   color: var(--color-text-light);
@@ -551,36 +478,39 @@ function handleSkip() { router.push('/home') }
 .link {
   color: var(--theme-primary);
   cursor: pointer;
-  transition: opacity 0.3s;
+  white-space: nowrap;
 }
-.link:hover { opacity: 0.7; }
 
 /* ============================================================
    底部跳过
    ============================================================ */
 .skip-link {
-  margin-top: 40px;
+  margin-top: 32px;
   background: none;
   border: none;
   font-size: 13px;
   font-weight: 300;
   letter-spacing: 2px;
-  color: var(--color-text-light);
+  color: var(--color-text-tertiary);
   opacity: 0.45;
   cursor: pointer;
   position: relative;
   z-index: 1;
-  transition: opacity 0.4s;
-  padding: 8px 16px;
+  padding: 12px 16px;
+  min-height: 44px;
+  transition: opacity 0.3s;
 }
-.skip-link:hover { opacity: 0.7; }
+.skip-link:active {
+  transform: scale(0.97);
+  transition: transform var(--spring-snappy);
+}
 
 /* ============================================================
-   Toast
+   Toast — 移动端禁用backdrop-filter
    ============================================================ */
 .toast {
   position: fixed;
-  top: 80px;
+  top: 60px;
   left: 50%;
   transform: translateX(-50%);
   padding: 10px 24px;
@@ -590,17 +520,112 @@ function handleSkip() { router.push('/home') }
   letter-spacing: 1px;
   color: #fff;
   z-index: 999;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-elevated);
 }
-.toast.success { background: rgba(7, 193, 96, 0.78); }
-.toast.error   { background: rgba(200, 80, 80, 0.78); }
+.toast.success { background: rgba(7, 193, 96, 0.85); }
+.toast.error   { background: rgba(200, 80, 80, 0.85); }
 .toast-enter-active {
-  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: all 0.4s var(--spring-responsive);
 }
 .toast-leave-active {
-  transition: all 0.4s cubic-bezier(0.55, 0.06, 0.68, 0.19);
+  transition: all 0.3s cubic-bezier(0.55, 0.06, 0.68, 0.19);
 }
-.toast-enter-from { opacity: 0; transform: translateX(-50%) translateY(-12px); }
-.toast-leave-to   { opacity: 0; transform: translateX(-50%) translateY(-8px); }
+.toast-enter-from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+.toast-leave-to   { opacity: 0; transform: translateX(-50%) translateY(-6px); }
+
+/* ============================================================
+   桌面端：登录页精致化
+   ============================================================ */
+@media (min-width: 768px) {
+  .login-page {
+    padding: 0;
+  }
+
+  .brand {
+    margin-bottom: 48px;
+  }
+  .brand-mark {
+    width: 80px;
+    height: 80px;
+    border-radius: 22px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+  }
+  .brand-emoji { font-size: 36px; }
+  .brand-name {
+    font-size: 32px;
+    letter-spacing: 8px;
+  }
+  .brand-tagline {
+    font-size: 13px;
+    letter-spacing: 5px;
+    margin-top: 8px;
+  }
+
+  .login-card {
+    max-width: 380px;
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border-radius: 24px;
+    padding: 40px 32px 32px;
+    box-shadow:
+      0 4px 48px rgba(0, 0, 0, 0.06),
+      0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+    transition: transform 0.3s var(--spring-responsive),
+                box-shadow 0.4s;
+  }
+  .login-card:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 8px 56px rgba(0, 0, 0, 0.08),
+      0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+  }
+
+  .card-header { margin-bottom: 36px; }
+  .welcome {
+    font-size: 24px;
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-weight: 500;
+  }
+  .subtitle { font-size: 13px; margin-top: 8px; }
+
+  .wechat-btn {
+    height: 52px;
+    border-radius: 26px;
+    font-size: 16px;
+    transition: transform 0.2s var(--spring-responsive),
+                box-shadow 0.3s;
+  }
+  .wechat-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(7, 193, 96, 0.25);
+  }
+
+  .input-group {
+    height: 52px;
+    border-radius: 14px;
+  }
+  .submit-btn {
+    height: 52px;
+    border-radius: 26px;
+    font-size: 15px;
+    transition: transform 0.2s, box-shadow 0.3s;
+  }
+  .submit-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .skip-link {
+    margin-top: 48px;
+    font-size: 14px;
+    letter-spacing: 3px;
+    transition: opacity 0.3s, color 0.3s;
+  }
+  .skip-link:hover {
+    opacity: 0.8;
+    color: var(--theme-primary);
+  }
+}
 </style>

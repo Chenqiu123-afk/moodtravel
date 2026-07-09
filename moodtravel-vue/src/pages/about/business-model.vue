@@ -314,14 +314,19 @@ function goBack() {
   height: 36px;
   border-radius: 50%;
   border: none;
-  background: rgba(255,255,255,0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255,255,255,0.88);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+@media (min-width: 768px) {
+  .back-btn {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
 }
 
 .back-arrow {
@@ -358,11 +363,16 @@ function goBack() {
   display: flex;
   gap: 0;
   margin-bottom: 16px;
-  background: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.7);
   border-radius: 12px;
   padding: 4px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+}
+
+@media (min-width: 768px) {
+  .tab-bar {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
 }
 
 .tab-item {

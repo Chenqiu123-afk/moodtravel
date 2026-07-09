@@ -343,10 +343,15 @@ function certLevelClass(level) {
   justify-content: center;
   cursor: pointer;
   z-index: 10;
-  background: rgba(255,255,255,0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255,255,255,0.88);
   box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+@media (min-width: 768px) {
+  .back-btn {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
 }
 
 [data-accessibility="elderly"] .back-btn {
@@ -566,13 +571,18 @@ function certLevelClass(level) {
   right: 0;
   padding: 12px 20px;
   padding-bottom: max(12px, env(safe-area-inset-bottom));
-  background: rgba(255,255,255,0.78);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(255,255,255,0.88);
   border-top: 0.5px solid rgba(0,0,0,0.06);
   display: flex;
   justify-content: center;
   z-index: 50;
+}
+
+@media (min-width: 768px) {
+  .bottom-bar {
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+  }
 }
 
 [data-accessibility="elderly"] .bottom-bar {
@@ -599,7 +609,6 @@ function certLevelClass(level) {
   cursor: pointer;
   box-shadow: 0 4px 16px rgba(0,0,0,0.12);
   transition: box-shadow 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  will-change: transform;
 }
 
 .action-btn:active {
@@ -658,9 +667,15 @@ function certLevelClass(level) {
   gap: 8px;
   z-index: 60;
   white-space: nowrap;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255,255,255,0.88);
   border: 1px solid rgba(0,0,0,0.04);
+}
+
+@media (min-width: 768px) {
+  .toast {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
 }
 
 [data-accessibility="elderly"] .toast {

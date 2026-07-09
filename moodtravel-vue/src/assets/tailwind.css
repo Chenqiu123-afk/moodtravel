@@ -234,13 +234,18 @@
    Utility Components
    ================================================================ */
 @layer components {
+  /* 移动端禁用backdrop-filter，大屏保留 */
   .glass-card {
     background: rgba(255, 255, 255, var(--glass-opacity-card));
-    backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-saturate));
-    -webkit-backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-saturate));
     border: 1px solid var(--glass-border);
     border-radius: var(--layout-card-radius);
     box-shadow: var(--shadow-card);
+  }
+  @media (min-width: 768px) {
+    .glass-card {
+      backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-saturate));
+      -webkit-backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-saturate));
+    }
   }
 
   .btn-soft {

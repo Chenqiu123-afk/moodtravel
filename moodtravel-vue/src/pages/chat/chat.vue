@@ -830,10 +830,15 @@ onMounted(() => {
   flex-shrink: 0;
   padding: 10px 16px;
   padding-bottom: max(10px, env(safe-area-inset-bottom));
-  background: rgba(245,242,237,0.8);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(245,242,237,0.88);
   border-top: 0.5px solid rgba(0,0,0,0.04);
+}
+
+@media (min-width: 768px) {
+  .chat-footer {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
 }
 
 .footer-inner {

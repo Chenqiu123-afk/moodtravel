@@ -67,7 +67,7 @@
       </div>
 
       <!-- 当前进度卡片 -->
-      <div class="guide-progress-card glass-card">
+      <div class="guide-progress-card depth-card">
         <div class="progress-time-row">
           <span class="progress-label">⏰ 当前时间</span>
           <span class="progress-time">{{ simulatedTime }}</span>
@@ -251,12 +251,12 @@
 
         <!-- 能量推荐卡片 -->
         <div class="energy-cards" :style="cardsStyle">
-          <div class="energy-card glass-card" :style="energyCardStyle(0)">
+          <div class="energy-card material-card" :style="energyCardStyle(0)">
             <span class="energy-card-icon">{{ energyCards[0].icon }}</span>
             <span class="energy-card-title">{{ energyCards[0].title }}</span>
             <span class="energy-card-desc">{{ energyCards[0].desc }}</span>
           </div>
-          <div class="energy-card glass-card" :style="energyCardStyle(1)">
+          <div class="energy-card material-card" :style="energyCardStyle(1)">
             <span class="energy-card-icon">{{ energyCards[1].icon }}</span>
             <span class="energy-card-title">{{ energyCards[1].title }}</span>
             <span class="energy-card-desc">{{ energyCards[1].desc }}</span>
@@ -290,7 +290,7 @@
           <div
             v-for="sc in scenarios"
             :key="sc.key"
-            class="scenario-chip"
+            class="scenario-chip spring-touch"
             :class="{ active: store.dailyScenario === sc.key }"
             :style="store.dailyScenario === sc.key ? { background: theme.primary + '15', borderColor: theme.primary } : {}"
             @click="toggleScenario(sc.key)"
@@ -302,7 +302,7 @@
       </div>
 
       <!-- 每日人文关怀入口卡片 -->
-      <div class="care-entry glass-card" @click="goToDailyCare">
+      <div class="care-entry material-card spring-press" @click="goToDailyCare">
         <div class="care-entry-left">
           <span class="care-entry-icon">💌</span>
           <div class="care-entry-info">
@@ -378,7 +378,7 @@
           <div
             v-for="spot in filteredSpots"
             :key="spot.id"
-            class="spot-card glass-card spring-press"
+            class="spot-card material-card spring-press"
             @click="onSpotClick(spot)"
           >
             <div class="spot-image">
@@ -419,7 +419,7 @@
           <div
             v-for="mood in moods"
             :key="mood.key"
-            class="mood-item glass-card spring-press"
+            class="mood-item material-card spring-press"
             :class="{ active: store.moodLabel === mood.key }"
             :style="moodItemStyle(mood)"
             @click="selectMood(mood)"
@@ -440,7 +440,7 @@
           <span class="title-text">快速设置</span>
         </div>
         <div class="toggle-group">
-          <div class="toggle-row glass-card spring-press" @click="store.toggleSetting('diet')">
+          <div class="toggle-row material-card spring-press" @click="store.toggleSetting('diet')">
             <div class="toggle-left">
               <div class="toggle-icon" :style="{ background: theme.primary + '15' }">🥗</div>
               <div class="toggle-info">
@@ -453,7 +453,7 @@
               <span class="switch-slider" :style="{ '--switch-color': theme.primary }"></span>
             </label>
           </div>
-          <div class="toggle-row glass-card spring-press" @click="store.toggleSetting('budget')">
+          <div class="toggle-row material-card spring-press" @click="store.toggleSetting('budget')">
             <div class="toggle-left">
               <div class="toggle-icon" :style="{ background: theme.primary + '15' }">💰</div>
               <div class="toggle-info">
@@ -466,7 +466,7 @@
               <span class="switch-slider" :style="{ '--switch-color': theme.primary }"></span>
             </label>
           </div>
-          <div class="toggle-row glass-card spring-press" @click="openCompanionPopup">
+          <div class="toggle-row material-card spring-press" @click="openCompanionPopup">
             <div class="toggle-left">
               <div class="toggle-icon" :style="{ background: theme.primary + '15' }">👥</div>
               <div class="toggle-info">
@@ -480,7 +480,7 @@
       </div>
 
       <!-- 开始规划按钮 -->
-      <button class="plan-btn" :style="planBtnStyle" @click="startPlan">
+      <button class="plan-btn spring-press" :style="planBtnStyle" @click="startPlan">
         <span class="plan-btn-text">{{ store.displayMode === 'travel' ? '✨ 开始规划旅程' : '🚀 快速出行规划' }}</span>
       </button>
 
@@ -490,7 +490,7 @@
           <span class="title-icon">📋</span>
           <span class="title-text">最近行程</span>
         </div>
-        <div class="preview-card glass-card spring-press" @click="goToPlan">
+        <div class="preview-card material-card spring-press" @click="goToPlan">
           <div class="preview-header">
             <span class="preview-dest">{{ store.destination }}</span>
             <span class="preview-days">{{ store.days }}天行程</span>
@@ -717,7 +717,7 @@ function energyCardStyle(index) {
   const rotate = index === 0 ? (1 - p) * -2 : (1 - p) * 2
   return {
     transform: `scale(${scale}) rotate(${rotate}deg)`,
-    transition: 'all 0.5s cubic-bezier(0.32, 0.72, 0, 1)'
+    transition: 'all 0.5s var(--spring-smooth)'
   }
 }
 
@@ -1050,27 +1050,42 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
   justify-content: space-between;
   align-items: center;
   padding: 44px 0 16px;
+  gap: 8px;
+  background: transparent;
+}
+
+.nav-left {
+  flex-shrink: 0;
 }
 
 .nav-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
+  overflow: hidden;
 }
 
 /* 长辈关怀开关 */
 .elder-toggle {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding-right: 8px;
+  gap: 4px;
+  padding-right: 4px;
 }
 
 .toggle-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--color-text);
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--color-text-primary);
   white-space: nowrap;
+}
+
+/* 移动端：隐藏开关标签，仅显示图标 */
+@media (max-width: 380px) {
+  .toggle-label { display: none; }
+  .chat-entry-label { display: none; }
+  .chat-entry { padding: 6px 8px; }
+  .nav-right { gap: 4px; }
 }
 
 [data-accessibility="elderly"] .toggle-label {
@@ -1079,8 +1094,8 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .logo-text {
   font-size: 18px;
-  font-weight: 800;
-  letter-spacing: 1px;
+  font-weight: 300;
+  letter-spacing: 2px;
   transition: color 0.5s;
 }
 
@@ -1097,23 +1112,23 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
   cursor: pointer;
 }
 
-/* AI 向导入口 */
+/* AI 向导入口 — 移动端禁用backdrop-filter */
 .chat-entry {
   display: flex;
   align-items: center;
   gap: 4px;
   padding: 6px 12px;
   border-radius: 20px;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.7);
   box-shadow: 0 2px 8px rgba(0,0,0,.06);
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  border: 1px solid rgba(255,255,255,0.3);
+  transition: transform 0.15s var(--spring-responsive);
+  min-height: 36px;
 }
 
 .chat-entry:active {
-  transform: scale(0.93);
+  transform: scale(0.97);
+  transition: transform var(--duration-75) var(--spring-snappy);
 }
 
 .chat-entry-icon {
@@ -1123,8 +1138,8 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .chat-entry-label {
   font-size: 12px;
-  font-weight: 700;
-  color: var(--color-text);
+  font-weight: 400;
+  color: var(--color-text-primary);
   white-space: nowrap;
 }
 
@@ -1135,7 +1150,7 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .guide-badge {
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 500;
   padding: 4px 10px;
   border-radius: 12px;
   transition: all 0.5s;
@@ -1143,7 +1158,7 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .guide-day-badge {
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 500;
   padding: 4px 10px;
   border-radius: 10px;
   transition: background 0.5s;
@@ -1158,9 +1173,9 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 }
 
 .guide-dest {
-  font-size: 20px;
-  font-weight: 800;
-  color: var(--color-text);
+  font-size: 24px;
+  font-weight: 300;
+  color: var(--color-text-primary);
 }
 
 .guide-status-dot {
@@ -1178,8 +1193,8 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .guide-status-text {
   font-size: 12px;
-  color: var(--color-text-light);
-  font-weight: 600;
+  color: var(--color-text-secondary);
+  font-weight: 400;
 }
 
 /* ===== 进度卡片 ===== */
@@ -1199,14 +1214,14 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .progress-label {
   font-size: 12px;
-  color: var(--color-text-light);
-  font-weight: 600;
+  color: var(--color-text-secondary);
+  font-weight: 400;
 }
 
 .progress-time {
-  font-size: 18px;
-  font-weight: 800;
-  color: var(--color-text);
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--color-text-primary);
   font-variant-numeric: tabular-nums;
 }
 
@@ -1216,8 +1231,8 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .progress-next-name {
   font-size: 16px;
-  font-weight: 700;
-  color: var(--color-text);
+  font-weight: 400;
+  color: var(--color-text-primary);
   display: block;
   margin-top: 2px;
 }
@@ -1230,7 +1245,7 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .progress-meta-item {
   font-size: 12px;
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   background: #F5F2ED;
   padding: 4px 8px;
   border-radius: 6px;
@@ -1247,13 +1262,13 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 .progress-bar {
   height: 100%;
   border-radius: 2px;
-  transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: width 0.8s var(--spring-responsive);
 }
 
 .progress-text {
   font-size: 11px;
-  color: var(--color-text-light);
-  font-weight: 600;
+  color: var(--color-text-secondary);
+  font-weight: 400;
 }
 
 /* ===== 贴心提示 ===== */
@@ -1285,7 +1300,7 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .tip-text {
   font-size: 13px;
-  color: var(--color-text);
+  color: var(--color-text-primary);
   font-weight: 400;
   line-height: 1.5;
 }
@@ -1320,7 +1335,7 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 }
 
 .guide-timeline-item.done .guide-tl-name {
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   text-decoration: line-through;
 }
 
@@ -1352,7 +1367,7 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .guide-tl-time {
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--theme-primary);
   min-width: 38px;
   transition: color 0.5s;
@@ -1360,14 +1375,14 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .guide-tl-name {
   font-size: 13px;
-  font-weight: 600;
-  color: var(--color-text);
+  font-weight: 400;
+  color: var(--color-text-primary);
   flex: 1;
 }
 
 .guide-tl-tag {
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 500;
   color: #fff;
   padding: 2px 6px;
   border-radius: 8px;
@@ -1377,7 +1392,7 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 .guide-tl-check {
   font-size: 12px;
   color: #8BA88C;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 /* ===== 操作按钮 ===== */
@@ -1393,7 +1408,7 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
   border-radius: 22px;
   border: none;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 500;
   transition: all 0.2s;
   cursor: pointer;
 }
@@ -1402,7 +1417,7 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .guide-btn.secondary {
   background: var(--color-card);
-  color: var(--color-text);
+  color: var(--color-text-primary);
   border: 1px solid #E0DCD4;
 }
 
@@ -1417,19 +1432,19 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 }
 
 .energy-greeting {
-  font-size: 20px;
-  font-weight: 800;
-  color: var(--color-text);
+  font-size: 24px;
+  font-weight: 300;
+  color: var(--color-text-primary);
   display: block;
-  letter-spacing: -0.2px;
+  letter-spacing: -0.3px;
 }
 
 .energy-sub {
-  font-size: 12px;
-  color: var(--color-text-light);
+  font-size: 14px;
+  color: var(--color-text-secondary);
   margin-top: 2px;
   display: block;
-  font-weight: 400;
+  font-weight: 300;
 }
 
 .energy-slider-wrap {
@@ -1442,7 +1457,7 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
   position: relative;
   height: 8px;
   border-radius: 4px;
-  transition: background 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+  transition: background 0.5s var(--spring-smooth);
   overflow: hidden;
 }
 
@@ -1450,8 +1465,8 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
   position: absolute;
   inset: 0;
   border-radius: 4px;
-  transition: width 0.2s cubic-bezier(0.32, 0.72, 0, 1),
-              background 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+  transition: width 0.2s var(--spring-smooth),
+              background 0.5s var(--spring-smooth);
 }
 
 .energy-thumb {
@@ -1462,8 +1477,8 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
   height: 28px;
   border-radius: 50%;
   box-shadow: 0 2px 8px rgba(0,0,0,0.12), 0 0 0 4px rgba(255,255,255,0.8);
-  transition: left 0.2s cubic-bezier(0.32, 0.72, 0, 1),
-              background 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+  transition: left 0.2s var(--spring-smooth),
+              background 0.5s var(--spring-smooth);
   pointer-events: none;
   z-index: 2;
 }
@@ -1492,25 +1507,28 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .energy-label {
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 400;
   color: #A8A094;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  transition: all 0.3s var(--spring-smooth);
   padding: 2px 6px;
   border-radius: 8px;
 }
 
-.energy-label:active { transform: scale(0.95); }
+.energy-label:active {
+  transform: scale(0.97);
+  transition: transform var(--duration-75) var(--spring-snappy);
+}
 
 .energy-label.active {
-  color: var(--color-text);
-  font-weight: 700;
+  color: var(--color-text-primary);
+  font-weight: 500;
 }
 
 .energy-mid-label {
   font-size: 13px;
-  font-weight: 700;
-  transition: color 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+  font-weight: 400;
+  transition: color 0.5s var(--spring-smooth);
   letter-spacing: 0.5px;
 }
 
@@ -1528,7 +1546,7 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
   border-radius: 12px;
   background: transparent;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   color: #333;
   cursor: pointer;
 }
@@ -1539,7 +1557,7 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
   grid-template-columns: 1fr 1fr;
   gap: 8px;
   margin-top: 10px;
-  transition: all 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+  transition: all 0.5s var(--spring-smooth);
 }
 
 .energy-card {
@@ -1549,7 +1567,6 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
   flex-direction: column;
   gap: 4px;
   box-shadow: var(--shadow-card, 0 1px 6px rgba(0,0,0,0.03));
-  will-change: transform;
 }
 
 .energy-card-icon {
@@ -1559,14 +1576,14 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .energy-card-title {
   font-size: 13px;
-  font-weight: 700;
-  color: var(--color-text);
+  font-weight: 400;
+  color: var(--color-text-primary);
 }
 
 .energy-card-desc {
   font-size: 11px;
-  color: var(--color-text-light);
-  font-weight: 400;
+  color: var(--color-text-secondary);
+  font-weight: 300;
 }
 
 /* ===== 精选地点网格 ===== */
@@ -1584,12 +1601,13 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
   border-radius: var(--layout-card-radius, 14px);
   overflow: hidden;
   cursor: pointer;
-  will-change: transform, opacity;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 280px;
 }
 
 /* 进入动画 */
 .list-enter-active {
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: all 0.4s var(--spring-responsive);
 }
 
 .list-enter-from {
@@ -1599,7 +1617,7 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 /* 离开动画 */
 .list-leave-active {
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: all 0.3s var(--spring-responsive);
   position: absolute;
   opacity: 1;
 }
@@ -1611,7 +1629,7 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 /* 核心平滑移动动画：当其他卡片位移时保持平滑 */
 .list-move {
-  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: transform 0.5s var(--spring-responsive);
 }
 
 .spot-image {
@@ -1642,16 +1660,16 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .spot-title {
   margin: 0 0 6px;
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--color-text);
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--color-text-primary);
 }
 
 .spot-desc {
   margin: 0 0 10px;
   font-size: 12px;
   line-height: 1.5;
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
 }
 
 .spot-tags {
@@ -1664,13 +1682,13 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
   font-size: 10px;
   padding: 3px 8px;
   border-radius: 10px;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .empty-state {
   text-align: center;
   padding: 40px 20px;
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
 }
 
 .empty-icon {
@@ -1699,13 +1717,14 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .title-text {
   font-size: 15px;
-  font-weight: 700;
-  color: var(--color-text);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--color-text-primary);
 }
 
 .title-hint {
   font-size: 11px;
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   margin-left: auto;
 }
 
@@ -1733,13 +1752,13 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .mood-label {
   font-size: 13px;
-  font-weight: 700;
-  color: var(--color-text);
+  font-weight: 500;
+  color: var(--color-text-primary);
 }
 
 .mood-hint {
   font-size: 10px;
-  color: var(--color-text-light);
+  color: var(--color-text-tertiary);
 }
 
 .mood-theme-dot {
@@ -1802,14 +1821,14 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .toggle-name {
   font-size: 14px;
-  font-weight: 600;
-  color: var(--color-text);
+  font-weight: 400;
+  color: var(--color-text-primary);
   display: block;
 }
 
 .toggle-hint {
   font-size: 11px;
-  color: var(--color-text-light);
+  color: var(--color-text-tertiary);
   margin-top: 2px;
   display: block;
 }
@@ -1878,7 +1897,7 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .plan-btn-text {
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 500;
   color: #fff;
 }
 
@@ -1903,19 +1922,19 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .preview-dest {
   font-size: 14px;
-  font-weight: 700;
-  color: var(--color-text);
+  font-weight: 500;
+  color: var(--color-text-primary);
 }
 
 .preview-days {
   font-size: 12px;
   color: var(--theme-primary);
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .preview-stats {
   font-size: 11px;
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
 }
 
 /* ===== 同行人弹窗 ===== */
@@ -1965,8 +1984,8 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .popup-title {
   font-size: 16px;
-  font-weight: 700;
-  color: var(--color-text);
+  font-weight: 500;
+  color: var(--color-text-primary);
 }
 
 .popup-close {
@@ -1978,13 +1997,13 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
   align-items: center;
   justify-content: center;
   font-size: 14px;
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   cursor: pointer;
 }
 
 .popup-desc {
   font-size: 12px;
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   margin-bottom: 12px;
   display: block;
 }
@@ -2020,14 +2039,14 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .companion-name {
   font-size: 14px;
-  font-weight: 600;
-  color: var(--color-text);
+  font-weight: 400;
+  color: var(--color-text-primary);
   display: block;
 }
 
 .companion-detail {
   font-size: 11px;
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   margin-top: 2px;
   display: block;
 }
@@ -2078,8 +2097,8 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .add-btn-text {
   font-size: 11px;
-  font-weight: 600;
-  color: var(--color-text);
+  font-weight: 400;
+  color: var(--color-text-primary);
 }
 
 .popup-footer { margin-top: 16px }
@@ -2093,13 +2112,13 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
   align-items: center;
   justify-content: center;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 500;
   color: #fff;
   transition: background 0.5s;
   cursor: pointer;
 }
 
-.safe-bottom { height: 20px }
+.safe-bottom { height: 80px }
 
 /* ===== 日常情绪与人文关怀 ===== */
 .daily-care-section {
@@ -2125,11 +2144,12 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
   margin-bottom: 14px;
   cursor: pointer;
   box-shadow: var(--shadow-card, 0 2px 12px rgba(0,0,0,0.03));
-  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: all 0.2s var(--spring-responsive);
 }
 
 .care-entry:active {
   transform: scale(0.97);
+  transition: transform var(--duration-75) var(--spring-snappy);
 }
 
 .care-entry-left {
@@ -2151,14 +2171,14 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .care-entry-title {
   font-size: 14px;
-  font-weight: 700;
-  color: var(--color-text, #3A3A3A);
+  font-weight: 400;
+  color: var(--color-text-primary, #3A3A3A);
 }
 
 .care-entry-desc {
   font-size: 11px;
-  color: var(--color-text-light, #9A9A9A);
-  font-weight: 400;
+  color: var(--color-text-secondary, #9A9A9A);
+  font-weight: 300;
 }
 
 .care-entry-arrow {
@@ -2201,20 +2221,19 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
   gap: 4px;
   padding: 12px 16px;
   border-radius: 14px;
-  border: 1px solid transparent;
-  background: rgba(255,255,255,0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0,0,0,0.04);
+  background: rgba(255,255,255,0.75);
   white-space: nowrap;
   flex-shrink: 0;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: all 0.25s var(--spring-responsive);
   min-width: 80px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.02);
 }
 
 .scenario-chip:active {
-  transform: scale(0.92);
+  transform: scale(0.97);
+  transition: transform var(--duration-75) var(--spring-snappy);
 }
 
 .scenario-chip.active {
@@ -2228,8 +2247,8 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .scenario-label {
   font-size: 12px;
-  font-weight: 600;
-  color: var(--color-text, #3A3A3A);
+  font-weight: 400;
+  color: var(--color-text-primary, #3A3A3A);
 }
 
 /* ===== 长辈模式极简列表 ===== */
@@ -2245,11 +2264,12 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
   background: var(--color-card, #fff);
   box-shadow: 0 2px 12px rgba(0,0,0,0.06);
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: all 0.2s var(--spring-responsive);
 }
 
 .elder-spot-card:active {
   transform: scale(0.97);
+  transition: transform var(--duration-75) var(--spring-snappy);
 }
 
 .elder-spot-image {
@@ -2274,14 +2294,14 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .elder-spot-name {
   font-size: 20px;
-  font-weight: 800;
-  color: var(--color-text, #2A2A2A);
+  font-weight: 500;
+  color: var(--color-text-primary, #2A2A2A);
   line-height: 1.3;
 }
 
 .elder-spot-distance {
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--theme-primary, #A3B5A6);
 }
 
@@ -2303,7 +2323,8 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 }
 
 .elder-float-btn:active {
-  transform: scale(0.92);
+  transform: scale(0.97);
+  transition: transform var(--duration-75) var(--spring-snappy);
 }
 
 @keyframes floatBreath {
@@ -2318,7 +2339,7 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .elder-float-label {
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 1px;
 }
 
@@ -2329,11 +2350,9 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
   justify-content: space-between;
   padding: 10px 14px;
   margin-bottom: 12px;
-  background: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.65);
   border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.3);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-float);
 }
 
 .certified-checkbox {
@@ -2355,7 +2374,7 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
   font-size: 12px;
   color: #fff;
   font-weight: 700;
-  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: all 0.2s var(--spring-responsive);
 }
 
 .certified-checkbox-icon.checked {
@@ -2364,20 +2383,20 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .certified-checkbox-label {
   font-size: 13px;
-  font-weight: 600;
-  color: var(--color-text);
+  font-weight: 400;
+  color: var(--color-text-primary);
 }
 
 .certified-checkbox-badge {
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 500;
   padding: 2px 8px;
   border-radius: 8px;
 }
 
 .certified-filter-hint {
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 400;
   cursor: pointer;
   transition: opacity 0.2s;
 }
@@ -2398,7 +2417,7 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 .explicit-mood-label {
   font-size: 12px;
   font-weight: 500;
-  color: var(--color-text-light);
+  color: var(--color-text-secondary);
   white-space: nowrap;
 }
 
@@ -2416,16 +2435,17 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
   gap: 2px;
   padding: 8px 6px;
   border-radius: 12px;
-  border: 1px solid rgba(0,0,0,0.06);
-  background: rgba(255,255,255,0.5);
+  box-shadow: var(--shadow-float);
+  background: var(--material-card);
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: all 0.25s var(--spring-responsive);
   position: relative;
   overflow: hidden;
 }
 
 .explicit-mood-btn:active {
-  transform: scale(0.93);
+  transform: scale(0.97);
+  transition: transform var(--duration-75) var(--spring-snappy);
 }
 
 .explicit-mood-btn.anxious-btn {
@@ -2453,16 +2473,123 @@ const showWeatherAlert = computed(() => !store.elderlyMode)
 
 .explicit-mood-text {
   font-size: 11px;
-  font-weight: 600;
-  color: var(--color-text);
+  font-weight: 400;
+  color: var(--color-text-primary);
 }
 
 .explicit-mood-hint {
   font-size: 9px;
-  font-weight: 500;
+  font-weight: 400;
   color: #B5A3C4;
   background: #B5A3C412;
   padding: 1px 6px;
   border-radius: 6px;
+}
+
+/* ================================================================
+   桌面端响应式 — 首页
+   ================================================================ */
+@media (min-width: 768px) {
+  .home-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px var(--layout-page-padding);
+  }
+
+  /* 导航栏展开 */
+  .nav-bar {
+    padding: 28px 0 24px;
+  }
+  .logo-text {
+    font-size: 22px;
+    letter-spacing: 2px;
+  }
+  .toggle-label {
+    font-size: 13px;
+  }
+
+  /* 心情选择器：居中大卡片 */
+  .mood-selector {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    padding: 24px 0;
+  }
+
+  /* 推荐卡片网格 */
+  .spot-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+  }
+
+  /* 场景入口横向排列 */
+  .scenario-scroll {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  /* 玻璃卡片 */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 20px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+    transition: transform 0.3s var(--spring-responsive),
+                box-shadow 0.4s;
+  }
+  .glass-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  }
+
+  /* 推荐卡片悬停 */
+  .spot-card {
+    transition: transform 0.35s var(--spring-responsive),
+                box-shadow 0.4s;
+  }
+  .spot-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.1);
+  }
+
+  /* 场景芯片悬停 */
+  .scenario-chip {
+    transition: transform 0.2s var(--spring-responsive),
+                box-shadow 0.3s;
+  }
+  .scenario-chip:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  /* 段落间距加大 */
+  .section {
+    margin-bottom: 28px;
+  }
+  .section-title {
+    margin-bottom: 16px;
+  }
+  .title-text {
+    font-size: 17px;
+  }
+
+  /* 设置行悬停 */
+  .setting-row {
+    transition: background 0.2s;
+    border-radius: 12px;
+  }
+  .setting-row:hover {
+    background: rgba(0, 0, 0, 0.02);
+  }
+
+  /* 安全底部 */
+  .safe-bottom {
+    height: 40px;
+  }
 }
 </style>
