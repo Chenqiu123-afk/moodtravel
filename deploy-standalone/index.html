@@ -772,13 +772,13 @@ body.elderly-mode .bg-waves { opacity:0.4 !important; }
 
 /* 右侧面板 58% — 可滚动 */
 .right-panel {
-  width:58%; overflow-y:auto; overflow-x:hidden; padding:48px 64px 48px 0;
+  width:58%; overflow-y:auto; overflow-x:hidden; padding:24px 64px 48px 0;
   scroll-behavior:smooth; -webkit-overflow-scrolling:touch;
 }
 .right-panel::-webkit-scrollbar { width:4px; }
 .right-panel::-webkit-scrollbar-track { background:transparent; }
 .right-panel::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.4); border-radius:2px; }
-.right-content { display:flex; flex-direction:column; gap:40px; }
+.right-content { display:flex; flex-direction:column; gap:28px; }
 
 /* 玻璃拟态面板 */
 .glass-panel {
@@ -2635,15 +2635,20 @@ body.light-mode .expense-item { background:rgba(255,255,255,0.5); border-color:r
 body.light-mode .map-container { background:linear-gradient(180deg, #E8F0F4 0%, #F0F4F0 40%, #F4F4EC 100%); }
 body.light-mode .right-panel { background:transparent; }
 
-/* 标题文字 */
-body.light-mode .brand-name { color:#2D3436 !important; text-shadow:none !important; }
-body.light-mode .brand-slogan { color:#2D3436 !important; text-shadow:none !important; }
-body.light-mode .brand-sub { color:rgba(0,0,0,0.4) !important; }
-body.light-mode .brand-icon { color:rgba(0,0,0,0.6) !important; text-shadow:none !important; }
-body.light-mode .section-title { color:#2D3436 !important; text-shadow:none !important; }
-body.light-mode .budget-number { color:#2D3436 !important; text-shadow:none !important; }
-body.light-mode .scenario-title { color:#2D3436 !important; }
-body.light-mode .section-hint { color:rgba(0,0,0,0.35) !important; }
+/* 标题文字 — 浅色模式下强制覆盖心情颜色 */
+body.light-mode .brand-name { color:#1a1a2e !important; text-shadow:none !important; }
+body.light-mode .brand-slogan { color:#1a1a2e !important; text-shadow:none !important; }
+body.light-mode .brand-sub { color:rgba(0,0,0,0.55) !important; }
+body.light-mode .brand-icon { color:rgba(0,0,0,0.7) !important; text-shadow:none !important; }
+body.light-mode .section-title { color:#1a1a2e !important; text-shadow:none !important; }
+body.light-mode .budget-number { color:#1a1a2e !important; text-shadow:none !important; }
+body.light-mode .scenario-title { color:#1a1a2e !important; }
+body.light-mode .section-hint { color:rgba(0,0,0,0.45) !important; }
+body.light-mode .section-count { color:rgba(0,0,0,0.5) !important; }
+body.light-mode .warm-greeting { color:rgba(0,0,0,0.5) !important; }
+body.light-mode .card-title { color:#1a1a2e !important; }
+body.light-mode .left-section-card .card-title { color:#1a1a2e !important; }
+body.light-mode .viz-card-title { color:#1a1a2e !important; }
 
 /* 心情选择器 */
 body.light-mode .mood-section-title { color:rgba(0,0,0,0.4) !important; }
