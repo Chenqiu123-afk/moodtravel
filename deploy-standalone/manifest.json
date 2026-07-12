@@ -1,0 +1,19 @@
+{
+  "name": "MoodTravel · 情绪旅行",
+  "short_name": "MoodTravel",
+  "description": "情绪驱动的AI智能旅行规划 — 感知你的心情，生成专属长三角14城旅行路线",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#8BA88C",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["travel", "lifestyle"],
+  "lang": "zh-CN"
+}

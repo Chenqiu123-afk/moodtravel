@@ -7826,13 +7826,13 @@ function renderPlanCards() {
     var stats = card.showBack ? card.planBStats : card.planAStats;
     var html = '<div class="plan-card glass-panel"><div class="plan-card-header">' +
       '<span class="plan-card-mood" style="background:' + card.color + '22;color:' + card.color + '">' + __(card.moodLabel, 'moodLabels') + '</span>' +
-      '<button class="plan-card-switch" style="color:' + activeMoodColor + '">' + (card.showBack ? t.planA : t.planB) + '</button>' +
+      '<button class="plan-card-switch" style="color:' + activeMoodColor + '">' + (card.showBack ? (t.planA || '方案A') : (t.planB || '方案B')) + '</button>' +
       '</div><div class="plan-card-route">';
     steps.forEach(function(step) {
       html += '<div class="plan-route-step"><span class="plan-step-time">' + step.time + '</span><span class="plan-step-dot" style="background:' + card.color + '"></span><span class="plan-step-name">' + __(step.name, 'planSteps') + '</span></div>';
     });
     html += '</div><div class="plan-card-footer"><div class="plan-card-stats"><span>' + stats.steps + '</span><span>' + stats.time + '</span><span>' + stats.budget + '</span></div>' +
-      '<button class="plan-card-book" style="background:' + activeMoodColor + '">' + t.bookBtn + '</button></div></div>';
+      '<button class="plan-card-book" style="background:' + activeMoodColor + '">' + (t.bookBtn || '预订') + '</button></div></div>';
     plansWaterfall.innerHTML += html;
   });
   planCount.textContent = visibleCards.length + t.planCountUnit;
