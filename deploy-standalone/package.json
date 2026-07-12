@@ -1,0 +1,9 @@
+{
+  "name": "moodtravel",
+  "version": "1.0.0",
+  "description": "MoodTravel - AI-powered mood-driven travel planning",
+  "scripts": {
+    "test": "node --test --test-force-exit tests/*.test.js"
+  },
+  "type": "commonjs"
+}
